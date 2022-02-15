@@ -1,0 +1,11 @@
+{
+  "name": "ldes-time-fragmenter",
+  "version": "0.0.1",
+  "description": "A time fragmenter for LDES",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT"
+}
