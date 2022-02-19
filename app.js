@@ -1,8 +1,10 @@
 import { app, uuid, errorHandler } from 'mu';
 
-import fs from 'fs';
-import { parse, graph, namedNode, triple, literal, Formula, serialize } from 'rdflib';
+import { readTriples, writeTriples, triplesFileAsString } from './storage/files';
+
+import { parse, graph, namedNode, triple, literal } from 'rdflib';
 import bodyParser from 'body-parser';
+
 
 app.use(bodyParser.text({
   type: function(req) {
@@ -20,21 +22,7 @@ function generateVersion(_namedNode) {
   return `http://mu.semte.ch/services/ldes-time-fragmenter/versioned/${uuid()}`;
 }
 
-function triplesFileAsString() {
-  return fs.readFileSync(FILE, 'utf8');
-}
-
-function readTriples() {
-  const newGraph = graph();
-  parse(triplesFileAsString(), newGraph, GRAPH_STR, "text/turtle");
-  return newGraph;
-}
-
-function writeTriples(dataset) {
-  fs.writeFileSync(FILE, serialize(GRAPH, dataset, 'text/turtle'));
-}
-
-async function turtleParseString(string) {
+function turtleParseString(string) {
   const newGraph = graph();
   parse(string, newGraph, "http://example.com/", "text/turtle");
   return newGraph;
@@ -49,9 +37,9 @@ function nowLiteral() {
 /**
  * Publishes a new version of the same resource.
  */
-app.post('/resource', async (req, res) => {
+app.post('/resource', (req, res) => {
   try {
-    const body = await turtleParseString(req.body);
+    const body = turtleParseString(req.body);
     const resource = namedNode(req.query.resource);
     const versionedResource = namedNode(generateVersion(resource));
 
@@ -89,11 +77,11 @@ app.post('/resource', async (req, res) => {
     ));
 
     // merge the old and the new dataset
-    const currentDataset = readTriples();
+    const currentDataset = readTriples(FILE, GRAPH);
     currentDataset.addAll(newTriples.match());
 
     // write out the triples
-    writeTriples(currentDataset);
+    writeTriples(currentDataset, GRAPH, FILE);
     res.status(200).send('{"message": "ok"}');
   } catch (e) {
     console.error(e);
@@ -106,7 +94,7 @@ app.get('/', function(_req, res) {
     res
       .header('Content-Type', 'text/turtle')
       .status(200)
-      .send(triplesFileAsString());
+      .send(triplesFileAsString(FILE));
   } catch (e) {
     console.error(e);
   }
