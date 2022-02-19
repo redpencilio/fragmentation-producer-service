@@ -1,10 +1,6 @@
 import { app, uuid, errorHandler } from 'mu';
-
-import { readTriples, writeTriples, triplesFileAsString } from './storage/files';
-
-import { parse, graph, namedNode, triple, literal } from 'rdflib';
 import bodyParser from 'body-parser';
-
+import { NamedNode } from 'rdflib';
 
 app.use(bodyParser.text({
   type: function(req) {
@@ -12,9 +8,11 @@ app.use(bodyParser.text({
   }
 }));
 
+import { readTriples, writeTriples, triplesFileAsString } from './storage/files';
+import { parse, graph, namedNode, triple, literal } from 'rdflib';
+
 const FILE = '/app/data/feed.ttl';
-const GRAPH_STR = "http://mu.semte.ch/services/ldes-time-fragmenter";
-const GRAPH = namedNode(GRAPH_STR);
+const GRAPH = namedNode("http://mu.semte.ch/services/ldes-time-fragmenter");
 
 const stream = namedNode("http://mu.semte.ch/services/ldes-time-fragmenter/example-stream");
 
@@ -32,6 +30,22 @@ function nowLiteral() {
   const xsdDateTime = namedNode('http://www.w3.org/2001/XMLSchema#dateTime');
   const now = (new Date()).toISOString();
   return literal(now, xsdDateTime);
+}
+
+/**
+ * Yield the amount of solutions in the specified graph of the store.
+ *
+ * @param {Store} store Store containing all the triples.
+ * @param {NamedNode} graph The graph containing the data.
+ */
+function countVersionedItems(store, graph) {
+  return store
+    .match(
+      stream,
+      namedNode("https://w3id.org/tree#member"),
+      undefined,
+      graph)
+    .length;
 }
 
 /**
@@ -95,6 +109,16 @@ app.get('/', function(_req, res) {
       .header('Content-Type', 'text/turtle')
       .status(200)
       .send(triplesFileAsString(FILE));
+  } catch (e) {
+    console.error(e);
+  }
+});
+
+app.get('/count', function(_req, res) {
+  try {
+    const currentDataset = readTriples(FILE, GRAPH);
+    const count = countVersionedItems(currentDataset, GRAPH);
+    res.status(200).send(`{"count": ${count}}`);
   } catch (e) {
     console.error(e);
   }
