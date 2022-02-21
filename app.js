@@ -12,6 +12,7 @@ import { readTriples, writeTriples, triplesFileAsString } from './storage/files'
 import { parse, graph, namedNode, triple, literal } from 'rdflib';
 
 const FILE = '/app/data/feed.ttl';
+const PAGES_FOLDER = '/app/data/pages/';
 const GRAPH = namedNode("http://mu.semte.ch/services/ldes-time-fragmenter");
 
 const stream = namedNode("http://mu.semte.ch/services/ldes-time-fragmenter/example-stream");
@@ -30,6 +31,20 @@ function nowLiteral() {
   const xsdDateTime = namedNode('http://www.w3.org/2001/XMLSchema#dateTime');
   const now = (new Date()).toISOString();
   return literal(now, xsdDateTime);
+}
+
+function lastPage() {
+  return 1;
+}
+
+/**
+ * Yields the file path on which the specified page number is described.
+ *
+ * @param {number} page Page index for which we want te get the file path.
+ * @return {string} Path to the page.
+ */
+function fileForPage(page) {
+  return `${PAGES_FOLDER}${page}.ttl`;
 }
 
 /**
@@ -58,6 +73,8 @@ app.post('/resource', (req, res) => {
     const versionedResource = namedNode(generateVersion(resource));
 
     const newTriples = graph();
+
+    const pageFile = fileForPage(lastPage());
 
     // create new version of the resource
     for (let match of body.match()) {
@@ -91,11 +108,11 @@ app.post('/resource', (req, res) => {
     ));
 
     // merge the old and the new dataset
-    const currentDataset = readTriples(FILE, GRAPH);
+    const currentDataset = readTriples(pageFile, GRAPH);
     currentDataset.addAll(newTriples.match());
 
     // write out the triples
-    writeTriples(currentDataset, GRAPH, FILE);
+    writeTriples(currentDataset, GRAPH, pageFile);
     res.status(200).send('{"message": "ok"}');
   } catch (e) {
     console.error(e);
@@ -104,6 +121,8 @@ app.post('/resource', (req, res) => {
 });
 
 app.get('/', function(_req, res) {
+  console.log("Index");
+
   try {
     res
       .header('Content-Type', 'text/turtle')
@@ -111,6 +130,32 @@ app.get('/', function(_req, res) {
       .send(triplesFileAsString(FILE));
   } catch (e) {
     console.error(e);
+  }
+});
+
+app.get('/pages', function(req, res) {
+  console.log("A page");
+
+  try {
+    const page = parseInt(req.query.page);
+
+    if ( page === 1 ) {
+      console.log("hosting page 1");
+      res
+        .header('Content-Type', 'text/turtle')
+        // .header('Cache-Control', 'public, max-age=60')
+        .header('Cache-Control', 'public, immutable')
+        .status(200)
+        .send(triplesFileAsString(fileForPage(page)));
+    } else {
+      res
+        .header('Content-Type', 'text/turtle')
+        .status(200)
+        .send(triplesFileAsString(fileForPage(page)));
+    }
+  } catch (e) {
+    console.error(e);
+    res.status(500).send();
   }
 });
 
