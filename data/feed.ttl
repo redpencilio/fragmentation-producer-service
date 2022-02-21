@@ -8,12 +8,12 @@
 @prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
 
-</>
+<http://mu.semte.ch/services/ldes-time-fragmenter/example-stream>
   a ldes:EventStream, tree:Collection ;
   ldes:timestampPath sosa:resultTime ;
-  tree:view </pages?page=1> .
+  tree:view <http://localhost:8888/pages?page=1> .
 
-</pages?page=1> a tree:Node .
+# </pages?page=1> a tree:Node .
 # </pages?page=1> tree:relation ex:relation.
 # ex:relation a tree:LessThanRelation .
 # ex:relation tree:node ex:page2 .

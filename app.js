@@ -1,6 +1,5 @@
 import { app, uuid, errorHandler } from 'mu';
 import bodyParser from 'body-parser';
-import { NamedNode } from 'rdflib';
 
 app.use(bodyParser.text({
   type: function(req) {
@@ -9,16 +8,26 @@ app.use(bodyParser.text({
 }));
 
 import { readTriples, writeTriples, triplesFileAsString, lastPage } from './storage/files';
-import { parse, graph, namedNode, triple, literal } from 'rdflib';
+import { parse, graph, namedNode, triple, literal, Store, NamedNode } from 'rdflib';
 
-const FILE = '/app/data/feed.ttl';
+const FEED_FILE = '/app/data/feed.ttl';
 const PAGES_FOLDER = '/app/data/pages/';
 const GRAPH = namedNode("http://mu.semte.ch/services/ldes-time-fragmenter");
+const MAX_RESOURCES_PER_PAGE = 10;
+const SERVICE_PATH = "http://localhost:8888/"; // a workaround for json-ld not accepting relative paths
 
 const stream = namedNode("http://mu.semte.ch/services/ldes-time-fragmenter/example-stream");
 
 function generateVersion(_namedNode) {
-  return `http://mu.semte.ch/services/ldes-time-fragmenter/versioned/${uuid()}`;
+  return namedNode(`http://mu.semte.ch/services/ldes-time-fragmenter/versioned/${uuid()}`);
+}
+
+function generateTreeRelation() {
+  return namedNode(`http://mu.semte.ch/services/ldes-time-fragmenter/relations/${uuid()}`);
+}
+
+function generatePageResource(number) {
+  return namedNode(`${SERVICE_PATH}pages?page=${number}`);
 }
 
 function turtleParseString(string) {
@@ -60,17 +69,26 @@ function countVersionedItems(store, graph) {
 }
 
 /**
+ * Indicates whether or not we should create a new page.
+ *
+ * @param {Store} store Store which contains parsed triples.
+ * @param {NamedNode} graph Graph in which current triples are stored.
+ * @return {boolean} Truethy if we should create a new file.
+ */
+function shouldCreateNewPage( store, graph ) {
+  return countVersionedItems( store, graph ) >= MAX_RESOURCES_PER_PAGE;
+}
+
+/**
  * Publishes a new version of the same resource.
  */
 app.post('/resource', (req, res) => {
   try {
     const body = turtleParseString(req.body);
     const resource = namedNode(req.query.resource);
-    const versionedResource = namedNode(generateVersion(resource));
+    const versionedResource = generateVersion(resource);
 
     const newTriples = graph();
-
-    const pageFile = fileForPage(lastPage(PAGES_FOLDER));
 
     // create new version of the resource
     for (let match of body.match()) {
@@ -84,6 +102,8 @@ app.post('/resource', (req, res) => {
       newTriples.add(quad);
     }
 
+    const dateLiteral = nowLiteral();
+
     // add resources about this version
     newTriples.add(triple(
       versionedResource,
@@ -93,7 +113,7 @@ app.post('/resource', (req, res) => {
     newTriples.add(triple(
       versionedResource,
       namedNode("http://www.w3.org/ns/sosa/resultTime"),
-      nowLiteral(),
+      dateLiteral,
       GRAPH
     ));
     newTriples.add(triple(
@@ -103,13 +123,72 @@ app.post('/resource', (req, res) => {
       GRAPH
     ));
 
-    // merge the old and the new dataset
-    const currentDataset = readTriples(pageFile, GRAPH);
-    currentDataset.addAll(newTriples.match());
+    // read the current dataset
+    const lastPageNr = lastPage(PAGES_FOLDER);
+    let pageFile = fileForPage(lastPageNr);
+    let currentDataset = readTriples(pageFile, GRAPH);
 
-    // write out the triples
-    writeTriples(currentDataset, GRAPH, pageFile);
-    res.status(200).send('{"message": "ok"}');
+    if( shouldCreateNewPage( currentDataset, GRAPH ) ) {
+      const closingDataset = currentDataset;
+
+      // link the current dataset to the new dataset but don't save yet
+      const closingPageFile = pageFile;
+      const nextPageFile = fileForPage(lastPageNr + 1);
+      const relationResource = generateTreeRelation();
+      const currentPageResource = generatePageResource(lastPageNr);
+      const nextPageResource = generatePageResource(lastPageNr + 1);
+      closingDataset.add(triple(
+        currentPageResource,
+        namedNode("https://w3id.org/tree#relation"),
+        relationResource,
+        GRAPH));
+      closingDataset.add(triple(
+        relationResource,
+        namedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
+        namedNode("https://w3id.org/tree#GreaterThanOrEqualRelation"),
+        GRAPH
+      ));
+      closingDataset.add(triple(
+        relationResource,
+        namedNode("https://w3id.org/tree#node"),
+        nextPageResource,
+        GRAPH
+      ));
+      closingDataset.add(triple(
+        relationResource,
+        namedNode("https://w3id.org/tree#path"),
+        namedNode("http://www.w3.org/ns/sosa/resultTime"),
+        GRAPH
+      ));
+      closingDataset.add(triple(
+        relationResource,
+        namedNode("https://w3id.org/tree#value"),
+        dateLiteral,
+        GRAPH
+      ));
+
+      // create a store with the new graph for the new file
+      currentDataset = readTriples(FEED_FILE, GRAPH);
+      currentDataset.add(triple(
+        nextPageResource,
+        namedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
+        namedNode("https://w3id.org/tree#Node"),
+        GRAPH
+      ));
+      currentDataset.addAll(newTriples.match());
+
+      // Write out new dataset to nextPageFile
+      writeTriples(currentDataset, GRAPH, nextPageFile);
+      // Write out closing dataset to closingPageFile
+      writeTriples(closingDataset, GRAPH, closingPageFile);
+    } else {
+      currentDataset.addAll(newTriples.match());
+      writeTriples(currentDataset, GRAPH, pageFile);
+    }
+
+    const newCount = countVersionedItems(currentDataset, GRAPH);
+
+    res.status(200).send(`{"message": "ok", "triplesInPage": ${newCount}}`);
   } catch (e) {
     console.error(e);
     res.status(500).send();
@@ -117,21 +196,18 @@ app.post('/resource', (req, res) => {
 });
 
 app.get('/', function(_req, res) {
-  console.log("Index");
-
+  // LDES does not use this index page
   try {
     res
       .header('Content-Type', 'text/turtle')
       .status(200)
-      .send(triplesFileAsString(FILE));
+      .send(triplesFileAsString(FEED_FILE));
   } catch (e) {
     console.error(e);
   }
 });
 
 app.get('/pages', function(req, res) {
-  console.log("A page");
-
   try {
     const page = parseInt(req.query.page);
 
@@ -150,7 +226,9 @@ app.get('/pages', function(req, res) {
 
 app.get('/count', function(_req, res) {
   try {
-    const currentDataset = readTriples(FILE, GRAPH);
+    const file = fileForPage(lastPage(PAGES_FOLDER));
+    console.log(`Reading from ${file}`);
+    const currentDataset = readTriples(file, GRAPH);
     const count = countVersionedItems(currentDataset, GRAPH);
     res.status(200).send(`{"count": ${count}}`);
   } catch (e) {

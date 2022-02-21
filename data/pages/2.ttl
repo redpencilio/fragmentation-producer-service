@@ -1,38 +1,112 @@
 @prefix : <#>.
 @prefix dct: <http://purl.org/dc/terms/>.
+@prefix prov: <http://www.w3.org/ns/prov#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
 @prefix lde: <http://mu.semte.ch/services/ldes-time-fragmenter/>.
 @prefix tree: <https://w3id.org/tree#>.
 @prefix ver: <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/>.
 @prefix tests: <http://mu.semte.ch/services/tests/>.
 @prefix sos: <http://www.w3.org/ns/sosa/>.
-@prefix ldes: <http://w3id.org/ldes#> .
-@prefix sosa: <http://www.w3.org/ns/sosa/> .
-@prefix tree: <https://w3id.org/tree#> .
+@prefix ldes: <http://w3id.org/ldes#>.
+@prefix ex: <http://example.com/>.
+@prefix rel: <http://mu.semte.ch/services/ldes-time-fragmenter/relations/>.
 
-@prefix ex: <http://example.com/> .
-@prefix prov: <http://www.w3.org/ns/prov#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+ex:relation
+    a tree:GreaterThanOrEqualRelation;
+    tree:node <http://localhost:8888/pages?page=2>;
+    tree:path prov:generatedAtTime;
+    tree:value "2022-02-20T09:02:11.910Z"^^xsd:dateTime.
+<http://localhost:8888/pages?page=1> a tree:Node.
 
-@base <http://localhost:8888/> .
-
-</>
-  a ldes:EventStream, tree:Collection;
-  ldes:timestampPath sosa:resultTime ;
-  tree:member ver:ca6d1c00-922b-11ec-b222-f5082803e760 ;
-  tree:view </pages?page=1> .
-
-</pages?page=1> a tree:Node .
-</pages?page=1> tree:relation ex:relation .
-
-ex:relation a tree:GreaterThanOrEqualRelation ;
-  tree:node </pages?page=2> ;
-  tree:path  prov:generatedAtTime ;
-  tree:value "2022-02-20T09:02:11.910Z"^^xsd:dateTime .
-
+<http://localhost:8888/pages?page=2>
+tree:relation rel:682ed3f0-9332-11ec-b709-39581a509f27.
+lde:example-stream
+    a ldes:EventStream, tree:Collection;
+    ldes:timestampPath sos:resultTime;
+    tree:member
+        ver:ca6d1c00-922b-11ec-b222-f5082803e760,
+        ver:e7c4f240-9330-11ec-b7d6-2941807423e4,
+        ver:e8f11630-9330-11ec-b7d6-2941807423e4,
+        ver:e9415910-9330-11ec-b7d6-2941807423e4,
+        ver:e97d9ec0-9330-11ec-b7d6-2941807423e4,
+        ver:e9ba0b80-9330-11ec-b7d6-2941807423e4,
+        ver:e9f5b4f0-9330-11ec-b7d6-2941807423e4,
+        ver:ea35f240-9330-11ec-b7d6-2941807423e4,
+        ver:ea75e170-9330-11ec-b7d6-2941807423e4,
+        ver:eabad9b0-9330-11ec-b7d6-2941807423e4;
+    tree:view <http://localhost:8888/pages?page=1>.
+rel:682ed3f0-9332-11ec-b709-39581a509f27
+    a tree:GreaterThanOrEqualRelation;
+    tree:node <http://localhost:8888/pages?page=3>;
+    tree:path sos:resultTime;
+    tree:value "2022-02-21T16:22:04.703Z"^^xsd:dateTime.
 ver:ca6d1c00-922b-11ec-b222-f5082803e760
-  a tests:Test;
-  tests:description "How about this?  Does the LDES client discover our updated object?";
-  tests:name "Second test";
-  dct:isVersionOf tests:1;
-  sos:resultTime "2022-02-20T09:02:11.915Z"^^xsd:dateTime.
+    a tests:Test;
+    tests:description
+    "How about this?  Does the LDES client discover our updated object?";
+    tests:name "Second test";
+    dct:isVersionOf tests:1;
+    sos:resultTime "2022-02-20T09:02:11.915Z"^^xsd:dateTime.
+ver:e7c4f240-9330-11ec-b7d6-2941807423e4
+    a tests:Test;
+    tests:description
+    "How about this?  Does the LDES client discover our changes?";
+    tests:name "First test but again a new revision is called for.";
+    dct:isVersionOf tests:1;
+    sos:resultTime "2022-02-21T16:11:19.780Z"^^xsd:dateTime.
+ver:e8f11630-9330-11ec-b7d6-2941807423e4
+    a tests:Test;
+    tests:description
+    "How about this?  Does the LDES client discover our changes?";
+    tests:name "First test but again a new revision is called for.";
+    dct:isVersionOf tests:1;
+    sos:resultTime "2022-02-21T16:11:21.747Z"^^xsd:dateTime.
+ver:e9415910-9330-11ec-b7d6-2941807423e4
+    a tests:Test;
+    tests:description
+    "How about this?  Does the LDES client discover our changes?";
+    tests:name "First test but again a new revision is called for.";
+    dct:isVersionOf tests:1;
+    sos:resultTime "2022-02-21T16:11:22.274Z"^^xsd:dateTime.
+ver:e97d9ec0-9330-11ec-b7d6-2941807423e4
+    a tests:Test;
+    tests:description
+    "How about this?  Does the LDES client discover our changes?";
+    tests:name "First test but again a new revision is called for.";
+    dct:isVersionOf tests:1;
+    sos:resultTime "2022-02-21T16:11:22.669Z"^^xsd:dateTime.
+ver:e9ba0b80-9330-11ec-b7d6-2941807423e4
+    a tests:Test;
+    tests:description
+    "How about this?  Does the LDES client discover our changes?";
+    tests:name "First test but again a new revision is called for.";
+    dct:isVersionOf tests:1;
+    sos:resultTime "2022-02-21T16:11:23.065Z"^^xsd:dateTime.
+ver:e9f5b4f0-9330-11ec-b7d6-2941807423e4
+    a tests:Test;
+    tests:description
+    "How about this?  Does the LDES client discover our changes?";
+    tests:name "First test but again a new revision is called for.";
+    dct:isVersionOf tests:1;
+    sos:resultTime "2022-02-21T16:11:23.455Z"^^xsd:dateTime.
+ver:ea35f240-9330-11ec-b7d6-2941807423e4
+    a tests:Test;
+    tests:description
+    "How about this?  Does the LDES client discover our changes?";
+    tests:name "First test but again a new revision is called for.";
+    dct:isVersionOf tests:1;
+    sos:resultTime "2022-02-21T16:11:23.877Z"^^xsd:dateTime.
+ver:ea75e170-9330-11ec-b7d6-2941807423e4
+    a tests:Test;
+    tests:description
+    "How about this?  Does the LDES client discover our changes?";
+    tests:name "First test but again a new revision is called for.";
+    dct:isVersionOf tests:1;
+    sos:resultTime "2022-02-21T16:11:24.296Z"^^xsd:dateTime.
+ver:eabad9b0-9330-11ec-b7d6-2941807423e4
+    a tests:Test;
+    tests:description
+    "How about this?  Does the LDES client discover our changes?";
+    tests:name "First test but again a new revision is called for.";
+    dct:isVersionOf tests:1;
+    sos:resultTime "2022-02-21T16:11:24.747Z"^^xsd:dateTime.

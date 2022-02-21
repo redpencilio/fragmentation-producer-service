@@ -16,13 +16,14 @@
 
 @base <http://localhost:8888/> .
 
-</>
+<http://mu.semte.ch/services/ldes-time-fragmenter/example-stream>
   a ldes:EventStream, tree:Collection;
   ldes:timestampPath sosa:resultTime ;
   tree:view </pages?page=1> ;
   tree:member ver:ca6d1c00-922b-11ec-b222-f5082803e759 .
 
 </pages?page=1> a tree:Node .
+
 </pages?page=1> tree:relation ex:relation .
 
 ex:relation a tree:GreaterThanOrEqualRelation ;
