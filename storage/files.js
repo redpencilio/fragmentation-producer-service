@@ -40,3 +40,33 @@ export function readTriples(file, targetGraph, store = graph()) {
 export function writeTriples(store, graph, file) {
   fs.writeFileSync(file, serialize(graph, store, 'text/turtle'));
 }
+
+/**
+ * Returns the last page number currently available.
+ *
+ * @param {string} folder The folder in which the files are stored.
+ *
+ * @return {number | NaN} Biggest page index currently available or NaN
+ * if no numbered pages were found.
+ */
+export function lastPage(folder) {
+  const files = fs.readdirSync(folder);
+  const fileNumbers = files
+    .map((path) => {
+      const match = path.match(/\d*/);
+      const parsedNumber = match.length && parseInt(match[0]);
+      if (parsedNumber && parsedNumber !== NaN)
+        return parsedNumber;
+      else
+        return NaN;
+    })
+    .filter((x) => x !== NaN);
+
+  fileNumbers.sort((a, b) => b - a);
+  if (fileNumbers.length) {
+    return fileNumbers[0];
+  } else {
+    return NaN;
+  }
+}
+

@@ -8,7 +8,7 @@ app.use(bodyParser.text({
   }
 }));
 
-import { readTriples, writeTriples, triplesFileAsString } from './storage/files';
+import { readTriples, writeTriples, triplesFileAsString, lastPage } from './storage/files';
 import { parse, graph, namedNode, triple, literal } from 'rdflib';
 
 const FILE = '/app/data/feed.ttl';
@@ -31,10 +31,6 @@ function nowLiteral() {
   const xsdDateTime = namedNode('http://www.w3.org/2001/XMLSchema#dateTime');
   const now = (new Date()).toISOString();
   return literal(now, xsdDateTime);
-}
-
-function lastPage() {
-  return 1;
 }
 
 /**
@@ -166,6 +162,17 @@ app.get('/count', function(_req, res) {
     res.status(200).send(`{"count": ${count}}`);
   } catch (e) {
     console.error(e);
+    res.status(500).send();
+  }
+});
+
+app.get('/last-page', function(_req, res) {
+  try {
+    const page = lastPage(PAGES_FOLDER);
+    res.status(200).send(`{"lastPage": ${page}}`);
+  } catch (e) {
+    console.error(e);
+    res.status(500).send();
   }
 });
 
