@@ -70,7 +70,7 @@ app.post('/resource', (req, res) => {
 
     const newTriples = graph();
 
-    const pageFile = fileForPage(lastPage());
+    const pageFile = fileForPage(lastPage(PAGES_FOLDER));
 
     // create new version of the resource
     for (let match of body.match()) {
@@ -135,20 +135,13 @@ app.get('/pages', function(req, res) {
   try {
     const page = parseInt(req.query.page);
 
-    if ( page === 1 ) {
-      console.log("hosting page 1");
-      res
-        .header('Content-Type', 'text/turtle')
-        // .header('Cache-Control', 'public, max-age=60')
-        .header('Cache-Control', 'public, immutable')
-        .status(200)
-        .send(triplesFileAsString(fileForPage(page)));
-    } else {
-      res
-        .header('Content-Type', 'text/turtle')
-        .status(200)
-        .send(triplesFileAsString(fileForPage(page)));
-    }
+    if (page < lastPage(PAGES_FOLDER))
+      res.header('Cache-Control', 'public, immutable');
+
+    res
+      .header('Content-Type', 'text/turtle')
+      .status(200)
+      .send(triplesFileAsString(fileForPage(page)));
   } catch (e) {
     console.error(e);
     res.status(500).send();
@@ -169,7 +162,10 @@ app.get('/count', function(_req, res) {
 app.get('/last-page', function(_req, res) {
   try {
     const page = lastPage(PAGES_FOLDER);
-    res.status(200).send(`{"lastPage": ${page}}`);
+    if (page === NaN)
+      res.status(500).send(`{"message": "No pages found"}`);
+    else
+      res.status(200).send(`{"lastPage": ${page}}`);
   } catch (e) {
     console.error(e);
     res.status(500).send();
