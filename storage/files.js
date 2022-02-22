@@ -6,6 +6,8 @@ import { parse, graph, Store, NamedNode, serialize } from 'rdflib';
  * content.
  */
 
+const fileCache = {};
+
 /**
  * Loads a file as a string.
  *
@@ -13,7 +15,10 @@ import { parse, graph, Store, NamedNode, serialize } from 'rdflib';
  * @return {string} Contents of the file, read as UTF-8.
  */
 export function triplesFileAsString(file) {
-  return fs.readFileSync(file, 'utf8');
+  if( !fileCache[file] )
+    fileCache[file] = fs.readFileSync(file, 'utf8');
+
+  return fileCache[file];
 }
 
 /**
@@ -38,7 +43,9 @@ export function readTriples(file, targetGraph, store = graph()) {
  * @param {string} file Path of the file to which we will write the content.
  */
 export function writeTriples(store, graph, file) {
-  fs.writeFileSync(file, serialize(graph, store, 'text/turtle'));
+  const serialized = serialize(graph, store, 'text/turtle');
+  fs.writeFileSync(file, serialized);
+  fileCache[file] = serialized;
 }
 
 /**
