@@ -48,6 +48,17 @@ export function writeTriples(store, graph, file) {
   fileCache[file] = serialized;
 }
 
+const lastPageCache = {};
+
+/**
+ * Clears the last page cache for the supplied folder.
+ *
+ * @param {string} folder The folder for which the last page cache will be cleared.
+ */
+export function clearLastPageCache(folder) {
+  delete lastPageCache[folder];
+}
+
 /**
  * Returns the last page number currently available.
  *
@@ -57,23 +68,27 @@ export function writeTriples(store, graph, file) {
  * if no numbered pages were found.
  */
 export function lastPage(folder) {
-  const files = fs.readdirSync(folder);
-  const fileNumbers = files
-    .map((path) => {
-      const match = path.match(/\d*/);
-      const parsedNumber = match.length && parseInt(match[0]);
-      if (parsedNumber && parsedNumber !== NaN)
-        return parsedNumber;
-      else
-        return NaN;
-    })
-    .filter((x) => x !== NaN);
+  if( !lastPageCache[folder] ) {
+    const files = fs.readdirSync(folder);
+    const fileNumbers = files
+      .map((path) => {
+        const match = path.match(/\d*/);
+        const parsedNumber = match.length && parseInt(match[0]);
+        if (parsedNumber && parsedNumber !== NaN)
+          return parsedNumber;
+        else
+          return NaN;
+      })
+      .filter((x) => x !== NaN);
 
-  fileNumbers.sort((a, b) => b - a);
-  if (fileNumbers.length) {
-    return fileNumbers[0];
-  } else {
-    return NaN;
+    fileNumbers.sort((a, b) => b - a);
+    if (fileNumbers.length) {
+      lastPageCache[folder]=fileNumbers[0];
+    } else {
+      return NaN; // let's not cache this as it's a starting point
+    }
   }
+
+  return lastPageCache[folder];
 }
 

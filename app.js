@@ -7,7 +7,7 @@ app.use(bodyParser.text({
   }
 }));
 
-import { readTriples, writeTriples, triplesFileAsString, lastPage } from './storage/files';
+import { readTriples, writeTriples, triplesFileAsString, lastPage, clearLastPageCache } from './storage/files';
 import { parse, graph, namedNode, triple, literal, Store, NamedNode } from 'rdflib';
 
 const FEED_FILE = '/app/data/feed.ttl';
@@ -181,6 +181,8 @@ app.post('/resource', (req, res) => {
       writeTriples(currentDataset, GRAPH, nextPageFile);
       // Write out closing dataset to closingPageFile
       writeTriples(closingDataset, GRAPH, closingPageFile);
+      // Clear the last page cache
+      clearLastPageCache(PAGES_FOLDER);
     } else {
       currentDataset.addAll(newTriples.match());
       writeTriples(currentDataset, GRAPH, pageFile);
