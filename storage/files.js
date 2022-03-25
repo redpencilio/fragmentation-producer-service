@@ -1,6 +1,8 @@
-import fs from 'fs';
-import { parse, graph, Store, NamedNode, serialize } from 'rdflib';
-
+import fs from "fs";
+import { parse, graph, Store, NamedNode, serialize } from "rdflib";
+import rdfParser from "rdf-parse";
+import rdfSerializer from "rdf-serialize";
+import jsstream from "stream";
 /**
  * Contains abstractions for working with files containing turtle
  * content.
@@ -15,8 +17,7 @@ const fileCache = {};
  * @return {string} Contents of the file, read as UTF-8.
  */
 export function triplesFileAsString(file) {
-  if( !fileCache[file] )
-    fileCache[file] = fs.readFileSync(file, 'utf8');
+  if (!fileCache[file]) fileCache[file] = fs.readFileSync(file, "utf8");
 
   return fileCache[file];
 }
@@ -35,6 +36,12 @@ export function readTriples(file, targetGraph, store = graph()) {
   return store;
 }
 
+export function readTriplesStream(file, targetGraph) {
+  const fileStream = jsstream.Readable.from(triplesFileAsString(file));
+  return rdfParser.parse(fileStream, {
+    contentType: "text/turtle",
+  });
+}
 /**
  * Writes the triples in text-turtle to a file.
  *
@@ -43,9 +50,17 @@ export function readTriples(file, targetGraph, store = graph()) {
  * @param {string} file Path of the file to which we will write the content.
  */
 export function writeTriples(store, graph, file) {
-  const serialized = serialize(graph, store, 'text/turtle');
+  const serialized = serialize(graph, store, "text/turtle");
   fs.writeFileSync(file, serialized);
   fileCache[file] = serialized;
+}
+
+export function writeTriplesStream(store, graph, file) {
+  const quadStream = jsstream.Readable.from(store);
+  const turtleStream = rdfSerializer.serialize(quadStream, {
+    contentType: "text/turtle",
+  });
+  turtleStream.pipe(fs.createWriteStream(file));
 }
 
 const lastPageCache = {};
@@ -68,22 +83,20 @@ export function clearLastPageCache(folder) {
  * if no numbered pages were found.
  */
 export function lastPage(folder) {
-  if( !lastPageCache[folder] ) {
+  if (!lastPageCache[folder]) {
     const files = fs.readdirSync(folder);
     const fileNumbers = files
       .map((path) => {
         const match = path.match(/\d*/);
         const parsedNumber = match.length && parseInt(match[0]);
-        if (parsedNumber && parsedNumber !== NaN)
-          return parsedNumber;
-        else
-          return NaN;
+        if (parsedNumber && parsedNumber !== NaN) return parsedNumber;
+        else return NaN;
       })
       .filter((x) => x !== NaN);
 
     fileNumbers.sort((a, b) => b - a);
     if (fileNumbers.length) {
-      lastPageCache[folder]=fileNumbers[0];
+      lastPageCache[folder] = fileNumbers[0];
     } else {
       return NaN; // let's not cache this as it's a starting point
     }
@@ -91,4 +104,3 @@ export function lastPage(folder) {
 
   return lastPageCache[folder];
 }
-

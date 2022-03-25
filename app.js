@@ -3,6 +3,10 @@ import bodyParser from "body-parser";
 import rdfParser from "rdf-parse";
 import rdfSerializer from "rdf-serialize";
 import fs from "fs";
+import jsstream from "stream";
+import { storeStream } from "rdf-store-stream";
+import { Store, DataFactory } from "n3";
+const { namedNode, quad } = DataFactory;
 
 app.use(
   bodyParser.text({
@@ -14,20 +18,14 @@ app.use(
 
 import {
   readTriples,
+  readTriplesStream,
   writeTriples,
   triplesFileAsString,
   lastPage,
   clearLastPageCache,
+  writeTriplesStream,
 } from "./storage/files";
-import {
-  parse,
-  graph,
-  namedNode,
-  triple,
-  literal,
-  Store,
-  NamedNode,
-} from "rdflib";
+import { parse, graph, triple, literal, NamedNode } from "rdflib";
 
 const FEED_FILE = "/app/data/feed.ttl";
 const PAGES_FOLDER = "/app/data/pages/";
@@ -56,11 +54,8 @@ function generatePageResource(number) {
 }
 
 function parseString(string, contentType) {
-  console.log(string);
   let newGraph = graph();
-  parse(string, newGraph, "http://example.com/", contentType);
-  console.log(result.statements);
-  // console.log(newGraph.statements);
+  parse(string, newGraph, "http://example.com/", "text/turtle");
   return newGraph;
 }
 
@@ -87,12 +82,15 @@ function fileForPage(page) {
  * @param {NamedNode} graph The graph containing the data.
  */
 function countVersionedItems(store, graph) {
-  return store.match(
+  console.log(store);
+  let count = store.countQuads(
     stream,
     namedNode("https://w3id.org/tree#member"),
     undefined,
-    graph
-  ).length;
+    undefined
+  );
+  console.log("Count", count);
+  return count;
 }
 
 /**
@@ -109,13 +107,12 @@ function shouldCreateNewPage(store, graph) {
 /**
  * Publishes a new version of the same resource.
  */
-app.post("/resource", (req, res) => {
+app.post("/resource", async (req, res) => {
   try {
-    const contentType = req.headers["content-type"];
-    const body = parseString(req.body, contentType);
-    console.log(body.match());
+    const body = turtleParseString(req.body);
     const resource = namedNode(req.query.resource);
     const versionedResource = generateVersion(resource);
+
     const newTriples = graph();
 
     // create new version of the resource
@@ -238,6 +235,141 @@ app.post("/resource", (req, res) => {
       writeTriples(currentDataset, GRAPH, pageFile);
     }
 
+    const newCount = countVersionedItems(currentDataset, GRAPH);
+
+    res.status(200).send(`{"message": "ok", "triplesInPage": ${newCount}}`);
+  } catch (e) {
+    console.error(e);
+    res.status(500).send();
+  }
+});
+
+app.post("/resource-stream", async function (req, res) {
+  try {
+    const contentType = req.headers["content-type"];
+
+    const resource = namedNode(req.query.resource);
+    const versionedResource = generateVersion(resource);
+
+    const bodyStream = jsstream.Readable.from(req.body);
+
+    const quadStream = rdfParser.parse(bodyStream, {
+      contentType: contentType,
+    });
+
+    const store = await storeStream(quadStream);
+
+    const versionedStore = new Store();
+
+    for (let match of store.match()) {
+      versionedStore.add(
+        quad(
+          match.subject.equals(resource) ? versionedResource : match.subject,
+          match.predicate.equals(resource)
+            ? versionedResource
+            : match.predicate,
+          match.object.equals(resource) ? versionedResource : match.object
+        )
+      );
+    }
+
+    const dateLiteral = nowLiteral();
+
+    let a = versionedStore.getQuads();
+
+    // add resources about this version
+    versionedStore.add(
+      quad(
+        versionedResource,
+        namedNode("http://purl.org/dc/terms/isVersionOf"),
+        resource
+      )
+    );
+
+    versionedStore.add(
+      quad(
+        versionedResource,
+        namedNode("http://www.w3.org/ns/sosa/resultTime"),
+        dateLiteral
+      )
+    );
+
+    versionedStore.add(
+      quad(stream, namedNode("https://w3id.org/tree#member"), versionedResource)
+    );
+
+    // read the current dataset
+    const lastPageNr = lastPage(PAGES_FOLDER);
+    let pageFile = fileForPage(lastPageNr);
+    let currentDataset = await storeStream(readTriplesStream(pageFile, GRAPH));
+
+    if (shouldCreateNewPage(currentDataset, GRAPH)) {
+      const closingDataset = currentDataset;
+
+      // link the current dataset to the new dataset but don't save yet
+      const closingPageFile = pageFile;
+      const nextPageFile = fileForPage(lastPageNr + 1);
+      const relationResource = generateTreeRelation();
+      const currentPageResource = generatePageResource(lastPageNr);
+      const nextPageResource = generatePageResource(lastPageNr + 1);
+      closingDataset.add(
+        quad(
+          currentPageResource,
+          namedNode("https://w3id.org/tree#relation"),
+          relationResource
+        )
+      );
+      closingDataset.add(
+        quad(
+          relationResource,
+          namedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
+          namedNode("https://w3id.org/tree#GreaterThanOrEqualRelation")
+        )
+      );
+      closingDataset.add(
+        quad(
+          relationResource,
+          namedNode("https://w3id.org/tree#node"),
+          nextPageResource
+        )
+      );
+      closingDataset.add(
+        quad(
+          relationResource,
+          namedNode("https://w3id.org/tree#path"),
+          namedNode("http://www.w3.org/ns/sosa/resultTime")
+        )
+      );
+      closingDataset.add(
+        quad(
+          relationResource,
+          namedNode("https://w3id.org/tree#value"),
+          dateLiteral
+        )
+      );
+
+      // create a store with the new graph for the new file
+      currentDataset = await storeStream(readTriplesStream(FEED_FILE, GRAPH));
+      currentDataset.add(
+        quad(
+          nextPageResource,
+          namedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
+          namedNode("https://w3id.org/tree#Node")
+        )
+      );
+      currentDataset.addQuads(versionedStore.getQuads());
+
+      // // Write out new dataset to nextPageFile
+      writeTriplesStream(currentDataset, GRAPH, nextPageFile);
+      // // Write out closing dataset to closingPageFile
+      writeTriplesStream(closingDataset, GRAPH, closingPageFile);
+      // Clear the last page cache
+      clearLastPageCache(PAGES_FOLDER);
+    } else {
+      currentDataset.addQuads(versionedStore.getQuads());
+      writeTriplesStream(currentDataset, GRAPH, pageFile);
+    }
+    console.log(currentDataset);
     const newCount = countVersionedItems(currentDataset, GRAPH);
 
     res.status(200).send(`{"message": "ok", "triplesInPage": ${newCount}}`);
