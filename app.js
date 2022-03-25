@@ -247,13 +247,27 @@ app.post("/resource", (req, res) => {
   }
 });
 
-app.get("/", function (_req, res) {
+app.get("/", function (req, res) {
   // LDES does not use this index page
   try {
-    res
-      .header("Content-Type", "text/turtle")
-      .status(200)
-      .send(triplesFileAsString(FEED_FILE));
+    const fileStream = fs.createReadStream(FEED_FILE);
+    const rdfStream = rdfParser.parse(fileStream, {
+      contentType: "text/turtle",
+    });
+
+    res.header("Content-Type", req.headers["accept"]);
+
+    rdfSerializer
+      .serialize(rdfStream, {
+        contentType: req.headers["accept"],
+      })
+      .on("data", (d) => res.write(d))
+      .on("error", (error) => {
+        console.log(error);
+      })
+      .on("end", () => {
+        res.end();
+      });
   } catch (e) {
     console.error(e);
   }
@@ -266,25 +280,24 @@ app.get("/pages", function (req, res) {
     if (page < lastPage(PAGES_FOLDER))
       res.header("Cache-Control", "public, immutable");
 
-    if (req.accepts("application/ld+json")) {
-      const fileStream = fs.createReadStream(fileForPage(page));
-      const rdfStream = rdfParser.parse(fileStream, {
-        contentType: "text/turtle",
-      });
+    const fileStream = fs.createReadStream(fileForPage(page));
+    const rdfStream = rdfParser.parse(fileStream, {
+      contentType: "text/turtle",
+    });
 
-      rdfSerializer
-        .serialize(rdfStream, {
-          contentType: "application/ld+json",
-        })
-        .on("data", (d) => res.write(d))
-        .on("error", (error) => console.log(error))
-        .on("end", () => res.end());
-    } else {
-      res
-        .header("Content-Type", "text/turtle")
-        .status(200)
-        .send(triplesFileAsString(fileForPage(page)));
-    }
+    res.header("Content-Type", req.headers["accept"]);
+
+    rdfSerializer
+      .serialize(rdfStream, {
+        contentType: req.headers["accept"],
+      })
+      .on("data", (d) => res.write(d))
+      .on("error", (error) => {
+        throw error;
+      })
+      .on("end", () => {
+        res.end();
+      });
   } catch (e) {
     console.error(e);
     res.status(500).send();
