@@ -1,4 +1,5 @@
 import fs from "fs";
+import { Quad, Store } from "n3";
 import rdfParser from "rdf-parse";
 import rdfSerializer from "rdf-serialize";
 import jsstream, { Stream } from "stream";
@@ -7,7 +8,7 @@ import jsstream, { Stream } from "stream";
  * content.
  */
 
-const fileCache = {};
+const fileCache: any = {};
 
 /**
  * Loads a file as a string.
@@ -15,7 +16,7 @@ const fileCache = {};
  * @param {string} file The file path as a string.
  * @return {string} Contents of the file, read as UTF-8.
  */
-export function triplesFileAsString(file) {
+export function triplesFileAsString(file: string): string {
   if (!fileCache[file]) fileCache[file] = fs.readFileSync(file, "utf8");
 
   return fileCache[file];
@@ -28,7 +29,7 @@ export function triplesFileAsString(file) {
  * @return {Stream} Stream containing all triples which were downloaded.
  */
 
-export function readTriplesStream(file, targetGraph) {
+export function readTriplesStream(file: string): Stream {
   const fileStream = jsstream.Readable.from(triplesFileAsString(file));
   return rdfParser.parse(fileStream, {
     contentType: "text/turtle",
@@ -41,7 +42,7 @@ export function readTriplesStream(file, targetGraph) {
  * @param {NamedNode} graph The graph which will be written to the file.
  * @param {string} file Path of the file to which we will write the content.
  */
-export function writeTriplesStream(store, graph, file) {
+export function writeTriplesStream(store: Store, file: string): void {
   const quadStream = jsstream.Readable.from(store);
   const turtleStream = rdfSerializer.serialize(quadStream, {
     contentType: "text/turtle",
@@ -57,14 +58,14 @@ export function writeTriplesStream(store, graph, file) {
   });
 }
 
-const lastPageCache = {};
+const lastPageCache: any = {};
 
 /**
  * Clears the last page cache for the supplied folder.
  *
  * @param {string} folder The folder for which the last page cache will be cleared.
  */
-export function clearLastPageCache(folder) {
+export function clearLastPageCache(folder: string) {
   delete lastPageCache[folder];
 }
 
@@ -76,15 +77,19 @@ export function clearLastPageCache(folder) {
  * @return {number | NaN} Biggest page index currently available or NaN
  * if no numbered pages were found.
  */
-export function lastPage(folder) {
+export function lastPage(folder: string) {
   if (!lastPageCache[folder]) {
     const files = fs.readdirSync(folder);
     const fileNumbers = files
       .map((path) => {
         const match = path.match(/\d*/);
-        const parsedNumber = match.length && parseInt(match[0]);
-        if (parsedNumber && parsedNumber !== NaN) return parsedNumber;
-        else return NaN;
+        if (match) {
+          const parsedNumber = match.length && parseInt(match[0]);
+          if (parsedNumber && parsedNumber !== NaN) return parsedNumber;
+          else return NaN;
+        } else {
+          return NaN;
+        }
       })
       .filter((x) => x !== NaN);
 

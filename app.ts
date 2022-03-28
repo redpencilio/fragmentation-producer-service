@@ -5,12 +5,12 @@ import rdfSerializer from "rdf-serialize";
 import fs from "fs";
 import jsstream from "stream";
 import { storeStream } from "rdf-store-stream";
-import { Store, DataFactory } from "n3";
+import { Store, DataFactory, Quad } from "n3";
 const { namedNode, quad, literal } = DataFactory;
 
 app.use(
   bodyParser.text({
-    type: function (req) {
+    type: function (req: any) {
       return true;
     },
   })
@@ -33,7 +33,7 @@ const stream = namedNode(
   "http://mu.semte.ch/services/ldes-time-fragmenter/example-stream"
 );
 
-function generateVersion(_namedNode) {
+function generateVersion(_namedNode: any) {
   return namedNode(
     `http://mu.semte.ch/services/ldes-time-fragmenter/versioned/${uuid()}`
   );
@@ -45,7 +45,7 @@ function generateTreeRelation() {
   );
 }
 
-function generatePageResource(number) {
+function generatePageResource(number: number) {
   return namedNode(`${SERVICE_PATH}pages?page=${number}`);
 }
 
@@ -61,7 +61,7 @@ function nowLiteral() {
  * @param {number} page Page index for which we want te get the file path.
  * @return {string} Path to the page.
  */
-function fileForPage(page) {
+function fileForPage(page: number) {
   return `${PAGES_FOLDER}${page}.ttl`;
 }
 
@@ -71,14 +71,13 @@ function fileForPage(page) {
  * @param {Store} store Store containing all the triples.
  * @param {NamedNode} graph The graph containing the data.
  */
-function countVersionedItems(store, graph) {
+function countVersionedItems(store: Store): number {
   let count = store.countQuads(
     stream,
     namedNode("https://w3id.org/tree#member"),
     undefined,
     undefined
   );
-  console.log("Count", count);
   return count;
 }
 
@@ -86,17 +85,16 @@ function countVersionedItems(store, graph) {
  * Indicates whether or not we should create a new page.
  *
  * @param {Store} store Store which contains parsed triples.
- * @param {NamedNode} graph Graph in which current triples are stored.
  * @return {boolean} Truethy if we should create a new file.
  */
-function shouldCreateNewPage(store, graph) {
-  return countVersionedItems(store, graph) >= MAX_RESOURCES_PER_PAGE;
+function shouldCreateNewPage(store: Store): boolean {
+  return countVersionedItems(store) >= MAX_RESOURCES_PER_PAGE;
 }
 
 /**
  * Publishes a new version of the same resource.
  */
-app.post("/resource", async function (req, res) {
+app.post("/resource", async function (req: any, res: any) {
   try {
     const contentType = req.headers["content-type"];
 
@@ -109,7 +107,9 @@ app.post("/resource", async function (req, res) {
       contentType: contentType,
     });
 
-    const store = await storeStream(quadStream);
+    const store = new Store();
+
+    store.import(quadStream);
 
     const versionedStore = new Store();
 
@@ -127,7 +127,7 @@ app.post("/resource", async function (req, res) {
 
     const dateLiteral = nowLiteral();
 
-    let a = versionedStore.getQuads();
+    let a = versionedStore.getQuads(null, null, null, null);
 
     // add resources about this version
     versionedStore.add(
@@ -153,9 +153,12 @@ app.post("/resource", async function (req, res) {
     // read the current dataset
     const lastPageNr = lastPage(PAGES_FOLDER);
     let pageFile = fileForPage(lastPageNr);
-    let currentDataset = await storeStream(readTriplesStream(pageFile, GRAPH));
 
-    if (shouldCreateNewPage(currentDataset, GRAPH)) {
+    let currentDataset = new Store();
+
+    currentDataset.import(readTriplesStream(pageFile));
+
+    if (shouldCreateNewPage(currentDataset)) {
       const closingDataset = currentDataset;
 
       // link the current dataset to the new dataset but don't save yet
@@ -201,7 +204,8 @@ app.post("/resource", async function (req, res) {
       );
 
       // create a store with the new graph for the new file
-      currentDataset = await storeStream(readTriplesStream(FEED_FILE, GRAPH));
+      currentDataset = new Store();
+      currentDataset.import(readTriplesStream(FEED_FILE));
       currentDataset.add(
         quad(
           nextPageResource,
@@ -209,20 +213,20 @@ app.post("/resource", async function (req, res) {
           namedNode("https://w3id.org/tree#Node")
         )
       );
-      currentDataset.addQuads(versionedStore.getQuads());
+      currentDataset.addQuads(versionedStore.getQuads(null, null, null, null));
 
       // // Write out new dataset to nextPageFile
-      writeTriplesStream(currentDataset, GRAPH, nextPageFile);
+      writeTriplesStream(currentDataset, nextPageFile);
       // // Write out closing dataset to closingPageFile
-      writeTriplesStream(closingDataset, GRAPH, closingPageFile);
+      writeTriplesStream(closingDataset, closingPageFile);
       // Clear the last page cache
       clearLastPageCache(PAGES_FOLDER);
     } else {
-      currentDataset.addQuads(versionedStore.getQuads());
-      writeTriplesStream(currentDataset, GRAPH, pageFile);
+      currentDataset.addQuads(versionedStore.getQuads(null, null, null, null));
+      writeTriplesStream(currentDataset, pageFile);
     }
     console.log(currentDataset);
-    const newCount = countVersionedItems(currentDataset, GRAPH);
+    const newCount = countVersionedItems(currentDataset);
 
     res.status(200).send(`{"message": "ok", "triplesInPage": ${newCount}}`);
   } catch (e) {
@@ -231,7 +235,7 @@ app.post("/resource", async function (req, res) {
   }
 });
 
-app.get("/", function (req, res) {
+app.get("/", function (req: any, res: any) {
   // LDES does not use this index page
   try {
     const fileStream = fs.createReadStream(FEED_FILE);
@@ -257,7 +261,7 @@ app.get("/", function (req, res) {
   }
 });
 
-app.get("/pages", function (req, res) {
+app.get("/pages", function (req: any, res: any) {
   try {
     const page = parseInt(req.query.page);
 
@@ -288,12 +292,14 @@ app.get("/pages", function (req, res) {
   }
 });
 
-app.get("/count", async function (_req, res) {
+app.get("/count", async function (_req: any, res: any) {
   try {
     const file = fileForPage(lastPage(PAGES_FOLDER));
     console.log(`Reading from ${file}`);
-    const currentDataset = await storeStream(readTriplesStream(file, GRAPH));
-    const count = countVersionedItems(currentDataset, GRAPH);
+
+    const currentDataset = new Store();
+    currentDataset.import(readTriplesStream(file));
+    const count = countVersionedItems(currentDataset);
     res.status(200).send(`{"count": ${count}}`);
   } catch (e) {
     console.error(e);
@@ -301,7 +307,7 @@ app.get("/count", async function (_req, res) {
   }
 });
 
-app.get("/last-page", function (_req, res) {
+app.get("/last-page", function (_req: any, res: any) {
   try {
     const page = lastPage(PAGES_FOLDER);
     if (page === NaN) res.status(500).send(`{"message": "No pages found"}`);

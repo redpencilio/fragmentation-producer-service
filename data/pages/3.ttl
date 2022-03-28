@@ -1,10 +1,20 @@
 <http://mu.semte.ch/services/ldes-time-fragmenter/example-stream> a <http://w3id.org/ldes#EventStream>, <https://w3id.org/tree#Collection>;
     <http://w3id.org/ldes#timestampPath> <http://www.w3.org/ns/sosa/resultTime>;
     <https://w3id.org/tree#view> <http://localhost:8888/pages?page=1>;
-    <https://w3id.org/tree#member> <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/e7b4ad40-ac58-11ec-9faf-afcfc94035ae>.
-<http://localhost:8888/pages?page=3> a <https://w3id.org/tree#Node>.
+    <https://w3id.org/tree#member> <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/e7b4ad40-ac58-11ec-9faf-afcfc94035ae>, <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/55a3ddb0-ae72-11ec-a2c4-b3d93c61b49f>, <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/5e9831a0-ae72-11ec-a2c4-b3d93c61b49f>.
 <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/e7b4ad40-ac58-11ec-9faf-afcfc94035ae> a <http://mu.semte.ch/services/tests/Test>;
     <http://www.w3.org/ns/sosa/resultTime> "2022-03-25T16:30:38.619Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
     <http://mu.semte.ch/services/tests/description> "How about this?  Does the LDES client discover our updated object?";
     <http://mu.semte.ch/services/tests/name> "1000000 test";
+    <http://purl.org/dc/terms/isVersionOf> <http://mu.semte.ch/services/ldes-time-fragmenter/example-stream>.
+<http://mu.semte.ch/services/ldes-time-fragmenter/versioned/55a3ddb0-ae72-11ec-a2c4-b3d93c61b49f> a <http://mu.semte.ch/services/tests/Test>;
+    <http://www.w3.org/ns/sosa/resultTime> "2022-03-28T08:37:42.803Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
+    <http://mu.semte.ch/services/tests/description> "How about this?  Does the LDES client discover our updated object?";
+    <http://mu.semte.ch/services/tests/name> "400 test";
+    <http://purl.org/dc/terms/isVersionOf> <http://mu.semte.ch/services/ldes-time-fragmenter/example-stream>.
+<http://localhost:8888/pages?page=3> a <https://w3id.org/tree#Node>.
+<http://mu.semte.ch/services/ldes-time-fragmenter/versioned/5e9831a0-ae72-11ec-a2c4-b3d93c61b49f> a <http://mu.semte.ch/services/tests/Test>;
+    <http://www.w3.org/ns/sosa/resultTime> "2022-03-28T08:37:57.820Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
+    <http://mu.semte.ch/services/tests/description> "How about this?  Does the LDES client discover our updated object?";
+    <http://mu.semte.ch/services/tests/name> "500 test";
     <http://purl.org/dc/terms/isVersionOf> <http://mu.semte.ch/services/ldes-time-fragmenter/example-stream>.
