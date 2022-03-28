@@ -2,13 +2,18 @@ import fs from "fs";
 import { Quad, Store } from "n3";
 import rdfParser from "rdf-parse";
 import rdfSerializer from "rdf-serialize";
-import jsstream, { Stream } from "stream";
+import jsstream from "stream";
+import type { Stream } from "@rdfjs/types";
 /**
  * Contains abstractions for working with files containing turtle
  * content.
  */
 
-const fileCache: any = {};
+interface FileCache {
+  [file: string]: string;
+}
+
+const fileCache: FileCache = {};
 
 /**
  * Loads a file as a string.
@@ -29,7 +34,7 @@ export function triplesFileAsString(file: string): string {
  * @return {Stream} Stream containing all triples which were downloaded.
  */
 
-export function readTriplesStream(file: string): Stream {
+export function readTriplesStream(file: string): Stream<Quad> {
   const fileStream = jsstream.Readable.from(triplesFileAsString(file));
   return rdfParser.parse(fileStream, {
     contentType: "text/turtle",
@@ -58,14 +63,18 @@ export function writeTriplesStream(store: Store, file: string): void {
   });
 }
 
-const lastPageCache: any = {};
+interface PageCache {
+  [folder: string]: number;
+}
+
+const lastPageCache: PageCache = {};
 
 /**
  * Clears the last page cache for the supplied folder.
  *
  * @param {string} folder The folder for which the last page cache will be cleared.
  */
-export function clearLastPageCache(folder: string) {
+export function clearLastPageCache(folder: string): void {
   delete lastPageCache[folder];
 }
 
@@ -77,7 +86,7 @@ export function clearLastPageCache(folder: string) {
  * @return {number | NaN} Biggest page index currently available or NaN
  * if no numbered pages were found.
  */
-export function lastPage(folder: string) {
+export function lastPage(folder: string): number {
   if (!lastPageCache[folder]) {
     const files = fs.readdirSync(folder);
     const fileNumbers = files

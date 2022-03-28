@@ -75,8 +75,8 @@ function countVersionedItems(store: Store): number {
   let count = store.countQuads(
     stream,
     namedNode("https://w3id.org/tree#member"),
-    undefined,
-    undefined
+    null,
+    null
   );
   return count;
 }
