@@ -17,10 +17,7 @@ app.use(
 );
 
 import {
-  readTriples,
   readTriplesStream,
-  writeTriples,
-  triplesFileAsString,
   lastPage,
   clearLastPageCache,
   writeTriplesStream,
@@ -291,11 +288,11 @@ app.get("/pages", function (req, res) {
   }
 });
 
-app.get("/count", function (_req, res) {
+app.get("/count", async function (_req, res) {
   try {
     const file = fileForPage(lastPage(PAGES_FOLDER));
     console.log(`Reading from ${file}`);
-    const currentDataset = readTriples(file, GRAPH);
+    const currentDataset = await storeStream(readTriplesStream(file, GRAPH));
     const count = countVersionedItems(currentDataset, GRAPH);
     res.status(200).send(`{"count": ${count}}`);
   } catch (e) {

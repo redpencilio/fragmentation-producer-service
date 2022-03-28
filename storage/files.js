@@ -1,8 +1,7 @@
 import fs from "fs";
-import { parse, graph, Store, NamedNode, serialize } from "rdflib";
 import rdfParser from "rdf-parse";
 import rdfSerializer from "rdf-serialize";
-import jsstream from "stream";
+import jsstream, { Stream } from "stream";
 /**
  * Contains abstractions for working with files containing turtle
  * content.
@@ -26,15 +25,8 @@ export function triplesFileAsString(file) {
  * Reads the triples in a file, assuming text/turtle.
  *
  * @param {string} file File path where the turtle file is stored.
- * @param {NamedNode} graph The graph to which we will write.
- * @param {Store?} store OPTIONAL: The store to which the content will be written.
- * @return {Store} Instance containing all triples which were downloaded.
+ * @return {Stream} Stream containing all triples which were downloaded.
  */
-export function readTriples(file, targetGraph, store = graph()) {
-  // TODO: targetGraph is not considered to be a new graph, how?
-  parse(triplesFileAsString(file), store, targetGraph.value, "text/turtle");
-  return store;
-}
 
 export function readTriplesStream(file, targetGraph) {
   const fileStream = jsstream.Readable.from(triplesFileAsString(file));
@@ -49,12 +41,6 @@ export function readTriplesStream(file, targetGraph) {
  * @param {NamedNode} graph The graph which will be written to the file.
  * @param {string} file Path of the file to which we will write the content.
  */
-export function writeTriples(store, graph, file) {
-  const serialized = serialize(graph, store, "text/turtle");
-  fs.writeFileSync(file, serialized);
-  fileCache[file] = serialized;
-}
-
 export function writeTriplesStream(store, graph, file) {
   const quadStream = jsstream.Readable.from(store);
   const turtleStream = rdfSerializer.serialize(quadStream, {
