@@ -46,7 +46,15 @@ export function writeTriplesStream(store, graph, file) {
   const turtleStream = rdfSerializer.serialize(quadStream, {
     contentType: "text/turtle",
   });
-  turtleStream.pipe(fs.createWriteStream(file));
+  const writeStream = fs.createWriteStream(file);
+  fileCache[file] = "";
+  turtleStream.on("data", (turtleChunk) => {
+    writeStream.write(turtleChunk);
+    fileCache[file] += turtleChunk;
+  });
+  turtleStream.on("end", () => {
+    writeStream.end();
+  });
 }
 
 const lastPageCache = {};
