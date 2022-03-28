@@ -6,7 +6,7 @@ import fs from "fs";
 import jsstream from "stream";
 import { storeStream } from "rdf-store-stream";
 import { Store, DataFactory } from "n3";
-const { namedNode, quad } = DataFactory;
+const { namedNode, quad, literal } = DataFactory;
 
 app.use(
   bodyParser.text({
@@ -25,7 +25,6 @@ import {
   clearLastPageCache,
   writeTriplesStream,
 } from "./storage/files";
-import { parse, graph, triple, literal, NamedNode } from "rdflib";
 
 const FEED_FILE = "/app/data/feed.ttl";
 const PAGES_FOLDER = "/app/data/pages/";
@@ -53,12 +52,6 @@ function generatePageResource(number) {
   return namedNode(`${SERVICE_PATH}pages?page=${number}`);
 }
 
-function parseString(string, contentType) {
-  let newGraph = graph();
-  parse(string, newGraph, "http://example.com/", "text/turtle");
-  return newGraph;
-}
-
 function nowLiteral() {
   const xsdDateTime = namedNode("http://www.w3.org/2001/XMLSchema#dateTime");
   const now = new Date().toISOString();
@@ -82,7 +75,6 @@ function fileForPage(page) {
  * @param {NamedNode} graph The graph containing the data.
  */
 function countVersionedItems(store, graph) {
-  console.log(store);
   let count = store.countQuads(
     stream,
     namedNode("https://w3id.org/tree#member"),
