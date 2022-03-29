@@ -22,12 +22,15 @@ import {
   writeTriplesStream,
   createStore,
 } from "./storage/files";
+import PromiseQueue from "./promise-queue";
 
 const FEED_FILE = "/app/data/feed.ttl";
 const PAGES_FOLDER = "/app/data/pages/";
 const GRAPH = namedNode("http://mu.semte.ch/services/ldes-time-fragmenter");
 const MAX_RESOURCES_PER_PAGE = 10;
 const SERVICE_PATH = "http://localhost:8888/"; // a workaround for json-ld not accepting relative paths
+
+const UPDATE_QUEUE = new PromiseQueue<Store>();
 
 function error(status: number, msg: string) {
   var err = new Error(msg);
@@ -107,23 +110,26 @@ async function constructVersionedStore(
 
   const bodyStream = jsstream.Readable.from(body);
 
-  const store = await createStore(
-    rdfParser.parse(bodyStream, {
-      contentType: contentType,
-    })
-  );
-
-  const versionedStore = new Store();
-
-  for (let match of store.match()) {
-    versionedStore.add(
+  const versionedStream = new jsstream.Transform({ objectMode: true });
+  versionedStream._transform = (quadObj, encoding, callback) => {
+    versionedStream.push(
       quad(
-        match.subject.equals(resource) ? versionedResource : match.subject,
-        match.predicate.equals(resource) ? versionedResource : match.predicate,
-        match.object.equals(resource) ? versionedResource : match.object
+        quadObj.subject.equals(resource) ? versionedResource : quadObj.subject,
+        quadObj.predicate.equals(resource)
+          ? versionedResource
+          : quadObj.predicate,
+        quadObj.object.equals(resource) ? versionedResource : quadObj.object
       )
     );
-  }
+    callback();
+  };
+  rdfParser
+    .parse(bodyStream, {
+      contentType: contentType,
+    })
+    .pipe(versionedStream);
+
+  const versionedStore = await createStore(versionedStream);
 
   const dateLiteral = nowLiteral();
 
@@ -205,6 +211,37 @@ async function closeDataset(closingDataset: Store, pageNr: number) {
   return currentDataset;
 }
 
+async function writeVersionedResource(versionedStore: Store) {
+  const lastPageNr = lastPage(PAGES_FOLDER);
+  let pageFile = fileForPage(lastPageNr);
+
+  let currentDataset = await createStore(readTriplesStream(pageFile));
+
+  if (shouldCreateNewPage(currentDataset)) {
+    const closingDataset = currentDataset;
+
+    // link the current dataset to the new dataset but don't save yet
+    const closingPageFile = pageFile;
+    const nextPageFile = fileForPage(lastPageNr + 1);
+
+    // create a store with the new graph for the new file
+    currentDataset = await closeDataset(closingDataset, lastPageNr);
+
+    currentDataset.addQuads(versionedStore.getQuads(null, null, null, null));
+
+    // // Write out new dataset to nextPageFile
+    writeTriplesStream(currentDataset, nextPageFile);
+    // // Write out closing dataset to closingPageFile
+    writeTriplesStream(closingDataset, closingPageFile);
+    // Clear the last page cache
+    clearLastPageCache(PAGES_FOLDER);
+  } else {
+    currentDataset.addQuads(versionedStore.getQuads(null, null, null, null));
+    writeTriplesStream(currentDataset, pageFile);
+  }
+  return currentDataset;
+}
+
 /**
  * Publishes a new version of the same resource.
  */
@@ -216,34 +253,10 @@ app.post("/resource", async function (req: any, res: any, next: any) {
       req.headers["content-type"]
     );
 
-    // read the current dataset
-    const lastPageNr = lastPage(PAGES_FOLDER);
-    let pageFile = fileForPage(lastPageNr);
+    const currentDataset = await UPDATE_QUEUE.push(() =>
+      writeVersionedResource(versionedStore)
+    );
 
-    let currentDataset = await createStore(readTriplesStream(pageFile));
-
-    if (shouldCreateNewPage(currentDataset)) {
-      const closingDataset = currentDataset;
-
-      // link the current dataset to the new dataset but don't save yet
-      const closingPageFile = pageFile;
-      const nextPageFile = fileForPage(lastPageNr + 1);
-
-      // create a store with the new graph for the new file
-      currentDataset = await closeDataset(closingDataset, lastPageNr);
-
-      currentDataset.addQuads(versionedStore.getQuads(null, null, null, null));
-
-      // // Write out new dataset to nextPageFile
-      writeTriplesStream(currentDataset, nextPageFile);
-      // // Write out closing dataset to closingPageFile
-      writeTriplesStream(closingDataset, closingPageFile);
-      // Clear the last page cache
-      clearLastPageCache(PAGES_FOLDER);
-    } else {
-      currentDataset.addQuads(versionedStore.getQuads(null, null, null, null));
-      writeTriplesStream(currentDataset, pageFile);
-    }
     console.log(currentDataset);
     const newCount = countVersionedItems(currentDataset);
 
