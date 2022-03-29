@@ -243,13 +243,13 @@ app.get("/", function (req: any, res: any) {
       })
       .on("data", (d) => res.write(d))
       .on("error", (error) => {
-        console.log(error);
+        res.status(500).send();
       })
       .on("end", () => {
         res.end();
       });
   } catch (e) {
-    console.error(e);
+    res.status(500).send();
   }
 });
 
@@ -287,7 +287,10 @@ app.get("/pages", function (req: any, res: any) {
 
 app.get("/count", async function (_req: any, res: any) {
   try {
-    const file = fileForPage(lastPage(PAGES_FOLDER));
+    const page = lastPage(PAGES_FOLDER);
+    if (page === NaN) res.status(404).send(`{"message": "No pages found"}`);
+
+    const file = fileForPage(page);
     console.log(`Reading from ${file}`);
 
     const currentDataset = createStore(readTriplesStream(file));
