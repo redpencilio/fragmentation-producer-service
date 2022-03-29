@@ -23,12 +23,19 @@ import {
   writeTriplesStream,
   createStore,
 } from "./storage/files";
+import { NextId } from "rdflib";
 
 const FEED_FILE = "/app/data/feed.ttl";
 const PAGES_FOLDER = "/app/data/pages/";
 const GRAPH = namedNode("http://mu.semte.ch/services/ldes-time-fragmenter");
 const MAX_RESOURCES_PER_PAGE = 10;
 const SERVICE_PATH = "http://localhost:8888/"; // a workaround for json-ld not accepting relative paths
+
+function error(status: number, msg: string) {
+  var err = new Error(msg);
+  err.status = status;
+  return err;
+}
 
 const stream = namedNode(
   "http://mu.semte.ch/services/ldes-time-fragmenter/example-stream"
@@ -95,7 +102,7 @@ function shouldCreateNewPage(store: Store): boolean {
 /**
  * Publishes a new version of the same resource.
  */
-app.post("/resource", async function (req: any, res: any) {
+app.post("/resource", async function (req: any, res: any, next: any) {
   try {
     const contentType = req.headers["content-type"];
 
@@ -226,11 +233,11 @@ app.post("/resource", async function (req: any, res: any) {
     res.status(201).send(`{"message": "ok", "triplesInPage": ${newCount}}`);
   } catch (e) {
     console.error(e);
-    res.status(500).send();
+    next(error(500, ""));
   }
 });
 
-app.get("/", function (req: any, res: any) {
+app.get("/", function (req: any, res: any, next: any) {
   // LDES does not use this index page
   try {
     const rdfStream = readTriplesStream(FEED_FILE);
@@ -243,17 +250,17 @@ app.get("/", function (req: any, res: any) {
       })
       .on("data", (d) => res.write(d))
       .on("error", (error) => {
-        res.status(500).send();
+        next(error(500, "Serializing error"));
       })
       .on("end", () => {
         res.end();
       });
   } catch (e) {
-    res.status(500).send();
+    next(error(500, ""));
   }
 });
 
-app.get("/pages", function (req: any, res: any) {
+app.get("/pages", function (req: any, res: any, next: any) {
   try {
     const page = parseInt(req.query.page);
 
@@ -261,7 +268,7 @@ app.get("/pages", function (req: any, res: any) {
       res.header("Cache-Control", "public, immutable");
 
     if (page > lastPage(PAGES_FOLDER)) {
-      res.status(404).send("Page not found");
+      next(error(404, "Page not found"));
     }
 
     const rdfStream = readTriplesStream(fileForPage(page));
@@ -274,21 +281,21 @@ app.get("/pages", function (req: any, res: any) {
       })
       .on("data", (d) => res.write(d))
       .on("error", (error) => {
-        res.status(500).send();
+        next(error(500, "Serializing error"));
       })
       .on("end", () => {
         res.end();
       });
   } catch (e) {
     console.error(e);
-    res.status(500).send();
+    next(error(500, ""));
   }
 });
 
-app.get("/count", async function (_req: any, res: any) {
+app.get("/count", async function (_req: any, res: any, next: any) {
   try {
     const page = lastPage(PAGES_FOLDER);
-    if (page === NaN) res.status(404).send(`{"message": "No pages found"}`);
+    if (page === NaN) next(error(404, "No pages found"));
 
     const file = fileForPage(page);
     console.log(`Reading from ${file}`);
@@ -299,18 +306,18 @@ app.get("/count", async function (_req: any, res: any) {
     res.status(200).send(`{"count": ${count}}`);
   } catch (e) {
     console.error(e);
-    res.status(500).send();
+    next(error(500, ""));
   }
 });
 
-app.get("/last-page", function (_req: any, res: any) {
+app.get("/last-page", function (_req: any, res: any, next: any) {
   try {
     const page = lastPage(PAGES_FOLDER);
-    if (page === NaN) res.status(404).send(`{"message": "No pages found"}`);
+    if (page === NaN) next(error(404, "No pages found"));
     else res.status(200).send(`{"lastPage": ${page}}`);
   } catch (e) {
     console.error(e);
-    res.status(500).send();
+    next(error(500, ""));
   }
 });
 
