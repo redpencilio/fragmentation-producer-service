@@ -59,13 +59,14 @@ export function writeTriplesStream(store: Store, file: string): void {
     contentType: "text/turtle",
   });
   const writeStream = fs.createWriteStream(file);
-  fileCache[file] = "";
+  let fileData = "";
   turtleStream.on("data", (turtleChunk) => {
     writeStream.write(turtleChunk);
-    fileCache[file] += turtleChunk;
+    fileData += turtleChunk;
   });
   turtleStream.on("end", () => {
     writeStream.end();
+    fileCache[file] = fileData;
   });
 }
 

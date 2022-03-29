@@ -23,7 +23,6 @@ import {
   writeTriplesStream,
   createStore,
 } from "./storage/files";
-import { NextId } from "rdflib";
 
 const FEED_FILE = "/app/data/feed.ttl";
 const PAGES_FOLDER = "/app/data/pages/";
