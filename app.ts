@@ -110,7 +110,7 @@ app.post("/resource", async function (req: any, res: any, next: any) {
 
     const bodyStream = jsstream.Readable.from(req.body);
 
-    const store = createStore(
+    const store = await storeStream<Quad>(
       rdfParser.parse(bodyStream, {
         contentType: contentType,
       })
@@ -157,7 +157,7 @@ app.post("/resource", async function (req: any, res: any, next: any) {
     const lastPageNr = lastPage(PAGES_FOLDER);
     let pageFile = fileForPage(lastPageNr);
 
-    let currentDataset = createStore(readTriplesStream(pageFile));
+    let currentDataset = await storeStream(readTriplesStream(pageFile));
 
     if (shouldCreateNewPage(currentDataset)) {
       const closingDataset = currentDataset;
@@ -205,7 +205,7 @@ app.post("/resource", async function (req: any, res: any, next: any) {
       );
 
       // create a store with the new graph for the new file
-      currentDataset = createStore(readTriplesStream(FEED_FILE));
+      currentDataset = await storeStream(readTriplesStream(FEED_FILE));
 
       currentDataset.add(
         quad(
@@ -299,7 +299,7 @@ app.get("/count", async function (_req: any, res: any, next: any) {
     const file = fileForPage(page);
     console.log(`Reading from ${file}`);
 
-    const currentDataset = createStore(readTriplesStream(file));
+    const currentDataset = await storeStream(readTriplesStream(file));
 
     const count = countVersionedItems(currentDataset);
     res.status(200).send(`{"count": ${count}}`);
