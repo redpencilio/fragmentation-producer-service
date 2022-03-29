@@ -41,10 +41,14 @@ export function readTriplesStream(file: string): Stream<Quad> {
   });
 }
 
-export function createStore(quadStream: Stream<Quad>): Store {
+export function createStore(quadStream: Stream<Quad>): Promise<Store> {
   const store = new Store();
-  store.import(quadStream);
-  return store;
+  return new Promise((resolve, reject) =>
+    store
+      .import(quadStream)
+      .on("error", reject)
+      .once("end", () => resolve(store))
+  );
 }
 /**
  * Writes the triples in text-turtle to a file.

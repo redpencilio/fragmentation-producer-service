@@ -4,7 +4,6 @@ import rdfParser from "rdf-parse";
 import rdfSerializer from "rdf-serialize";
 import fs from "fs";
 import jsstream from "stream";
-import { storeStream } from "rdf-store-stream";
 import { Store, DataFactory, Quad } from "n3";
 const { namedNode, quad, literal } = DataFactory;
 
@@ -110,7 +109,7 @@ app.post("/resource", async function (req: any, res: any, next: any) {
 
     const bodyStream = jsstream.Readable.from(req.body);
 
-    const store = await storeStream<Quad>(
+    const store = await createStore(
       rdfParser.parse(bodyStream, {
         contentType: contentType,
       })
@@ -157,7 +156,7 @@ app.post("/resource", async function (req: any, res: any, next: any) {
     const lastPageNr = lastPage(PAGES_FOLDER);
     let pageFile = fileForPage(lastPageNr);
 
-    let currentDataset = await storeStream(readTriplesStream(pageFile));
+    let currentDataset = await createStore(readTriplesStream(pageFile));
 
     if (shouldCreateNewPage(currentDataset)) {
       const closingDataset = currentDataset;
@@ -205,7 +204,7 @@ app.post("/resource", async function (req: any, res: any, next: any) {
       );
 
       // create a store with the new graph for the new file
-      currentDataset = await storeStream(readTriplesStream(FEED_FILE));
+      currentDataset = await createStore(readTriplesStream(FEED_FILE));
 
       currentDataset.add(
         quad(
@@ -299,7 +298,7 @@ app.get("/count", async function (_req: any, res: any, next: any) {
     const file = fileForPage(page);
     console.log(`Reading from ${file}`);
 
-    const currentDataset = await storeStream(readTriplesStream(file));
+    const currentDataset = await createStore(readTriplesStream(file));
 
     const count = countVersionedItems(currentDataset);
     res.status(200).send(`{"count": ${count}}`);
