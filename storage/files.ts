@@ -40,6 +40,12 @@ export function readTriplesStream(file: string): Stream<Quad> {
     contentType: "text/turtle",
   });
 }
+
+export function createStore(quadStream: Stream<Quad>): Store {
+  const store = new Store();
+  store.import(quadStream);
+  return store;
+}
 /**
  * Writes the triples in text-turtle to a file.
  *

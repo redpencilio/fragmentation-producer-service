@@ -21,6 +21,7 @@ import {
   lastPage,
   clearLastPageCache,
   writeTriplesStream,
+  createStore,
 } from "./storage/files";
 
 const FEED_FILE = "/app/data/feed.ttl";
@@ -103,13 +104,11 @@ app.post("/resource", async function (req: any, res: any) {
 
     const bodyStream = jsstream.Readable.from(req.body);
 
-    const quadStream = rdfParser.parse(bodyStream, {
-      contentType: contentType,
-    });
-
-    const store = new Store();
-
-    store.import(quadStream);
+    const store = createStore(
+      rdfParser.parse(bodyStream, {
+        contentType: contentType,
+      })
+    );
 
     const versionedStore = new Store();
 
@@ -126,8 +125,6 @@ app.post("/resource", async function (req: any, res: any) {
     }
 
     const dateLiteral = nowLiteral();
-
-    let a = versionedStore.getQuads(null, null, null, null);
 
     // add resources about this version
     versionedStore.add(
@@ -154,9 +151,7 @@ app.post("/resource", async function (req: any, res: any) {
     const lastPageNr = lastPage(PAGES_FOLDER);
     let pageFile = fileForPage(lastPageNr);
 
-    let currentDataset = new Store();
-
-    currentDataset.import(readTriplesStream(pageFile));
+    let currentDataset = createStore(readTriplesStream(pageFile));
 
     if (shouldCreateNewPage(currentDataset)) {
       const closingDataset = currentDataset;
@@ -204,8 +199,8 @@ app.post("/resource", async function (req: any, res: any) {
       );
 
       // create a store with the new graph for the new file
-      currentDataset = new Store();
-      currentDataset.import(readTriplesStream(FEED_FILE));
+      currentDataset = createStore(readTriplesStream(FEED_FILE));
+
       currentDataset.add(
         quad(
           nextPageResource,
@@ -228,7 +223,7 @@ app.post("/resource", async function (req: any, res: any) {
     console.log(currentDataset);
     const newCount = countVersionedItems(currentDataset);
 
-    res.status(200).send(`{"message": "ok", "triplesInPage": ${newCount}}`);
+    res.status(201).send(`{"message": "ok", "triplesInPage": ${newCount}}`);
   } catch (e) {
     console.error(e);
     res.status(500).send();
@@ -238,10 +233,7 @@ app.post("/resource", async function (req: any, res: any) {
 app.get("/", function (req: any, res: any) {
   // LDES does not use this index page
   try {
-    const fileStream = fs.createReadStream(FEED_FILE);
-    const rdfStream = rdfParser.parse(fileStream, {
-      contentType: "text/turtle",
-    });
+    const rdfStream = readTriplesStream(FEED_FILE);
 
     res.header("Content-Type", req.headers["accept"]);
 
@@ -268,10 +260,11 @@ app.get("/pages", function (req: any, res: any) {
     if (page < lastPage(PAGES_FOLDER))
       res.header("Cache-Control", "public, immutable");
 
-    const fileStream = fs.createReadStream(fileForPage(page));
-    const rdfStream = rdfParser.parse(fileStream, {
-      contentType: "text/turtle",
-    });
+    if (page > lastPage(PAGES_FOLDER)) {
+      res.status(404).send("Page not found");
+    }
+
+    const rdfStream = readTriplesStream(fileForPage(page));
 
     res.header("Content-Type", req.headers["accept"]);
 
@@ -281,7 +274,7 @@ app.get("/pages", function (req: any, res: any) {
       })
       .on("data", (d) => res.write(d))
       .on("error", (error) => {
-        throw error;
+        res.status(500).send();
       })
       .on("end", () => {
         res.end();
@@ -297,8 +290,8 @@ app.get("/count", async function (_req: any, res: any) {
     const file = fileForPage(lastPage(PAGES_FOLDER));
     console.log(`Reading from ${file}`);
 
-    const currentDataset = new Store();
-    currentDataset.import(readTriplesStream(file));
+    const currentDataset = createStore(readTriplesStream(file));
+
     const count = countVersionedItems(currentDataset);
     res.status(200).send(`{"count": ${count}}`);
   } catch (e) {
@@ -310,7 +303,7 @@ app.get("/count", async function (_req: any, res: any) {
 app.get("/last-page", function (_req: any, res: any) {
   try {
     const page = lastPage(PAGES_FOLDER);
-    if (page === NaN) res.status(500).send(`{"message": "No pages found"}`);
+    if (page === NaN) res.status(404).send(`{"message": "No pages found"}`);
     else res.status(200).send(`{"lastPage": ${page}}`);
   } catch (e) {
     console.error(e);
