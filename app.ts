@@ -4,6 +4,7 @@ import rdfParser from "rdf-parse";
 import rdfSerializer from "rdf-serialize";
 import fs from "fs";
 import jsstream from "stream";
+import { pipeline } from "stream/promises";
 import { Store, DataFactory, Quad } from "n3";
 const { namedNode, quad, literal } = DataFactory;
 
@@ -105,141 +106,160 @@ async function constructVersionedStore(
   body: string,
   contentType: string
 ) {
-  const resource = namedNode(resourceURI);
-  const versionedResource = generateVersion(resource);
+  try {
+    const resource = namedNode(resourceURI);
+    const versionedResource = generateVersion(resource);
 
-  const bodyStream = jsstream.Readable.from(body);
+    const bodyStream = jsstream.Readable.from(body);
+    const versionedStream = rdfParser
+      .parse(bodyStream, {
+        contentType: contentType,
+      })
+      .pipe(
+        new jsstream.Transform({
+          objectMode: true,
+          transform: (quadObj, encoding, callback) => {
+            callback(
+              null,
+              quad(
+                quadObj.subject.equals(resource)
+                  ? versionedResource
+                  : quadObj.subject,
+                quadObj.predicate.equals(resource)
+                  ? versionedResource
+                  : quadObj.predicate,
+                quadObj.object.equals(resource)
+                  ? versionedResource
+                  : quadObj.object
+              )
+            );
+          },
+        })
+      );
 
-  const versionedStream = new jsstream.Transform({ objectMode: true });
-  versionedStream._transform = (quadObj, encoding, callback) => {
-    versionedStream.push(
+    const versionedStore = await createStore(versionedStream);
+
+    const dateLiteral = nowLiteral();
+
+    // add resources about this version
+    versionedStore.add(
       quad(
-        quadObj.subject.equals(resource) ? versionedResource : quadObj.subject,
-        quadObj.predicate.equals(resource)
-          ? versionedResource
-          : quadObj.predicate,
-        quadObj.object.equals(resource) ? versionedResource : quadObj.object
+        versionedResource,
+        namedNode("http://purl.org/dc/terms/isVersionOf"),
+        resource
       )
     );
-    callback();
-  };
-  rdfParser
-    .parse(bodyStream, {
-      contentType: contentType,
-    })
-    .pipe(versionedStream);
 
-  const versionedStore = await createStore(versionedStream);
+    versionedStore.add(
+      quad(
+        versionedResource,
+        namedNode("http://www.w3.org/ns/sosa/resultTime"),
+        dateLiteral
+      )
+    );
 
-  const dateLiteral = nowLiteral();
+    versionedStore.add(
+      quad(stream, namedNode("https://w3id.org/tree#member"), versionedResource)
+    );
 
-  // add resources about this version
-  versionedStore.add(
-    quad(
-      versionedResource,
-      namedNode("http://purl.org/dc/terms/isVersionOf"),
-      resource
-    )
-  );
-
-  versionedStore.add(
-    quad(
-      versionedResource,
-      namedNode("http://www.w3.org/ns/sosa/resultTime"),
-      dateLiteral
-    )
-  );
-
-  versionedStore.add(
-    quad(stream, namedNode("https://w3id.org/tree#member"), versionedResource)
-  );
-
-  return versionedStore;
+    return versionedStore;
+  } catch (e) {
+    console.log("TESTTESTTEST");
+    console.log(e);
+  }
 }
 
 async function closeDataset(closingDataset: Store, pageNr: number) {
-  const relationResource = generateTreeRelation();
-  const currentPageResource = generatePageResource(pageNr);
-  const nextPageResource = generatePageResource(pageNr + 1);
-  closingDataset.add(
-    quad(
-      currentPageResource,
-      namedNode("https://w3id.org/tree#relation"),
-      relationResource
-    )
-  );
-  closingDataset.add(
-    quad(
-      relationResource,
-      namedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
-      namedNode("https://w3id.org/tree#GreaterThanOrEqualRelation")
-    )
-  );
-  closingDataset.add(
-    quad(
-      relationResource,
-      namedNode("https://w3id.org/tree#node"),
-      nextPageResource
-    )
-  );
-  closingDataset.add(
-    quad(
-      relationResource,
-      namedNode("https://w3id.org/tree#path"),
-      namedNode("http://www.w3.org/ns/sosa/resultTime")
-    )
-  );
-  const dateLiteral = nowLiteral();
-  closingDataset.add(
-    quad(
-      relationResource,
-      namedNode("https://w3id.org/tree#value"),
-      dateLiteral
-    )
-  );
+  try {
+    const relationResource = generateTreeRelation();
+    const currentPageResource = generatePageResource(pageNr);
+    const nextPageResource = generatePageResource(pageNr + 1);
+    closingDataset.add(
+      quad(
+        currentPageResource,
+        namedNode("https://w3id.org/tree#relation"),
+        relationResource
+      )
+    );
+    closingDataset.add(
+      quad(
+        relationResource,
+        namedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
+        namedNode("https://w3id.org/tree#GreaterThanOrEqualRelation")
+      )
+    );
+    closingDataset.add(
+      quad(
+        relationResource,
+        namedNode("https://w3id.org/tree#node"),
+        nextPageResource
+      )
+    );
+    closingDataset.add(
+      quad(
+        relationResource,
+        namedNode("https://w3id.org/tree#path"),
+        namedNode("http://www.w3.org/ns/sosa/resultTime")
+      )
+    );
+    const dateLiteral = nowLiteral();
+    closingDataset.add(
+      quad(
+        relationResource,
+        namedNode("https://w3id.org/tree#value"),
+        dateLiteral
+      )
+    );
 
-  // create a store with the new graph for the new file
-  const currentDataset = await createStore(readTriplesStream(FEED_FILE));
+    // create a store with the new graph for the new file
+    const currentDataset = await createStore(readTriplesStream(FEED_FILE));
 
-  currentDataset.add(
-    quad(
-      nextPageResource,
-      namedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
-      namedNode("https://w3id.org/tree#Node")
-    )
-  );
-  return currentDataset;
+    currentDataset.add(
+      quad(
+        nextPageResource,
+        namedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
+        namedNode("https://w3id.org/tree#Node")
+      )
+    );
+    return currentDataset;
+  } catch (e) {
+    console.log(e);
+  }
 }
 
 async function writeVersionedResource(versionedStore: Store) {
-  const lastPageNr = lastPage(PAGES_FOLDER);
-  let pageFile = fileForPage(lastPageNr);
+  try {
+    const lastPageNr = lastPage(PAGES_FOLDER);
+    let pageFile = fileForPage(lastPageNr);
 
-  let currentDataset = await createStore(readTriplesStream(pageFile));
+    let currentDataset = await createStore(readTriplesStream(pageFile));
 
-  if (shouldCreateNewPage(currentDataset)) {
-    const closingDataset = currentDataset;
+    if (shouldCreateNewPage(currentDataset)) {
+      const closingDataset = currentDataset;
 
-    // link the current dataset to the new dataset but don't save yet
-    const closingPageFile = pageFile;
-    const nextPageFile = fileForPage(lastPageNr + 1);
+      // link the current dataset to the new dataset but don't save yet
+      const closingPageFile = pageFile;
+      const nextPageFile = fileForPage(lastPageNr + 1);
 
-    // create a store with the new graph for the new file
-    currentDataset = await closeDataset(closingDataset, lastPageNr);
+      // create a store with the new graph for the new file
+      currentDataset = await closeDataset(closingDataset, lastPageNr);
 
-    currentDataset.addQuads(versionedStore.getQuads(null, null, null, null));
+      currentDataset.addQuads(versionedStore.getQuads(null, null, null, null));
 
-    // // Write out new dataset to nextPageFile
-    await writeTriplesStream(currentDataset, nextPageFile);
-    // // Write out closing dataset to closingPageFile
-    await writeTriplesStream(closingDataset, closingPageFile);
-    // Clear the last page cache
-    clearLastPageCache(PAGES_FOLDER);
-  } else {
-    currentDataset.addQuads(versionedStore.getQuads(null, null, null, null));
-    await writeTriplesStream(currentDataset, pageFile);
+      // // Write out new dataset to nextPageFile
+      await writeTriplesStream(currentDataset, nextPageFile);
+      // // Write out closing dataset to closingPageFile
+      await writeTriplesStream(closingDataset, closingPageFile);
+      // Clear the last page cache
+      clearLastPageCache(PAGES_FOLDER);
+    } else {
+      currentDataset.addQuads(versionedStore.getQuads(null, null, null, null));
+      await writeTriplesStream(currentDataset, pageFile);
+    }
+    return currentDataset;
+  } catch (e) {
+    console.log(e);
   }
-  return currentDataset;
 }
 
 /**
