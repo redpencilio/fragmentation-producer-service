@@ -164,8 +164,7 @@ async function constructVersionedStore(
 
     return versionedStore;
   } catch (e) {
-    console.log("TESTTESTTEST");
-    console.log(e);
+    throw e;
   }
 }
 
@@ -223,7 +222,7 @@ async function closeDataset(closingDataset: Store, pageNr: number) {
     );
     return currentDataset;
   } catch (e) {
-    console.log(e);
+    throw e;
   }
 }
 
@@ -258,7 +257,7 @@ async function writeVersionedResource(versionedStore: Store) {
     }
     return currentDataset;
   } catch (e) {
-    console.log(e);
+    throw e;
   }
 }
 
@@ -267,6 +266,11 @@ async function writeVersionedResource(versionedStore: Store) {
  */
 app.post("/resource", async function (req: any, res: any, next: any) {
   try {
+    const contentTypes = await rdfParser.getContentTypes();
+    if (!contentTypes.includes(req.headers["content-type"])) {
+      return next(error(400, "Content-Type not recognized"));
+    }
+
     const versionedStore = await constructVersionedStore(
       req.query.resource,
       req.body,
@@ -283,7 +287,7 @@ app.post("/resource", async function (req: any, res: any, next: any) {
     res.status(201).send(`{"message": "ok", "triplesInPage": ${newCount}}`);
   } catch (e) {
     console.error(e);
-    next(error(500, ""));
+    return next(error(500, ""));
   }
 });
 
@@ -306,7 +310,7 @@ app.get("/", function (req: any, res: any, next: any) {
         res.end();
       });
   } catch (e) {
-    next(error(500, ""));
+    return next(error(500, ""));
   }
 });
 
@@ -318,7 +322,7 @@ app.get("/pages", function (req: any, res: any, next: any) {
       res.header("Cache-Control", "public, immutable");
 
     if (page > lastPage(PAGES_FOLDER)) {
-      next(error(404, "Page not found"));
+      return next(error(404, "Page not found"));
     }
 
     const rdfStream = readTriplesStream(fileForPage(page));
@@ -338,14 +342,14 @@ app.get("/pages", function (req: any, res: any, next: any) {
       });
   } catch (e) {
     console.error(e);
-    next(error(500, ""));
+    return next(error(500, ""));
   }
 });
 
 app.get("/count", async function (_req: any, res: any, next: any) {
   try {
     const page = lastPage(PAGES_FOLDER);
-    if (page === NaN) next(error(404, "No pages found"));
+    if (page === NaN) return next(error(404, "No pages found"));
 
     const file = fileForPage(page);
     console.log(`Reading from ${file}`);
@@ -356,18 +360,18 @@ app.get("/count", async function (_req: any, res: any, next: any) {
     res.status(200).send(`{"count": ${count}}`);
   } catch (e) {
     console.error(e);
-    next(error(500, ""));
+    return next(error(500, ""));
   }
 });
 
 app.get("/last-page", function (_req: any, res: any, next: any) {
   try {
     const page = lastPage(PAGES_FOLDER);
-    if (page === NaN) next(error(404, "No pages found"));
+    if (page === NaN) return next(error(404, "No pages found"));
     else res.status(200).send(`{"lastPage": ${page}}`);
   } catch (e) {
     console.error(e);
-    next(error(500, ""));
+    return next(error(500, ""));
   }
 });
 
