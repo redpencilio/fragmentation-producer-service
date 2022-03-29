@@ -57,7 +57,7 @@ export function createStore(quadStream: Stream<Quad>): Promise<Store> {
  * @param {NamedNode} graph The graph which will be written to the file.
  * @param {string} file Path of the file to which we will write the content.
  */
-export function writeTriplesStream(store: Store, file: string): void {
+export function writeTriplesStream(store: Store, file: string): Promise<void> {
   const quadStream = jsstream.Readable.from(store);
   const turtleStream = rdfSerializer.serialize(quadStream, {
     contentType: "text/turtle",
@@ -68,9 +68,13 @@ export function writeTriplesStream(store: Store, file: string): void {
     writeStream.write(turtleChunk);
     fileData += turtleChunk;
   });
-  turtleStream.on("end", () => {
-    writeStream.end();
-    fileCache[file] = fileData;
+  return new Promise((resolve, reject) => {
+    turtleStream.on("error", reject);
+    turtleStream.on("end", () => {
+      writeStream.end();
+      fileCache[file] = fileData;
+      resolve();
+    });
   });
 }
 

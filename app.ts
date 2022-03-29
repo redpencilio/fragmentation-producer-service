@@ -230,14 +230,14 @@ async function writeVersionedResource(versionedStore: Store) {
     currentDataset.addQuads(versionedStore.getQuads(null, null, null, null));
 
     // // Write out new dataset to nextPageFile
-    writeTriplesStream(currentDataset, nextPageFile);
+    await writeTriplesStream(currentDataset, nextPageFile);
     // // Write out closing dataset to closingPageFile
-    writeTriplesStream(closingDataset, closingPageFile);
+    await writeTriplesStream(closingDataset, closingPageFile);
     // Clear the last page cache
     clearLastPageCache(PAGES_FOLDER);
   } else {
     currentDataset.addQuads(versionedStore.getQuads(null, null, null, null));
-    writeTriplesStream(currentDataset, pageFile);
+    await writeTriplesStream(currentDataset, pageFile);
   }
   return currentDataset;
 }
