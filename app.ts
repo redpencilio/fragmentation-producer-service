@@ -97,59 +97,123 @@ function shouldCreateNewPage(store: Store): boolean {
   return countVersionedItems(store) >= MAX_RESOURCES_PER_PAGE;
 }
 
+async function constructVersionedStore(
+  resourceURI: string,
+  body: string,
+  contentType: string
+) {
+  const resource = namedNode(resourceURI);
+  const versionedResource = generateVersion(resource);
+
+  const bodyStream = jsstream.Readable.from(body);
+
+  const store = await createStore(
+    rdfParser.parse(bodyStream, {
+      contentType: contentType,
+    })
+  );
+
+  const versionedStore = new Store();
+
+  for (let match of store.match()) {
+    versionedStore.add(
+      quad(
+        match.subject.equals(resource) ? versionedResource : match.subject,
+        match.predicate.equals(resource) ? versionedResource : match.predicate,
+        match.object.equals(resource) ? versionedResource : match.object
+      )
+    );
+  }
+
+  const dateLiteral = nowLiteral();
+
+  // add resources about this version
+  versionedStore.add(
+    quad(
+      versionedResource,
+      namedNode("http://purl.org/dc/terms/isVersionOf"),
+      resource
+    )
+  );
+
+  versionedStore.add(
+    quad(
+      versionedResource,
+      namedNode("http://www.w3.org/ns/sosa/resultTime"),
+      dateLiteral
+    )
+  );
+
+  versionedStore.add(
+    quad(stream, namedNode("https://w3id.org/tree#member"), versionedResource)
+  );
+
+  return versionedStore;
+}
+
+async function closeDataset(closingDataset: Store, pageNr: number) {
+  const relationResource = generateTreeRelation();
+  const currentPageResource = generatePageResource(pageNr);
+  const nextPageResource = generatePageResource(pageNr + 1);
+  closingDataset.add(
+    quad(
+      currentPageResource,
+      namedNode("https://w3id.org/tree#relation"),
+      relationResource
+    )
+  );
+  closingDataset.add(
+    quad(
+      relationResource,
+      namedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
+      namedNode("https://w3id.org/tree#GreaterThanOrEqualRelation")
+    )
+  );
+  closingDataset.add(
+    quad(
+      relationResource,
+      namedNode("https://w3id.org/tree#node"),
+      nextPageResource
+    )
+  );
+  closingDataset.add(
+    quad(
+      relationResource,
+      namedNode("https://w3id.org/tree#path"),
+      namedNode("http://www.w3.org/ns/sosa/resultTime")
+    )
+  );
+  const dateLiteral = nowLiteral();
+  closingDataset.add(
+    quad(
+      relationResource,
+      namedNode("https://w3id.org/tree#value"),
+      dateLiteral
+    )
+  );
+
+  // create a store with the new graph for the new file
+  const currentDataset = await createStore(readTriplesStream(FEED_FILE));
+
+  currentDataset.add(
+    quad(
+      nextPageResource,
+      namedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
+      namedNode("https://w3id.org/tree#Node")
+    )
+  );
+  return currentDataset;
+}
+
 /**
  * Publishes a new version of the same resource.
  */
 app.post("/resource", async function (req: any, res: any, next: any) {
   try {
-    const contentType = req.headers["content-type"];
-
-    const resource = namedNode(req.query.resource);
-    const versionedResource = generateVersion(resource);
-
-    const bodyStream = jsstream.Readable.from(req.body);
-
-    const store = await createStore(
-      rdfParser.parse(bodyStream, {
-        contentType: contentType,
-      })
-    );
-
-    const versionedStore = new Store();
-
-    for (let match of store.match()) {
-      versionedStore.add(
-        quad(
-          match.subject.equals(resource) ? versionedResource : match.subject,
-          match.predicate.equals(resource)
-            ? versionedResource
-            : match.predicate,
-          match.object.equals(resource) ? versionedResource : match.object
-        )
-      );
-    }
-
-    const dateLiteral = nowLiteral();
-
-    // add resources about this version
-    versionedStore.add(
-      quad(
-        versionedResource,
-        namedNode("http://purl.org/dc/terms/isVersionOf"),
-        resource
-      )
-    );
-
-    versionedStore.add(
-      quad(
-        versionedResource,
-        namedNode("http://www.w3.org/ns/sosa/resultTime"),
-        dateLiteral
-      )
-    );
-
-    versionedStore.add(
-      quad(stream, namedNode("https://w3id.org/tree#member"), versionedResource)
+    const versionedStore = await constructVersionedStore(
+      req.query.resource,
+      req.body,
+      req.headers["content-type"]
     );
 
     // read the current dataset
@@ -164,55 +228,10 @@ app.post("/resource", async function (req: any, res: any, next: any) {
       // link the current dataset to the new dataset but don't save yet
       const closingPageFile = pageFile;
       const nextPageFile = fileForPage(lastPageNr + 1);
-      const relationResource = generateTreeRelation();
-      const currentPageResource = generatePageResource(lastPageNr);
-      const nextPageResource = generatePageResource(lastPageNr + 1);
-      closingDataset.add(
-        quad(
-          currentPageResource,
-          namedNode("https://w3id.org/tree#relation"),
-          relationResource
-        )
-      );
-      closingDataset.add(
-        quad(
-          relationResource,
-          namedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
-          namedNode("https://w3id.org/tree#GreaterThanOrEqualRelation")
-        )
-      );
-      closingDataset.add(
-        quad(
-          relationResource,
-          namedNode("https://w3id.org/tree#node"),
-          nextPageResource
-        )
-      );
-      closingDataset.add(
-        quad(
-          relationResource,
-          namedNode("https://w3id.org/tree#path"),
-          namedNode("http://www.w3.org/ns/sosa/resultTime")
-        )
-      );
-      closingDataset.add(
-        quad(
-          relationResource,
-          namedNode("https://w3id.org/tree#value"),
-          dateLiteral
-        )
-      );
 
       // create a store with the new graph for the new file
-      currentDataset = await createStore(readTriplesStream(FEED_FILE));
+      currentDataset = await closeDataset(closingDataset, lastPageNr);
 
-      currentDataset.add(
-        quad(
-          nextPageResource,
-          namedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
-          namedNode("https://w3id.org/tree#Node")
-        )
-      );
       currentDataset.addQuads(versionedStore.getQuads(null, null, null, null));
 
       // // Write out new dataset to nextPageFile
