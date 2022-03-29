@@ -314,16 +314,22 @@ app.get("/", function (req: any, res: any, next: any) {
   }
 });
 
-app.get("/pages", function (req: any, res: any, next: any) {
+app.get("/pages", async function (req: any, res: any, next: any) {
   try {
     const page = parseInt(req.query.page);
-
-    if (page < lastPage(PAGES_FOLDER))
-      res.header("Cache-Control", "public, immutable");
 
     if (page > lastPage(PAGES_FOLDER)) {
       return next(error(404, "Page not found"));
     }
+
+    const contentTypes = await rdfSerializer.getContentTypes();
+
+    if (!contentTypes.includes(req.headers["accept"])) {
+      return next(error(406, ""));
+    }
+
+    if (page < lastPage(PAGES_FOLDER))
+      res.header("Cache-Control", "public, immutable");
 
     const rdfStream = readTriplesStream(fileForPage(page));
 
