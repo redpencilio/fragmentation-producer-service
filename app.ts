@@ -154,7 +154,7 @@ async function constructVersionedStore(
     versionedStore.add(
       quad(
         versionedResource,
-        namedNode("http://www.w3.org/ns/sosa/resultTime"),
+        namedNode("http://www.w3.org/ns/prov#generatedAtTime"),
         dateLiteral
       )
     );
@@ -199,7 +199,7 @@ async function closeDataset(closingDataset: Store, pageNr: number) {
       quad(
         relationResource,
         namedNode("https://w3id.org/tree#path"),
-        namedNode("http://www.w3.org/ns/sosa/resultTime")
+        namedNode("http://www.w3.org/ns/prov#generatedAtTime")
       )
     );
     const dateLiteral = nowLiteral();
