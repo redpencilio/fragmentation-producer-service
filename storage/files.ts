@@ -4,6 +4,7 @@ import rdfParser from "rdf-parse";
 import rdfSerializer from "rdf-serialize";
 import jsstream from "stream";
 import type { Stream } from "@rdfjs/types";
+
 /**
  * Contains abstractions for working with files containing turtle
  * content.
@@ -38,6 +39,7 @@ export function readTriplesStream(file: string): Stream<Quad> {
   const fileStream = jsstream.Readable.from(triplesFileAsString(file));
   return rdfParser.parse(fileStream, {
     contentType: "text/turtle",
+    baseIRI: "/",
   });
 }
 

@@ -11,6 +11,7 @@
   "dependencies": {
     "@rdfjs/data-model": "^2.0.0",
     "@rdfjs/types": "^1.1.0",
+    "cors": "^2.8.5",
     "n3": "^1.15.0",
     "rdf-parse": "^2.0.0",
     "rdf-serialize": "^2.0.0",

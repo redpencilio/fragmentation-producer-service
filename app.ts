@@ -6,8 +6,9 @@ import fs from "fs";
 import jsstream from "stream";
 import { pipeline } from "stream/promises";
 import { Store, DataFactory, Quad } from "n3";
+import cors from "cors";
 const { namedNode, quad, literal } = DataFactory;
-
+app.use(cors());
 app.use(
   bodyParser.text({
     type: function (req: any) {
@@ -29,7 +30,7 @@ const FEED_FILE = "/app/data/feed.ttl";
 const PAGES_FOLDER = "/app/data/pages/";
 const GRAPH = namedNode("http://mu.semte.ch/services/ldes-time-fragmenter");
 const MAX_RESOURCES_PER_PAGE = 10;
-const SERVICE_PATH = "http://localhost:8888/"; // a workaround for json-ld not accepting relative paths
+const SERVICE_PATH = "http://localhost:8888"; // a workaround for json-ld not accepting relative paths
 
 const UPDATE_QUEUE = new PromiseQueue<Store>();
 
@@ -56,7 +57,7 @@ function generateTreeRelation() {
 }
 
 function generatePageResource(number: number) {
-  return namedNode(`${SERVICE_PATH}pages?page=${number}`);
+  return namedNode(`/pages?page=${number}`);
 }
 
 function nowLiteral() {
@@ -324,7 +325,9 @@ app.get("/pages", async function (req: any, res: any, next: any) {
 
     const contentTypes = await rdfSerializer.getContentTypes();
 
-    if (!contentTypes.includes(req.headers["accept"])) {
+    const contentType = req.accepts(contentTypes);
+    console.log(contentType);
+    if (!contentType) {
       return next(error(406, ""));
     }
 
@@ -333,11 +336,11 @@ app.get("/pages", async function (req: any, res: any, next: any) {
 
     const rdfStream = readTriplesStream(fileForPage(page));
 
-    res.header("Content-Type", req.headers["accept"]);
+    res.header("Content-Type", contentType);
 
     rdfSerializer
       .serialize(rdfStream, {
-        contentType: req.headers["accept"],
+        contentType: contentType,
       })
       .on("data", (d) => res.write(d))
       .on("error", (error) => {
