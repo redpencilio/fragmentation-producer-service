@@ -11,8 +11,32 @@ const { namedNode, quad, literal } = DataFactory;
 
 import * as RDF from "rdf-js";
 
-const FEED_FILE = "/app/data/feed.ttl";
 export default class TimeFragmenter extends Fragmenter {
+  constructPageTemplate(): Store {
+    const store = new Store();
+    const subject = this.stream;
+    store.addQuad(
+      subject,
+      namedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
+      namedNode("http://w3id.org/ldes#EventStream")
+    );
+    store.addQuad(
+      subject,
+      namedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
+      namedNode("https://w3id.org/tree#Collection")
+    );
+    store.addQuad(
+      subject,
+      namedNode("http://w3id.org/ldes#timestampPath"),
+      namedNode("http://www.w3.org/ns/prov#generatedAtTime")
+    );
+    store.addQuad(
+      subject,
+      namedNode("https://w3id.org/tree#view"),
+      namedNode("/pages?page=1")
+    );
+    return store;
+  }
   constructVersionedStore(store: Store, resource: NamedNode<string>): Store {
     const versionedResource = generateVersion(resource);
     const versionedStore = new Store();
@@ -109,7 +133,7 @@ export default class TimeFragmenter extends Fragmenter {
       );
 
       // create a store with the new graph for the new file
-      const currentDataset = await createStore(readTriplesStream(FEED_FILE));
+      const currentDataset = this.constructPageTemplate();
 
       currentDataset.add(
         quad(

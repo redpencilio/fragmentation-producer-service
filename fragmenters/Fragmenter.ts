@@ -23,6 +23,8 @@ export default abstract class Fragmenter {
 
   abstract closeDataset(store: Store, pageNr: number): Promise<Store>;
 
+  abstract constructPageTemplate(): Store;
+
   fileForPage(pageNr: number): string {
     return `${this.folder}/${pageNr}.ttl`;
   }
