@@ -3,7 +3,7 @@ import { Quad, Store } from "n3";
 import rdfParser from "rdf-parse";
 import rdfSerializer from "rdf-serialize";
 import jsstream from "stream";
-import type { Stream } from "@rdfjs/types";
+import * as RDF from "rdf-js";
 
 /**
  * Contains abstractions for working with files containing turtle
@@ -35,7 +35,7 @@ export function triplesFileAsString(file: string): string {
  * @return {Stream} Stream containing all triples which were downloaded.
  */
 
-export function readTriplesStream(file: string): Stream<Quad> {
+export function readTriplesStream(file: string): RDF.Stream<Quad> {
   const fileStream = jsstream.Readable.from(triplesFileAsString(file));
   return rdfParser.parse(fileStream, {
     contentType: "text/turtle",
@@ -43,7 +43,7 @@ export function readTriplesStream(file: string): Stream<Quad> {
   });
 }
 
-export function createStore(quadStream: Stream<Quad>): Promise<Store> {
+export function createStore(quadStream: RDF.Stream<Quad>): Promise<Store> {
   const store = new Store();
   return new Promise((resolve, reject) =>
     store

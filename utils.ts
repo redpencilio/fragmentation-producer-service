@@ -39,3 +39,9 @@ export function generateVersion(_namedNode: any) {
     `http://mu.semte.ch/services/ldes-time-fragmenter/versioned/${uuid()}`
   );
 }
+
+export function error(status: number, msg?: string) {
+  var err = new Error(msg || "An error occurred");
+  err.status = status;
+  return err;
+}

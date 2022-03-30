@@ -9,12 +9,11 @@ import {
 import Fragmenter from "./Fragmenter";
 const { namedNode, quad, literal } = DataFactory;
 
+import * as RDF from "rdf-js";
+
 const FEED_FILE = "/app/data/feed.ttl";
 export default class TimeFragmenter extends Fragmenter {
-  constructVersionedStore(
-    store: Store<Quad, Quad, Quad, Quad>,
-    resource: NamedNode<string>
-  ): Store<Quad, Quad, Quad, Quad> {
+  constructVersionedStore(store: Store, resource: NamedNode<string>): Store {
     const versionedResource = generateVersion(resource);
     const versionedStore = new Store();
     store.forEach(
@@ -67,10 +66,7 @@ export default class TimeFragmenter extends Fragmenter {
     return versionedStore;
   }
 
-  async closeDataset(
-    store: Store<Quad, Quad, Quad, Quad>,
-    pageNr: number
-  ): Promise<Store<Quad, Quad, Quad, Quad>> {
+  async closeDataset(store: Store, pageNr: number): Promise<Store> {
     try {
       const relationResource = generateTreeRelation();
       const currentPageResource = generatePageResource(pageNr);

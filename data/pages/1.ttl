@@ -1,8 +1,9 @@
 <http://mu.semte.ch/services/ldes-time-fragmenter/example-stream> a <http://w3id.org/ldes#EventStream>, <https://w3id.org/tree#Collection>;
     <http://w3id.org/ldes#timestampPath> <http://www.w3.org/ns/prov#generatedAtTime>;
     <https://w3id.org/tree#view> </pages?page=1>;
-    <https://w3id.org/tree#member> <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/ca6d1c00-922b-11ec-b222-f5082803e759>, <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/f331ee20-b00a-11ec-b0b9-ddeade989cd2>, <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/d8135040-b01c-11ec-a4db-ffcb1925c896>, <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/e834a5a0-b01c-11ec-a4db-ffcb1925c896>, <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/0d7ae220-b01d-11ec-8ac9-59cf6f3294ed>, <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/419a9540-b01e-11ec-946f-5d355e452d0b>, <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/420a6e10-b01e-11ec-946f-5d355e452d0b>, <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/4a4ed2f0-b01e-11ec-946f-5d355e452d0b>, <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/5d1d9510-b01e-11ec-9d20-091de08d5b1a>.
-</pages?page=1> a <https://w3id.org/tree#Node>.
+    <https://w3id.org/tree#member> <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/ca6d1c00-922b-11ec-b222-f5082803e759>, <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/f331ee20-b00a-11ec-b0b9-ddeade989cd2>, <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/d8135040-b01c-11ec-a4db-ffcb1925c896>, <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/e834a5a0-b01c-11ec-a4db-ffcb1925c896>, <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/0d7ae220-b01d-11ec-8ac9-59cf6f3294ed>, <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/419a9540-b01e-11ec-946f-5d355e452d0b>, <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/420a6e10-b01e-11ec-946f-5d355e452d0b>, <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/4a4ed2f0-b01e-11ec-946f-5d355e452d0b>, <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/5d1d9510-b01e-11ec-9d20-091de08d5b1a>, <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/9a61faf0-b01f-11ec-9a70-ffbf43a71ffe>.
+</pages?page=1> a <https://w3id.org/tree#Node>;
+    <https://w3id.org/tree#relation> <http://mu.semte.ch/services/ldes-time-fragmenter/relations/9ac26a70-b01f-11ec-9a70-ffbf43a71ffe>.
 <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/ca6d1c00-922b-11ec-b222-f5082803e759> a <http://mu.semte.ch/services/tests/Test>;
     <http://www.w3.org/ns/prov#generatedAtTime> "2022-02-20T09:02:11.905Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
     <http://mu.semte.ch/services/tests/description> "How about this?  Does the LDES client discover our object?";
@@ -42,3 +43,12 @@
     <http://mu.semte.ch/services/tests/description> "How about this?  Does the LDES client discover our updated object?";
     <http://mu.semte.ch/services/tests/name> "ldes-test 40";
     <http://purl.org/dc/terms/isVersionOf> <http://mu.semte.ch/services/ldes-time-fragmenter/example-stream>.
+<http://mu.semte.ch/services/ldes-time-fragmenter/versioned/9a61faf0-b01f-11ec-9a70-ffbf43a71ffe> a <http://mu.semte.ch/services/tests/Test>;
+    <http://www.w3.org/ns/prov#generatedAtTime> "2022-03-30T11:50:32.223Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
+    <http://mu.semte.ch/services/tests/description> "How about this?  Does the LDES client discover our updated object?";
+    <http://mu.semte.ch/services/tests/name> "ldes-test 40";
+    <http://purl.org/dc/terms/isVersionOf> <http://mu.semte.ch/services/ldes-time-fragmenter/example-stream>.
+<http://mu.semte.ch/services/ldes-time-fragmenter/relations/9ac26a70-b01f-11ec-9a70-ffbf43a71ffe> a <https://w3id.org/tree#GreaterThanOrEqualRelation>;
+    <https://w3id.org/tree#node> </pages?page=2>;
+    <https://w3id.org/tree#path> <http://www.w3.org/ns/prov#generatedAtTime>;
+    <https://w3id.org/tree#value> "2022-03-30T11:50:32.855Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>.
