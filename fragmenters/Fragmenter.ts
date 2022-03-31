@@ -6,8 +6,8 @@ import {
   lastPage,
   readTriplesStream,
   writeTriplesStream,
-} from "../storage/files";
-import { countVersionedItems } from "../utils";
+} from "../storage/files.js";
+import { countVersionedItems } from "../utils/utils.js";
 
 export default abstract class Fragmenter {
   folder: string;

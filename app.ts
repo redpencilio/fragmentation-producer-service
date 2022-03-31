@@ -15,18 +15,17 @@ app.use(
   })
 );
 
-import { readTriplesStream, lastPage, createStore } from "./storage/files";
-import PromiseQueue from "./promise-queue";
-import TimeFragmenter from "./fragmenters/TimeFragmenter";
-import { countVersionedItems, error } from "./utils";
+import { readTriplesStream, lastPage, createStore } from "./storage/files.js";
+import PromiseQueue from "./promise-queue.js";
+import TimeFragmenter from "./fragmenters/TimeFragmenter.js";
+import { countVersionedItems, error } from "./utils/utils.js";
+import { ldesTime } from "./utils/namespaces.js";
 
-const PAGES_FOLDER = "/app/data/pages/";
+const PAGES_FOLDER = "/data/pages";
 
 const UPDATE_QUEUE = new PromiseQueue<Store>();
 
-const stream = namedNode(
-  "http://mu.semte.ch/services/ldes-time-fragmenter/example-stream"
-);
+const stream = ldesTime("example-stream");
 
 const FRAGMENTER = new TimeFragmenter(PAGES_FOLDER, stream, 10);
 
@@ -37,11 +36,12 @@ const FRAGMENTER = new TimeFragmenter(PAGES_FOLDER, stream, 10);
  * @return {string} Path to the page.
  */
 function fileForPage(page: number) {
-  return `${PAGES_FOLDER}${page}.ttl`;
+  return `${PAGES_FOLDER}/${page}.ttl`;
 }
 
 app.post("/resource", async function (req: any, res: any, next: any) {
   try {
+    console.log(rdfSerializer.getContentTypes);
     const contentTypes = await rdfParser.getContentTypes();
     if (!contentTypes.includes(req.headers["content-type"])) {
       return next(error(400, "Content-Type not recognized"));
@@ -68,29 +68,6 @@ app.post("/resource", async function (req: any, res: any, next: any) {
     return next(error(500));
   }
 });
-
-// app.get("/", function (req: any, res: any, next: any) {
-//   // LDES does not use this index page
-//   try {
-//     const rdfStream = readTriplesStream(FEED_FILE);
-
-//     res.header("Content-Type", req.headers["accept"]);
-
-//     rdfSerializer
-//       .serialize(rdfStream, {
-//         contentType: req.headers["accept"],
-//       })
-//       .on("data", (d) => res.write(d))
-//       .on("error", (error) => {
-//         next(error(500, "Serializing error"));
-//       })
-//       .on("end", () => {
-//         res.end();
-//       });
-//   } catch (e) {
-//     return next(error(500, ""));
-//   }
-// });
 
 app.get("/pages", async function (req: any, res: any, next: any) {
   try {

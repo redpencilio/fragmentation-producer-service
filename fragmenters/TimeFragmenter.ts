@@ -1,40 +1,24 @@
 import { Store, Quad, NamedNode, DataFactory } from "n3";
-import { createStore, readTriplesStream } from "../storage/files";
 import {
   generatePageResource,
   generateTreeRelation,
   generateVersion,
   nowLiteral,
-} from "../utils";
-import Fragmenter from "./Fragmenter";
+} from "../utils/utils.js";
+import Fragmenter from "./Fragmenter.js";
 const { namedNode, quad, literal } = DataFactory;
 
 import * as RDF from "rdf-js";
+import { ldes, prov, purl, rdf, tree } from "../utils/namespaces.js";
 
 export default class TimeFragmenter extends Fragmenter {
   constructPageTemplate(): Store {
     const store = new Store();
     const subject = this.stream;
-    store.addQuad(
-      subject,
-      namedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
-      namedNode("http://w3id.org/ldes#EventStream")
-    );
-    store.addQuad(
-      subject,
-      namedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
-      namedNode("https://w3id.org/tree#Collection")
-    );
-    store.addQuad(
-      subject,
-      namedNode("http://w3id.org/ldes#timestampPath"),
-      namedNode("http://www.w3.org/ns/prov#generatedAtTime")
-    );
-    store.addQuad(
-      subject,
-      namedNode("https://w3id.org/tree#view"),
-      namedNode("/pages?page=1")
-    );
+    store.addQuad(subject, rdf("type"), ldes("EventStream"));
+    store.addQuad(subject, rdf("type"), tree("Collection"));
+    store.addQuad(subject, ldes("timeStampPath"), prov("generatedAtTime"));
+    store.addQuad(subject, tree("view"), namedNode("/pages?page=1"));
     return store;
   }
   constructVersionedStore(store: Store, resource: NamedNode<string>): Store {
@@ -63,29 +47,13 @@ export default class TimeFragmenter extends Fragmenter {
     const dateLiteral = nowLiteral();
 
     // add resources about this version
-    versionedStore.add(
-      quad(
-        versionedResource,
-        namedNode("http://purl.org/dc/terms/isVersionOf"),
-        resource
-      )
-    );
+    versionedStore.add(quad(versionedResource, purl("isVersionOf"), resource));
 
     versionedStore.add(
-      quad(
-        versionedResource,
-        namedNode("http://www.w3.org/ns/prov#generatedAtTime"),
-        dateLiteral
-      )
+      quad(versionedResource, prov("generatedAtTime"), dateLiteral)
     );
 
-    versionedStore.add(
-      quad(
-        this.stream,
-        namedNode("https://w3id.org/tree#member"),
-        versionedResource
-      )
-    );
+    versionedStore.add(quad(this.stream, tree("member"), versionedResource));
 
     return versionedStore;
   }
@@ -95,53 +63,19 @@ export default class TimeFragmenter extends Fragmenter {
       const relationResource = generateTreeRelation();
       const currentPageResource = generatePageResource(pageNr);
       const nextPageResource = generatePageResource(pageNr + 1);
+      store.add(quad(currentPageResource, tree("relation"), relationResource));
       store.add(
-        quad(
-          currentPageResource,
-          namedNode("https://w3id.org/tree#relation"),
-          relationResource
-        )
+        quad(relationResource, rdf("type"), tree("GreaterThanOrEqualRelation"))
       );
-      store.add(
-        quad(
-          relationResource,
-          namedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
-          namedNode("https://w3id.org/tree#GreaterThanOrEqualRelation")
-        )
-      );
-      store.add(
-        quad(
-          relationResource,
-          namedNode("https://w3id.org/tree#node"),
-          nextPageResource
-        )
-      );
-      store.add(
-        quad(
-          relationResource,
-          namedNode("https://w3id.org/tree#path"),
-          namedNode("http://www.w3.org/ns/prov#generatedAtTime")
-        )
-      );
+      store.add(quad(relationResource, tree("node"), nextPageResource));
+      store.add(quad(relationResource, tree("path"), prov("generatedAtTime")));
       const dateLiteral = nowLiteral();
-      store.add(
-        quad(
-          relationResource,
-          namedNode("https://w3id.org/tree#value"),
-          dateLiteral
-        )
-      );
+      store.add(quad(relationResource, tree("value"), dateLiteral));
 
       // create a store with the new graph for the new file
       const currentDataset = this.constructPageTemplate();
 
-      currentDataset.add(
-        quad(
-          nextPageResource,
-          namedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
-          namedNode("https://w3id.org/tree#Node")
-        )
-      );
+      currentDataset.add(quad(nextPageResource, rdf("type"), tree("Node")));
       return currentDataset;
     } catch (e) {
       throw e;
