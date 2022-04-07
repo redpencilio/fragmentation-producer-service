@@ -10,33 +10,33 @@ const { namedNode, quad, literal } = DataFactory;
  * @param {NamedNode} graph The graph containing the data.
  */
 export function countVersionedItems(
-  store: Store,
-  stream: RDF.NamedNode
+	store: Store,
+	stream: RDF.NamedNode
 ): number {
-  let count = store.countQuads(stream, tree("member"), null, null);
-  return count;
+	let count = store.countQuads(stream, tree("member"), null, null);
+	return count;
 }
 
 export function generateTreeRelation() {
-  return ldesTime(`relations/${uuid()}`);
+	return ldesTime(`relations/${uuid()}`);
 }
 
 export function generatePageResource(number: number) {
-  return namedNode(`/pages?page=${number}`);
+	return namedNode(`/pages?page=${number}`);
 }
 
 export function nowLiteral() {
-  const xsdDateTime = xml("dateTime");
-  const now = new Date().toISOString();
-  return literal(now, xsdDateTime);
+	const xsdDateTime = xml("dateTime");
+	const now = new Date().toISOString();
+	return literal(now, xsdDateTime);
 }
 
 export function generateVersion(_namedNode: any) {
-  return ldesTime(`versioned/${uuid()}`);
+	return ldesTime(`versioned/${uuid()}`);
 }
 
 export function error(status: number, msg?: string) {
-  var err = new Error(msg || "An error occurred");
-  err.status = status;
-  return err;
+	var err = new Error(msg || "An error occurred");
+	err.status = status;
+	return err;
 }

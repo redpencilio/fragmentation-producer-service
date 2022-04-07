@@ -1,4 +1,6 @@
 import { NamedNode, Store } from "n3";
+import Node from "../models/node.js";
+import Resource from "../models/resource.js";
 
 import {
 	clearLastPageCache,
@@ -23,20 +25,15 @@ export default abstract class Fragmenter {
 		this.stream = stream;
 		this.maxResourcesPerPage = maxResourcesPerPage;
 	}
-	abstract constructPageTemplate(): Store;
+	abstract constructNewNode(): Node;
 
 	fileForNode(nodeId: number): string {
 		return `${this.folder}/${nodeId}.ttl`;
 	}
 
-	shouldCreateNewPage(store: Store): boolean {
-		return (
-			countVersionedItems(store, this.stream) >= this.maxResourcesPerPage
-		);
+	shouldCreateNewPage(node: Node): boolean {
+		return node.count() >= this.maxResourcesPerPage;
 	}
 
-	abstract addResource(
-		resource_id: NamedNode,
-		resource_data: Store
-	): Promise<Store>;
+	abstract addResource(resource: Resource): Promise<Node>;
 }

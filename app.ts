@@ -15,15 +15,22 @@ app.use(
 	})
 );
 
-import { readTriplesStream, lastPage, createStore } from "./storage/files";
+import {
+	readTriplesStream,
+	lastPage,
+	createStore,
+	getNode,
+} from "./storage/files";
 import PromiseQueue from "./promise-queue";
 import TimeFragmenter from "./fragmenters/TimeFragmenter";
 import { countVersionedItems, error } from "./utils/utils";
 import { ldesTime } from "./utils/namespaces";
+import Resource from "./models/resource";
+import Node from "./models/node";
 
 const PAGES_FOLDER = "/data/pages";
 
-const UPDATE_QUEUE = new PromiseQueue<Store>();
+const UPDATE_QUEUE = new PromiseQueue<Node>();
 
 const stream = ldesTime("example-stream");
 
@@ -47,22 +54,20 @@ app.post("/resource", async function (req: any, res: any, next: any) {
 			return next(error(400, "Content-Type not recognized"));
 		}
 
-		const resource = namedNode(req.query.resource);
-
 		const quadStream = rdfParser.parse(jsstream.Readable.from(req.body), {
 			contentType: req.headers["content-type"],
 		});
-
 		const store = await createStore(quadStream);
 
+		const resource = new Resource(namedNode(req.query.resource), store);
+
 		const currentDataset = await UPDATE_QUEUE.push(() =>
-			FRAGMENTER.addResource(resource, store)
+			FRAGMENTER.addResource(resource)
 		);
 
-		console.log(currentDataset);
-		const newCount = countVersionedItems(currentDataset, stream);
-
-		res.status(201).send(`{"message": "ok", "triplesInPage": ${newCount}}`);
+		res.status(201).send(
+			`{"message": "ok", "triplesInPage": ${currentDataset.count()}}`
+		);
 	} catch (e) {
 		console.error(e);
 		return next(error(500));
@@ -117,9 +122,9 @@ app.get("/count", async function (_req: any, res: any, next: any) {
 		const file = fileForPage(page);
 		console.log(`Reading from ${file}`);
 
-		const currentDataset = await createStore(readTriplesStream(file));
-
-		const count = countVersionedItems(currentDataset, stream);
+		const currentNode = await getNode(readTriplesStream(file));
+		console.log(currentNode.id);
+		const count = currentNode.count();
 		res.status(200).send(`{"count": ${count}}`);
 	} catch (e) {
 		console.error(e);

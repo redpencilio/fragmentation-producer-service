@@ -4,6 +4,7 @@ import rdfParser from "rdf-parse";
 import rdfSerializer from "rdf-serialize";
 import jsstream from "stream";
 import * as RDF from "rdf-js";
+import Node from "../models/node";
 
 /**
  * Contains abstractions for working with files containing turtle
@@ -11,7 +12,7 @@ import * as RDF from "rdf-js";
  */
 
 interface FileCache {
-  [file: string]: string;
+	[file: string]: string;
 }
 
 const fileCache: FileCache = {};
@@ -23,9 +24,9 @@ const fileCache: FileCache = {};
  * @return {string} Contents of the file, read as UTF-8.
  */
 export function triplesFileAsString(file: string): string {
-  if (!fileCache[file]) fileCache[file] = fs.readFileSync(file, "utf8");
+	if (!fileCache[file]) fileCache[file] = fs.readFileSync(file, "utf8");
 
-  return fileCache[file];
+	return fileCache[file];
 }
 
 /**
@@ -36,21 +37,26 @@ export function triplesFileAsString(file: string): string {
  */
 
 export function readTriplesStream(file: string): RDF.Stream<Quad> {
-  const fileStream = jsstream.Readable.from(triplesFileAsString(file));
-  return rdfParser.parse(fileStream, {
-    contentType: "text/turtle",
-    baseIRI: "/",
-  });
+	const fileStream = jsstream.Readable.from(triplesFileAsString(file));
+	return rdfParser.parse(fileStream, {
+		contentType: "text/turtle",
+		baseIRI: "/",
+	});
+}
+
+export async function getNode(quadStream: RDF.Stream<Quad>): Promise<Node> {
+	const store = await createStore(quadStream);
+	return new Node(store);
 }
 
 export function createStore(quadStream: RDF.Stream<Quad>): Promise<Store> {
-  const store = new Store();
-  return new Promise((resolve, reject) =>
-    store
-      .import(quadStream)
-      .on("error", reject)
-      .once("end", () => resolve(store))
-  );
+	const store = new Store();
+	return new Promise((resolve, reject) =>
+		store
+			.import(quadStream)
+			.on("error", reject)
+			.once("end", () => resolve(store))
+	);
 }
 /**
  * Writes the triples in text-turtle to a file.
@@ -60,28 +66,28 @@ export function createStore(quadStream: RDF.Stream<Quad>): Promise<Store> {
  * @param {string} file Path of the file to which we will write the content.
  */
 export function writeTriplesStream(store: Store, file: string): Promise<void> {
-  const quadStream = jsstream.Readable.from(store);
-  const turtleStream = rdfSerializer.serialize(quadStream, {
-    contentType: "text/turtle",
-  });
-  const writeStream = fs.createWriteStream(file);
-  let fileData = "";
-  turtleStream.on("data", (turtleChunk) => {
-    writeStream.write(turtleChunk);
-    fileData += turtleChunk;
-  });
-  return new Promise((resolve, reject) => {
-    turtleStream.on("error", reject);
-    turtleStream.on("end", () => {
-      writeStream.end();
-      fileCache[file] = fileData;
-      resolve();
-    });
-  });
+	const quadStream = jsstream.Readable.from(store);
+	const turtleStream = rdfSerializer.serialize(quadStream, {
+		contentType: "text/turtle",
+	});
+	const writeStream = fs.createWriteStream(file);
+	let fileData = "";
+	turtleStream.on("data", (turtleChunk) => {
+		writeStream.write(turtleChunk);
+		fileData += turtleChunk;
+	});
+	return new Promise((resolve, reject) => {
+		turtleStream.on("error", reject);
+		turtleStream.on("end", () => {
+			writeStream.end();
+			fileCache[file] = fileData;
+			resolve();
+		});
+	});
 }
 
 interface PageCache {
-  [folder: string]: number;
+	[folder: string]: number;
 }
 
 const lastPageCache: PageCache = {};
@@ -92,7 +98,7 @@ const lastPageCache: PageCache = {};
  * @param {string} folder The folder for which the last page cache will be cleared.
  */
 export function clearLastPageCache(folder: string): void {
-  delete lastPageCache[folder];
+	delete lastPageCache[folder];
 }
 
 /**
@@ -104,28 +110,29 @@ export function clearLastPageCache(folder: string): void {
  * if no numbered pages were found.
  */
 export function lastPage(folder: string): number {
-  if (!lastPageCache[folder]) {
-    const files = fs.readdirSync(folder);
-    const fileNumbers = files
-      .map((path) => {
-        const match = path.match(/\d*/);
-        if (match) {
-          const parsedNumber = match.length && parseInt(match[0]);
-          if (parsedNumber && parsedNumber !== NaN) return parsedNumber;
-          else return NaN;
-        } else {
-          return NaN;
-        }
-      })
-      .filter((x) => x !== NaN);
+	if (!lastPageCache[folder]) {
+		const files = fs.readdirSync(folder);
+		const fileNumbers = files
+			.map((path) => {
+				const match = path.match(/\d*/);
+				if (match) {
+					const parsedNumber = match.length && parseInt(match[0]);
+					if (parsedNumber && parsedNumber !== NaN)
+						return parsedNumber;
+					else return NaN;
+				} else {
+					return NaN;
+				}
+			})
+			.filter((x) => x !== NaN);
 
-    fileNumbers.sort((a, b) => b - a);
-    if (fileNumbers.length) {
-      lastPageCache[folder] = fileNumbers[0];
-    } else {
-      return NaN; // let's not cache this as it's a starting point
-    }
-  }
+		fileNumbers.sort((a, b) => b - a);
+		if (fileNumbers.length) {
+			lastPageCache[folder] = fileNumbers[0];
+		} else {
+			return NaN; // let's not cache this as it's a starting point
+		}
+	}
 
-  return lastPageCache[folder];
+	return lastPageCache[folder];
 }
