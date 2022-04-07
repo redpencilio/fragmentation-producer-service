@@ -1,5 +1,7 @@
 import { NamedNode, Store, Term } from "n3";
 import { rdf, tree } from "../utils/namespaces";
+import { getFirstMatch } from "../utils/utils";
+import Relation from "./relation";
 
 export default class Node {
 	data: Store;
@@ -17,8 +19,49 @@ export default class Node {
 		throw Error("Id not found!");
 	}
 
-	getRelations() {
-		return this.data.getQuads(this.id, tree("relation"), null, null);
+	getRelations(): Relation[] {
+		const relationIds = this.data
+			.getQuads(this.id, tree("relation"), null, null)
+			.map((quad) => quad.object);
+		const relations: Relation[] = [];
+
+		relationIds.forEach((relationId) => {
+			let type = getFirstMatch(
+				this.data,
+				relationId,
+				rdf("type"),
+				null,
+				null
+			)?.object;
+			let value = getFirstMatch(
+				this.data,
+				relationId,
+				tree("value"),
+				null,
+				null
+			)?.object;
+			let target = getFirstMatch(
+				this.data,
+				relationId,
+				tree("node"),
+				null,
+				null
+			)?.object;
+			let path = getFirstMatch(
+				this.data,
+				relationId,
+				tree("path"),
+				null,
+				null
+			)?.object;
+			if (type && value && target && path) {
+				relations.push(
+					new Relation(relationId, type, value, target, path)
+				);
+			}
+		});
+
+		return relations;
 	}
 
 	count() {
