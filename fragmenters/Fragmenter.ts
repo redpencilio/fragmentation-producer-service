@@ -28,7 +28,11 @@ export default abstract class Fragmenter {
 	abstract constructNewNode(): Node;
 
 	fileForNode(nodeId: number): string {
-		return `${this.folder}/${nodeId}.ttl`;
+		return `/pages${this.folder}/${nodeId}.ttl`;
+	}
+
+	getViewFile() {
+		return this.fileForNode(1);
 	}
 
 	shouldCreateNewPage(node: Node): boolean {

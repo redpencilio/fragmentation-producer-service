@@ -34,7 +34,7 @@ const UPDATE_QUEUE = new PromiseQueue<Node>();
 
 const stream = ldesTime("example-stream");
 
-const FRAGMENTER = new TimeFragmenter(PAGES_FOLDER, stream, 10);
+const FRAGMENTER = new TimeFragmenter("/pages", stream, 10);
 
 /**
  * Yields the file path on which the specified page number is described.
