@@ -108,7 +108,7 @@ export default class TimeFragmenter extends Fragmenter {
 	async writeVersionedResource(versionedStore: Store): Promise<Store> {
 		try {
 			const lastPageNr = lastPage(this.folder);
-			let pageFile = this.fileForPage(lastPageNr);
+			let pageFile = this.fileForNode(lastPageNr);
 
 			let currentDataset = await createStore(readTriplesStream(pageFile));
 
@@ -117,7 +117,7 @@ export default class TimeFragmenter extends Fragmenter {
 
 				// link the current dataset to the new dataset but don't save yet
 				const closingPageFile = pageFile;
-				const nextPageFile = this.fileForPage(lastPageNr + 1);
+				const nextPageFile = this.fileForNode(lastPageNr + 1);
 
 				// create a store with the new graph for the new file
 				currentDataset = await this.closeDataset(

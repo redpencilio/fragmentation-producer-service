@@ -25,8 +25,8 @@ export default abstract class Fragmenter {
 	}
 	abstract constructPageTemplate(): Store;
 
-	fileForPage(pageNr: number): string {
-		return `${this.folder}/${pageNr}.ttl`;
+	fileForNode(nodeId: number): string {
+		return `${this.folder}/${nodeId}.ttl`;
 	}
 
 	shouldCreateNewPage(store: Store): boolean {

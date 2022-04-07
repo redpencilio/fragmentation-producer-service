@@ -56,7 +56,7 @@ app.post("/resource", async function (req: any, res: any, next: any) {
 		const store = await createStore(quadStream);
 
 		const currentDataset = await UPDATE_QUEUE.push(() =>
-			FRAGMENTER.fragment(store, resource)
+			FRAGMENTER.addResource(resource, store)
 		);
 
 		console.log(currentDataset);
