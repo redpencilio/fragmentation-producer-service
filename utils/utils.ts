@@ -1,4 +1,4 @@
-import { Store, DataFactory, NamedNode, Term, Quad, OTerm } from "n3";
+import { Store, DataFactory, Quad, OTerm } from "n3";
 import { uuid } from "mu";
 import { ldesTime, tree, xml } from "./namespaces";
 import * as RDF from "rdf-js";
@@ -35,12 +35,17 @@ export function error(status: number, msg?: string) {
 
 export function getFirstMatch(
 	store: Store,
-	subject: OTerm,
-	predicate: OTerm,
-	object: OTerm,
-	graph: OTerm
+	subject?: OTerm,
+	predicate?: OTerm,
+	object?: OTerm,
+	graph?: OTerm
 ): Quad | null {
-	const matches = store.getQuads(subject, predicate, object, graph);
+	const matches = store.getQuads(
+		subject || null,
+		predicate || null,
+		object || null,
+		graph || null
+	);
 	if (matches.length > 0) {
 		return matches[0];
 	}

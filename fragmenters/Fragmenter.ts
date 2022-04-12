@@ -21,7 +21,7 @@ export default abstract class Fragmenter {
 		this.maxResourcesPerPage = maxResourcesPerPage;
 	}
 	constructNewNode(): Node {
-		const nodeId = lastPage(this.folder);
+		const nodeId = lastPage("/data" + this.folder);
 		const node = new Node(
 			generatePageResource(nodeId),
 			this.stream,
@@ -31,7 +31,7 @@ export default abstract class Fragmenter {
 	}
 
 	fileForNode(nodeId: number): string {
-		return `/pages${this.folder}/${nodeId}.ttl`;
+		return `/data${this.folder}/${nodeId}.ttl`;
 	}
 
 	getViewFile() {

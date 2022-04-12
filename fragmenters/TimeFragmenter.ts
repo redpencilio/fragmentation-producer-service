@@ -83,6 +83,7 @@ export default class TimeFragmenter extends Fragmenter {
 
 			// create a store with the new graph for the new file
 			const currentNode = this.constructNewNode();
+			clearLastPageCache("/data" + this.folder);
 			return currentNode;
 		} catch (e) {
 			throw e;
@@ -91,7 +92,8 @@ export default class TimeFragmenter extends Fragmenter {
 
 	async writeVersionedResource(versionedResource: Resource): Promise<Node> {
 		try {
-			const lastPageNr = lastPage(this.folder);
+			const lastPageNr = lastPage("/data" + this.folder);
+			console.log(lastPageNr);
 			let pageFile = this.fileForNode(lastPageNr);
 
 			let currentNode = await readNode(pageFile);

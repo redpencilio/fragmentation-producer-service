@@ -43,9 +43,7 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 				const resourceTermValue = getFirstMatch(
 					resource.data,
 					resource.id,
-					childRelation.path,
-					null,
-					null
+					childRelation.path
 				)?.object.value;
 				if (resourceTermValue) {
 					// Check which type of relation we are dealing with and check if the resource fulfills the specific relation
@@ -85,13 +83,7 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 		// Determine the token at the given depth which occurs the most and split off members matching that specific token
 		let memberGroups: { [key: string]: Resource[] } = {};
 		node.members.forEach((member) => {
-			let pathValue = getFirstMatch(
-				member.data,
-				null,
-				this.path,
-				null,
-				null
-			)?.object;
+			let pathValue = getFirstMatch(member.data, null, this.path)?.object;
 			if (pathValue) {
 				let character = pathValue.value.substring(depth, depth + 1);
 				if (memberGroups[character]) {

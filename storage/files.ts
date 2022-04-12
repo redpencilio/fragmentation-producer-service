@@ -138,21 +138,14 @@ export function lastPage(folder: string): number {
 
 export async function readNode(path: string): Promise<Node> {
 	let store = await createStore(readTriplesStream(path));
-	const id = getFirstMatch(
-		store,
-		null,
-		rdf("type"),
-		tree("Node"),
-		null
-	)?.subject;
+	const id = getFirstMatch(store, null, rdf("type"), tree("Node"))?.subject;
 	const stream = getFirstMatch(
 		store,
 		null,
 		rdf("type"),
-		ldes("EventStream"),
-		null
+		ldes("EventStream")
 	)?.subject;
-	const view = getFirstMatch(store, null, tree("view"), null, null)?.object;
+	const view = getFirstMatch(store, null, tree("view"))?.object;
 	if (id && stream && view) {
 		let node: Node = new Node(
 			id as RDF.NamedNode,
@@ -166,34 +159,14 @@ export async function readNode(path: string): Promise<Node> {
 			.map((quad) => quad.object);
 
 		relationIds.forEach((relationId) => {
-			let type = getFirstMatch(
-				store,
-				relationId,
-				rdf("type"),
-				null,
-				null
-			)?.object;
-			let value = getFirstMatch(
-				store,
-				relationId,
-				tree("value"),
-				null,
-				null
-			)?.object;
-			let target = getFirstMatch(
-				store,
-				relationId,
-				tree("node"),
-				null,
-				null
-			)?.object;
-			let path = getFirstMatch(
-				store,
-				relationId,
-				tree("path"),
-				null,
-				null
-			)?.object;
+			let type = getFirstMatch(store, relationId, rdf("type"))?.object;
+
+			let value = getFirstMatch(store, relationId, tree("value"))?.object;
+
+			let target = getFirstMatch(store, relationId, tree("node"))?.object;
+
+			let path = getFirstMatch(store, relationId, tree("path"))?.object;
+
 			if (type && value && target && path) {
 				node.add_relation(
 					new Relation(
