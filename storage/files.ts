@@ -4,7 +4,11 @@ import rdfParser from "rdf-parse";
 import rdfSerializer from "rdf-serialize";
 import jsstream from "stream";
 import * as RDF from "rdf-js";
-import Node from "../models/node";
+import Node from "../models/node2";
+import { getFirstMatch } from "../utils/utils";
+import { rdf, tree } from "../utils/namespaces";
+import Resource from "../models/resource";
+import Relation from "../models/relation";
 
 /**
  * Contains abstractions for working with files containing turtle
@@ -42,11 +46,6 @@ export function readTriplesStream(file: string): RDF.Stream<Quad> {
 		contentType: "text/turtle",
 		baseIRI: "/",
 	});
-}
-
-export async function getNode(quadStream: RDF.Stream<Quad>): Promise<Node> {
-	const store = await createStore(quadStream);
-	return new Node(store);
 }
 
 export function createStore(quadStream: RDF.Stream<Quad>): Promise<Store> {
@@ -135,4 +134,72 @@ export function lastPage(folder: string): number {
 	}
 
 	return lastPageCache[folder];
+}
+
+export async function readNode(path: string): Promise<Node> {
+	let store = await createStore(readTriplesStream(path));
+	const id = getFirstMatch(
+		store,
+		null,
+		rdf("type"),
+		tree("Node"),
+		null
+	)?.subject;
+	const view = getFirstMatch(store, null, tree("view"), null, null)?.object;
+	if (id && view) {
+		let node: Node = new Node(id, view);
+
+		// Read relations from store and add them to the node
+		const relationIds = store
+			.getQuads(id, tree("relation"), null, null)
+			.map((quad) => quad.object);
+
+		relationIds.forEach((relationId) => {
+			let type = getFirstMatch(
+				store,
+				relationId,
+				rdf("type"),
+				null,
+				null
+			)?.object;
+			let value = getFirstMatch(
+				store,
+				relationId,
+				tree("value"),
+				null,
+				null
+			)?.object;
+			let target = getFirstMatch(
+				store,
+				relationId,
+				tree("node"),
+				null,
+				null
+			)?.object;
+			let path = getFirstMatch(
+				store,
+				relationId,
+				tree("path"),
+				null,
+				null
+			)?.object;
+			if (type && value && target && path) {
+				node.add_relation(
+					new Relation(relationId, type, value, target, path)
+				);
+			}
+		});
+		// Read members from store and add them to the node
+		const memberIds = store
+			.getQuads(null, tree("member"), null, null)
+			.map((quad) => quad.object);
+		memberIds.forEach((memberId) => {
+			let content = new Store(store.getQuads(memberId, null, null, null));
+			node.add_member(new Resource(memberId, content));
+		});
+
+		return node;
+	} else {
+		throw Error("Reference to id or view not found in the requested file");
+	}
 }

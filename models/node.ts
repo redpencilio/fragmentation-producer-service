@@ -2,8 +2,14 @@ import { NamedNode, Store, Term } from "n3";
 import { rdf, tree } from "../utils/namespaces";
 import { getFirstMatch } from "../utils/utils";
 import Relation from "./relation";
+import Resource from "./resource";
 
 export default class Node {
+	id: Term;
+	members: Resource[];
+	relations: Relation[];
+	view: Term;
+
 	data: Store;
 
 	constructor(data: Store) {
@@ -17,6 +23,20 @@ export default class Node {
 			return match[0].subject;
 		}
 		throw Error("Id not found!");
+	}
+
+	getMembers(): Resource[] {
+		const memberIds = this.data
+			.getQuads(null, tree("member"), null, null)
+			.map((quad) => quad.object);
+		const members: Resource[] = [];
+		memberIds.forEach((memberId) => {
+			let content = new Store(
+				this.data.getQuads(memberId, null, null, null)
+			);
+			members.push(new Resource(memberId, content));
+		});
+		return members;
 	}
 
 	getRelations(): Relation[] {

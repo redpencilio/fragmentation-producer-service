@@ -2,15 +2,6 @@ import { NamedNode, Store } from "n3";
 import Node from "../models/node.js";
 import Resource from "../models/resource.js";
 
-import {
-	clearLastPageCache,
-	createStore,
-	lastPage,
-	readTriplesStream,
-	writeTriplesStream,
-} from "../storage/files.js";
-import { countVersionedItems } from "../utils/utils";
-
 export default abstract class Fragmenter {
 	folder: string;
 	maxResourcesPerPage: number;

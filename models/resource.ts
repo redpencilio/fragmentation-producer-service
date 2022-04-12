@@ -1,10 +1,10 @@
-import { NamedNode, Store } from "n3";
+import { NamedNode, Store, Term } from "n3";
 
 export default class Resource {
-	id: NamedNode;
+	id: Term;
 	data: Store;
 
-	constructor(id: NamedNode, data: Store) {
+	constructor(id: Term, data: Store) {
 		this.id = id;
 		this.data = data;
 	}

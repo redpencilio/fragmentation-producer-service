@@ -24,22 +24,24 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 		const children = node.getRelations();
 		if (children.length > 0) {
 			children.forEach(async (childRelation) => {
-				if (childRelation.type.equals(tree("PrefixRelation"))) {
-					// The current node contains a child with a prefix relation
-					const resourceTermValue = getFirstMatch(
-						resource.data,
-						resource.id,
-						childRelation.path,
-						null,
-						null
-					)?.object;
+				// Retrieve the value of the relation path in the to be added resource
+				const resourceTermValue = getFirstMatch(
+					resource.data,
+					resource.id,
+					childRelation.path,
+					null,
+					null
+				)?.object.value;
+				if (resourceTermValue) {
+					// Check which type of relation we are dealing with and check if the resource fulfills the specific relation
 					if (
-						resourceTermValue &&
-						resourceTermValue.value.startsWith(
-							childRelation.value.value
-						)
+						(childRelation.type.equals(tree("PrefixRelation")) &&
+							resourceTermValue.startsWith(
+								childRelation.value.value
+							)) ||
+						(childRelation.type.equals(tree("EqualsRelation")) &&
+							resourceTermValue == childRelation.value.value)
 					) {
-						// The to be added resource matches the prefix
 						const childNode = await getNode(
 							readTriplesStream(childRelation.target.value)
 						);
@@ -64,6 +66,8 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 		}
 		return node;
 	}
+
+	splitNode(node: Node) {}
 
 	constructNewNode(): Node {
 		const store = new Store();
