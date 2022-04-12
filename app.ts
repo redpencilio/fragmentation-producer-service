@@ -19,11 +19,11 @@ import {
 	readTriplesStream,
 	lastPage,
 	createStore,
-	getNode,
+	readNode,
 } from "./storage/files";
 import PromiseQueue from "./promise-queue";
 import TimeFragmenter from "./fragmenters/TimeFragmenter";
-import { countVersionedItems, error } from "./utils/utils";
+import { error } from "./utils/utils";
 import { ldesTime } from "./utils/namespaces";
 import Resource from "./models/resource";
 import Node from "./models/node";
@@ -121,8 +121,7 @@ app.get("/count", async function (_req: any, res: any, next: any) {
 
 		const file = fileForPage(page);
 		console.log(`Reading from ${file}`);
-
-		const currentNode = await getNode(readTriplesStream(file));
+		const currentNode = await readNode(file);
 		console.log(currentNode.id);
 		const count = currentNode.count();
 		res.status(200).send(`{"count": ${count}}`);

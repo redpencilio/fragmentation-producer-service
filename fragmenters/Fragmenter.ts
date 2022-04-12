@@ -1,7 +1,8 @@
-import { NamedNode, Store } from "n3";
+import { DataFactory, NamedNode, Store } from "n3";
 import Node from "../models/node.js";
 import Resource from "../models/resource.js";
-
+import { generatePageResource } from "../utils/utils.js";
+const { namedNode, quad, literal } = DataFactory;
 export default abstract class Fragmenter {
 	folder: string;
 	maxResourcesPerPage: number;
@@ -16,7 +17,14 @@ export default abstract class Fragmenter {
 		this.stream = stream;
 		this.maxResourcesPerPage = maxResourcesPerPage;
 	}
-	abstract constructNewNode(): Node;
+	constructNewNode(nodeId: number): Node {
+		const node = new Node(
+			generatePageResource(nodeId),
+			this.stream,
+			namedNode("/pages?page=1")
+		);
+		return node;
+	}
 
 	fileForNode(nodeId: number): string {
 		return `/pages${this.folder}/${nodeId}.ttl`;

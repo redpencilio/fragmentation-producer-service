@@ -8,29 +8,18 @@ import {
 import Fragmenter from "./Fragmenter";
 const { namedNode, quad, literal } = DataFactory;
 
-import * as RDF from "rdf-js";
 import { ldes, prov, purl, rdf, tree } from "../utils/namespaces";
 import {
 	clearLastPageCache,
-	createStore,
-	getNode,
+	readNode,
 	lastPage,
-	readTriplesStream,
-	writeTriplesStream,
+	writeNode,
 } from "../storage/files";
 import Resource from "../models/resource";
 import Node from "../models/node";
+import Relation from "../models/relation";
 
 export default class TimeFragmenter extends Fragmenter {
-	constructNewNode(): Node {
-		const store = new Store();
-		const subject = this.stream;
-		store.addQuad(subject, rdf("type"), ldes("EventStream"));
-		store.addQuad(subject, rdf("type"), tree("Collection"));
-		store.addQuad(subject, ldes("timeStampPath"), prov("generatedAtTime"));
-		store.addQuad(subject, tree("view"), namedNode("/pages?page=1"));
-		return new Node(store);
-	}
 	constructVersionedResource(resource: Resource): Resource {
 		const versionedResourceId = generateVersion(resource.id);
 		const versionedStore = new Store();
@@ -79,31 +68,20 @@ export default class TimeFragmenter extends Fragmenter {
 			const relationResource = generateTreeRelation();
 			const currentPageResource = generatePageResource(pageNr);
 			const nextPageResource = generatePageResource(pageNr + 1);
-			node.data.add(
-				quad(currentPageResource, tree("relation"), relationResource)
-			);
-			node.data.add(
-				quad(
+			const dateLiteral = nowLiteral();
+
+			node.add_relation(
+				new Relation(
 					relationResource,
-					rdf("type"),
-					tree("GreaterThanOrEqualRelation")
+					tree("GreaterThanOrEqualRelation"),
+					dateLiteral,
+					nextPageResource,
+					prov("generatedAtTime")
 				)
 			);
-			node.data.add(
-				quad(relationResource, tree("node"), nextPageResource)
-			);
-			node.data.add(
-				quad(relationResource, tree("path"), prov("generatedAtTime"))
-			);
-			const dateLiteral = nowLiteral();
-			node.data.add(quad(relationResource, tree("value"), dateLiteral));
 
 			// create a store with the new graph for the new file
-			const currentNode = this.constructNewNode();
-
-			currentNode.data.add(
-				quad(nextPageResource, rdf("type"), tree("Node"))
-			);
+			const currentNode = this.constructNewNode(pageNr + 1);
 			return currentNode;
 		} catch (e) {
 			throw e;
@@ -115,7 +93,7 @@ export default class TimeFragmenter extends Fragmenter {
 			const lastPageNr = lastPage(this.folder);
 			let pageFile = this.fileForNode(lastPageNr);
 
-			let currentNode = await getNode(readTriplesStream(pageFile));
+			let currentNode = await readNode(pageFile);
 
 			// let currentDataset = await createStore(readTriplesStream(pageFile));
 
@@ -129,21 +107,16 @@ export default class TimeFragmenter extends Fragmenter {
 				// create a store with the new graph for the new file
 				currentNode = await this.closeDataset(closingNode, lastPageNr);
 
-				currentNode.data.addQuads(
-					versionedResource.data.getQuads(null, null, null, null)
-				);
+				currentNode.add_member(versionedResource);
 
-				// // Write out new dataset to nextPageFile
-				await writeTriplesStream(currentNode.data, nextPageFile);
-				// // Write out closing dataset to closingPageFile
-				await writeTriplesStream(closingNode.data, closingPageFile);
+				await writeNode(currentNode, nextPageFile);
+				await writeNode(closingNode, closingPageFile);
 				// Clear the last page cache
 				clearLastPageCache(this.folder);
 			} else {
-				currentNode.data.addQuads(
-					versionedResource.data.getQuads(null, null, null, null)
-				);
-				await writeTriplesStream(currentNode.data, pageFile);
+				currentNode.add_member(versionedResource);
+
+				await writeNode(currentNode, pageFile);
 			}
 			return currentNode;
 		} catch (e) {

@@ -4,9 +4,9 @@ import rdfParser from "rdf-parse";
 import rdfSerializer from "rdf-serialize";
 import jsstream from "stream";
 import * as RDF from "rdf-js";
-import Node from "../models/node2";
+import Node from "../models/node";
 import { getFirstMatch } from "../utils/utils";
-import { rdf, tree } from "../utils/namespaces";
+import { ldes, rdf, tree } from "../utils/namespaces";
 import Resource from "../models/resource";
 import Relation from "../models/relation";
 
@@ -145,9 +145,16 @@ export async function readNode(path: string): Promise<Node> {
 		tree("Node"),
 		null
 	)?.subject;
+	const stream = getFirstMatch(
+		store,
+		null,
+		rdf("type"),
+		ldes("EventStream"),
+		null
+	)?.subject;
 	const view = getFirstMatch(store, null, tree("view"), null, null)?.object;
-	if (id && view) {
-		let node: Node = new Node(id, view);
+	if (id && stream && view) {
+		let node: Node = new Node(id, stream, view);
 
 		// Read relations from store and add them to the node
 		const relationIds = store
@@ -200,6 +207,43 @@ export async function readNode(path: string): Promise<Node> {
 
 		return node;
 	} else {
-		throw Error("Reference to id or view not found in the requested file");
+		throw Error(
+			"Reference to id, stream or view not found in the requested file"
+		);
 	}
+}
+
+export async function writeNode(node: Node, path: string) {
+	let store = new Store();
+
+	// Add stream and its view property
+	store.addQuads([
+		new Quad(node.stream, rdf("type"), [
+			ldes("EventStream"),
+			tree("Collection"),
+		]),
+		new Quad(node.stream, tree("view"), node.view),
+	]);
+
+	// Add node id
+	store.add(new Quad(node.id, rdf("type"), tree("Node")));
+
+	// Add the different relations to the store
+	node.relations.forEach((relation) => {
+		store.add(new Quad(node.id, tree("relation"), relation.id));
+		store.addQuads([
+			new Quad(relation.id, rdf("type"), relation.type),
+			new Quad(relation.id, tree("value"), relation.value),
+			new Quad(relation.id, tree("node"), relation.target),
+			new Quad(relation.id, tree("path"), relation.path),
+		]);
+	});
+
+	// Add the different members and their data to the store
+	node.members.forEach((member) => {
+		store.add(new Quad(node.stream, tree("member"), member.id));
+		store.addQuads(member.data.getQuads(null, null, null, null));
+	});
+
+	await writeTriplesStream(store, path);
 }
