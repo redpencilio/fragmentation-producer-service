@@ -1,10 +1,11 @@
-import { NamedNode, Store, Term } from "n3";
+import { Store } from "n3";
+import * as RDF from "rdf-js";
 
 export default class Resource {
-	id: Term;
+	id: RDF.NamedNode;
 	data: Store;
 
-	constructor(id: Term, data: Store) {
+	constructor(id: RDF.NamedNode, data: Store) {
 		this.id = id;
 		this.data = data;
 	}

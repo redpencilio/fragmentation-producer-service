@@ -1,13 +1,19 @@
-import { NamedNode, Term } from "n3";
+import * as RDF from "rdf-js";
 
 export default class Relation {
-	id: Term;
-	type: Term;
-	value: Term;
-	target: Term;
-	path: Term;
+	id: RDF.NamedNode;
+	type: RDF.NamedNode;
+	value: RDF.Literal;
+	target: RDF.NamedNode;
+	path: RDF.NamedNode;
 
-	constructor(id: Term, type: Term, value: Term, target: Term, path: Term) {
+	constructor(
+		id: RDF.NamedNode,
+		type: RDF.NamedNode,
+		value: RDF.Literal,
+		target: RDF.NamedNode,
+		path: RDF.NamedNode
+	) {
 		this.id = id;
 		this.type = type;
 		this.value = value;

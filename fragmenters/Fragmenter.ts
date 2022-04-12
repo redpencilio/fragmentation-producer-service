@@ -1,23 +1,27 @@
 import { DataFactory, NamedNode, Store } from "n3";
 import Node from "../models/node.js";
 import Resource from "../models/resource.js";
+import { lastPage } from "../storage/files.js";
 import { generatePageResource } from "../utils/utils.js";
+import * as RDF from "rdf-js";
+
 const { namedNode, quad, literal } = DataFactory;
 export default abstract class Fragmenter {
 	folder: string;
 	maxResourcesPerPage: number;
-	stream: NamedNode;
+	stream: RDF.NamedNode;
 
 	constructor(
 		folder: string,
-		stream: NamedNode,
+		stream: RDF.NamedNode,
 		maxResourcesPerPage: number
 	) {
 		this.folder = folder;
 		this.stream = stream;
 		this.maxResourcesPerPage = maxResourcesPerPage;
 	}
-	constructNewNode(nodeId: number): Node {
+	constructNewNode(): Node {
+		const nodeId = lastPage(this.folder);
 		const node = new Node(
 			generatePageResource(nodeId),
 			this.stream,

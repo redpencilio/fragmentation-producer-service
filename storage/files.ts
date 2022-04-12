@@ -1,5 +1,6 @@
 import fs from "fs";
-import { Quad, Store } from "n3";
+import { Quad, Store, DataFactory, NamedNode } from "n3";
+const { quad } = DataFactory;
 import rdfParser from "rdf-parse";
 import rdfSerializer from "rdf-serialize";
 import jsstream from "stream";
@@ -20,7 +21,6 @@ interface FileCache {
 }
 
 const fileCache: FileCache = {};
-
 /**
  * Loads a file as a string.
  *
@@ -154,7 +154,11 @@ export async function readNode(path: string): Promise<Node> {
 	)?.subject;
 	const view = getFirstMatch(store, null, tree("view"), null, null)?.object;
 	if (id && stream && view) {
-		let node: Node = new Node(id, stream, view);
+		let node: Node = new Node(
+			id as RDF.NamedNode,
+			stream as RDF.NamedNode,
+			view as RDF.NamedNode
+		);
 
 		// Read relations from store and add them to the node
 		const relationIds = store
@@ -192,7 +196,13 @@ export async function readNode(path: string): Promise<Node> {
 			)?.object;
 			if (type && value && target && path) {
 				node.add_relation(
-					new Relation(relationId, type, value, target, path)
+					new Relation(
+						relationId as RDF.NamedNode,
+						type as RDF.NamedNode,
+						value as RDF.Literal,
+						target as RDF.NamedNode,
+						path as RDF.NamedNode
+					)
 				);
 			}
 		});
@@ -202,7 +212,7 @@ export async function readNode(path: string): Promise<Node> {
 			.map((quad) => quad.object);
 		memberIds.forEach((memberId) => {
 			let content = new Store(store.getQuads(memberId, null, null, null));
-			node.add_member(new Resource(memberId, content));
+			node.add_member(new Resource(memberId as RDF.NamedNode, content));
 		});
 
 		return node;
@@ -218,30 +228,28 @@ export async function writeNode(node: Node, path: string) {
 
 	// Add stream and its view property
 	store.addQuads([
-		new Quad(node.stream, rdf("type"), [
-			ldes("EventStream"),
-			tree("Collection"),
-		]),
-		new Quad(node.stream, tree("view"), node.view),
+		quad(node.stream, rdf("type"), ldes("EventStream")),
+		quad(node.stream, rdf("type"), tree("Collection")),
+		quad(node.stream, tree("view"), node.view),
 	]);
 
 	// Add node id
-	store.add(new Quad(node.id, rdf("type"), tree("Node")));
+	store.add(quad(node.id, rdf("type"), tree("Node")));
 
 	// Add the different relations to the store
 	node.relations.forEach((relation) => {
-		store.add(new Quad(node.id, tree("relation"), relation.id));
+		store.add(quad(node.id, tree("relation"), relation.id));
 		store.addQuads([
-			new Quad(relation.id, rdf("type"), relation.type),
-			new Quad(relation.id, tree("value"), relation.value),
-			new Quad(relation.id, tree("node"), relation.target),
-			new Quad(relation.id, tree("path"), relation.path),
+			quad(relation.id, rdf("type"), relation.type),
+			quad(relation.id, tree("value"), relation.value),
+			quad(relation.id, tree("node"), relation.target),
+			quad(relation.id, tree("path"), relation.path),
 		]);
 	});
 
 	// Add the different members and their data to the store
 	node.members.forEach((member) => {
-		store.add(new Quad(node.stream, tree("member"), member.id));
+		store.add(quad(node.stream, tree("member"), member.id));
 		store.addQuads(member.data.getQuads(null, null, null, null));
 	});
 

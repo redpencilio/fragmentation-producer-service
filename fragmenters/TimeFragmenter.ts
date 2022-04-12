@@ -6,6 +6,8 @@ import {
 	nowLiteral,
 } from "../utils/utils";
 import Fragmenter from "./Fragmenter";
+import * as RDF from "rdf-js";
+
 const { namedNode, quad, literal } = DataFactory;
 
 import { ldes, prov, purl, rdf, tree } from "../utils/namespaces";
@@ -66,7 +68,6 @@ export default class TimeFragmenter extends Fragmenter {
 	async closeDataset(node: Node, pageNr: number): Promise<Node> {
 		try {
 			const relationResource = generateTreeRelation();
-			const currentPageResource = generatePageResource(pageNr);
 			const nextPageResource = generatePageResource(pageNr + 1);
 			const dateLiteral = nowLiteral();
 
@@ -81,7 +82,7 @@ export default class TimeFragmenter extends Fragmenter {
 			);
 
 			// create a store with the new graph for the new file
-			const currentNode = this.constructNewNode(pageNr + 1);
+			const currentNode = this.constructNewNode();
 			return currentNode;
 		} catch (e) {
 			throw e;

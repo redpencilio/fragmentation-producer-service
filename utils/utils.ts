@@ -4,6 +4,11 @@ import { ldesTime, tree, xml } from "./namespaces";
 import * as RDF from "rdf-js";
 const { namedNode, quad, literal } = DataFactory;
 
+export type QuadElement =
+	| RDF.Quad_Subject
+	| RDF.Quad_Predicate
+	| RDF.Quad_Object;
+
 export function generateTreeRelation() {
 	return ldesTime(`relations/${uuid()}`);
 }
