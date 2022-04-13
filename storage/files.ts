@@ -72,14 +72,17 @@ export function writeTriplesStream(store: Store, file: string): Promise<void> {
 	const writeStream = fs.createWriteStream(file);
 	let fileData = "";
 	turtleStream.on("data", (turtleChunk) => {
+		turtleStream.pause();
 		writeStream.write(turtleChunk);
 		fileData += turtleChunk;
+		turtleStream.resume();
 	});
 	return new Promise((resolve, reject) => {
 		turtleStream.on("error", reject);
 		turtleStream.on("end", () => {
-			writeStream.end();
+			// writeStream.end();
 			fileCache[file] = fileData;
+			console.log("DATA", fileData);
 			resolve();
 		});
 	});
@@ -134,6 +137,14 @@ export function lastPage(folder: string): number {
 	}
 
 	return lastPageCache[folder];
+}
+
+export function updateLastPage(folder: string, value: number) {
+	lastPageCache[folder] = value;
+}
+
+export function getFile(nodeId: RDF.NamedNode): string {
+	return `/data${nodeId.value}.ttl`;
 }
 
 export async function readNode(path: string): Promise<Node> {

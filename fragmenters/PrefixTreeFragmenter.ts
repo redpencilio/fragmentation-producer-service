@@ -1,9 +1,15 @@
 import { Store, Quad, NamedNode, DataFactory, Term, Literal } from "n3";
+const { literal } = DataFactory;
 import { RdfParser } from "rdf-parse";
 import Node from "../models/node";
 import Relation from "../models/relation";
 import Resource from "../models/resource";
-import { readNode, writeNode } from "../storage/files";
+import {
+	clearLastPageCache,
+	getFile,
+	readNode,
+	writeNode,
+} from "../storage/files";
 import { ldes, rdf, tree } from "../utils/namespaces";
 import { generateTreeRelation, getFirstMatch } from "../utils/utils";
 import * as RDF from "rdf-js";
@@ -23,22 +29,36 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 		this.path = path;
 	}
 	async addResource(resource: Resource): Promise<Node> {
+		console.log("add resource start");
 		const viewFile = this.getViewFile();
-		const viewNode = await readNode(viewFile);
+		let viewNode: Node;
 		// Check if the view node exists, if not, create one
-		return this._addResource(resource, viewNode);
+
+		try {
+			viewNode = await readNode(viewFile);
+		} catch (e) {
+			console.log("No viewnode");
+			viewNode = this.constructNewNode();
+			await writeNode(viewNode, this.fileForNode(1));
+		}
+
+		const result = await this._addResource(resource, viewNode);
+
+		console.log("add resource end");
+		return result;
 	}
 
 	async _addResource(
 		resource: Resource,
 		node: Node,
+		currentValue: string = "",
 		depth: number = 0
 	): Promise<Node> {
 		// Check if we have to add the resource to a child of the current node, to the current node itself or if we have to split the current node.
 		const children = node.relations;
 		if (children.length > 0) {
 			// The current node has children, check if any of the relations match with the to be added resource
-			children.forEach(async (childRelation) => {
+			for (let childRelation of children) {
 				// Retrieve the value of the relation path in the to be added resource
 				const resourceTermValue = getFirstMatch(
 					resource.data,
@@ -56,30 +76,35 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 							resourceTermValue == childRelation.value.value)
 					) {
 						const childNode = await readNode(
-							childRelation.target.value
+							getFile(childRelation.target)
 						);
-						return this._addResource(resource, childNode);
+						return await this._addResource(
+							resource,
+							childNode,
+							childRelation.value.value,
+							depth + 1
+						);
 					}
-				}
-			});
-		} else {
-			// Add the resource to the current node, if it is full: split.
-			if (this.shouldCreateNewPage(node)) {
-				node.add_member(resource);
-				// the current node has to be splitted
-				this.splitNode(node, depth);
-			} else {
-				// we can simply add the new resource to the current node as a member
-				node.add_member(resource);
-				if (node.id?.value) {
-					await writeNode(node, node.id?.value);
 				}
 			}
 		}
+		// Add the resource to the current node, if it is full: split.
+		if (this.shouldCreateNewPage(node)) {
+			node.add_member(resource);
+			// the current node has to be splitted
+			await this.splitNode(node, currentValue, depth);
+		} else {
+			// we can simply add the new resource to the current node as a member
+			node.add_member(resource);
+			if (node.id.value) {
+				await writeNode(node, getFile(node.id));
+			}
+		}
+
 		return node;
 	}
 
-	splitNode(node: Node, depth: number) {
+	async splitNode(node: Node, currentValue: string, depth: number) {
 		// Determine the token at the given depth which occurs the most and split off members matching that specific token
 		let memberGroups: { [key: string]: Resource[] } = {};
 		node.members.forEach((member) => {
@@ -89,7 +114,7 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 				if (memberGroups[character]) {
 					memberGroups[character].push(member);
 				} else {
-					memberGroups;
+					memberGroups[character] = [member];
 				}
 			}
 		});
@@ -109,7 +134,7 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 			new Relation(
 				generateTreeRelation(),
 				newRelationType,
-				new Literal(mostOccuringToken),
+				literal(currentValue + mostOccuringToken),
 				newNode.id,
 				this.path
 			)
@@ -118,5 +143,9 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 		node.delete_members(memberGroups[mostOccuringToken]);
 
 		newNode.add_members(memberGroups[mostOccuringToken]);
+
+		await writeNode(node, getFile(node.id));
+
+		await writeNode(newNode, getFile(newNode.id));
 	}
 }

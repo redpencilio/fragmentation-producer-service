@@ -13,10 +13,6 @@ export function generateTreeRelation() {
 	return ldesTime(`relations/${uuid()}`);
 }
 
-export function generatePageResource(number: number) {
-	return namedNode(`/pages?page=${number}`);
-}
-
 export function nowLiteral() {
 	const xsdDateTime = xml("dateTime");
 	const now = new Date().toISOString();
