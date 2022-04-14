@@ -1,6 +1,5 @@
 import { Store, Quad, NamedNode, DataFactory } from "n3";
 import {
-	generatePageResource,
 	generateTreeRelation,
 	generateVersion,
 	nowLiteral,
@@ -68,7 +67,7 @@ export default class TimeFragmenter extends Fragmenter {
 	async closeDataset(node: Node, pageNr: number): Promise<Node> {
 		try {
 			const relationResource = generateTreeRelation();
-			const nextPageResource = generatePageResource(pageNr + 1);
+			const nextPageResource = this.generatePageResource(pageNr + 1);
 			const dateLiteral = nowLiteral();
 
 			node.add_relation(

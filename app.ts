@@ -3,7 +3,7 @@ import bodyParser from "body-parser";
 import rdfParser from "rdf-parse";
 import rdfSerializer from "rdf-serialize";
 import jsstream from "stream";
-import { Store, DataFactory } from "n3";
+import { Store, DataFactory, NamedNode } from "n3";
 import cors from "cors";
 const { namedNode } = DataFactory;
 app.use(cors());
@@ -23,10 +23,12 @@ import {
 } from "./storage/files";
 import PromiseQueue from "./promise-queue";
 import TimeFragmenter from "./fragmenters/TimeFragmenter";
-import { error } from "./utils/utils";
+import { error, getFirstMatch } from "./utils/utils";
 import { ldesTime } from "./utils/namespaces";
 import Resource from "./models/resource";
 import Node from "./models/node";
+import PrefixTreeFragmenter from "./fragmenters/PrefixTreeFragmenter";
+import populateTree from "./populateStreetNameTree";
 
 const PAGES_FOLDER = "/data/pages";
 
@@ -34,7 +36,12 @@ const UPDATE_QUEUE = new PromiseQueue<Node>();
 
 const stream = ldesTime("example-stream");
 
-const FRAGMENTER = new TimeFragmenter("/pages", stream, 10);
+const FRAGMENTER = new PrefixTreeFragmenter(
+	"/pagesPrefix",
+	stream,
+	10,
+	new NamedNode("http://mu.semte.ch/services/tests/name")
+);
 
 /**
  * Yields the file path on which the specified page number is described.
@@ -42,8 +49,8 @@ const FRAGMENTER = new TimeFragmenter("/pages", stream, 10);
  * @param {number} page Page index for which we want te get the file path.
  * @return {string} Path to the page.
  */
-function fileForPage(page: number) {
-	return `${PAGES_FOLDER}/${page}.ttl`;
+function fileForPage(folder: string, page: number) {
+	return `${folder}/${page}.ttl`;
 }
 
 app.post("/resource", async function (req: any, res: any, next: any) {
@@ -58,7 +65,6 @@ app.post("/resource", async function (req: any, res: any, next: any) {
 			contentType: req.headers["content-type"],
 		});
 		const store = await createStore(quadStream);
-
 		const resource = new Resource(namedNode(req.query.resource), store);
 
 		const currentDataset = await UPDATE_QUEUE.push(() =>
@@ -74,11 +80,11 @@ app.post("/resource", async function (req: any, res: any, next: any) {
 	}
 });
 
-app.get("/pages", async function (req: any, res: any, next: any) {
+app.get("/:folder/:nodeId", async function (req: any, res: any, next: any) {
 	try {
-		const page = parseInt(req.query.page);
-
-		if (page > lastPage(PAGES_FOLDER)) {
+		const page = parseInt(req.params.nodeId);
+		const pagesFolder = `/data/${req.params.folder}`;
+		if (page > lastPage(pagesFolder)) {
 			return next(error(404, "Page not found"));
 		}
 
@@ -90,10 +96,10 @@ app.get("/pages", async function (req: any, res: any, next: any) {
 			return next(error(406));
 		}
 
-		if (page < lastPage(PAGES_FOLDER))
+		if (page < lastPage(pagesFolder))
 			res.header("Cache-Control", "public, immutable");
 
-		const rdfStream = readTriplesStream(fileForPage(page));
+		const rdfStream = readTriplesStream(fileForPage(pagesFolder, page));
 
 		res.header("Content-Type", contentType);
 
@@ -119,7 +125,7 @@ app.get("/count", async function (_req: any, res: any, next: any) {
 		const page = lastPage(PAGES_FOLDER);
 		if (page === NaN) return next(error(404, "No pages found"));
 
-		const file = fileForPage(page);
+		const file = fileForPage(PAGES_FOLDER, page);
 		console.log(`Reading from ${file}`);
 		const currentNode = await readNode(file);
 		console.log(currentNode.id);
@@ -136,6 +142,16 @@ app.get("/last-page", function (_req: any, res: any, next: any) {
 		const page = lastPage(PAGES_FOLDER);
 		if (page === NaN) return next(error(404, "No pages found"));
 		else res.status(200).send(`{"lastPage": ${page}}`);
+	} catch (e) {
+		console.error(e);
+		return next(error(500));
+	}
+});
+
+app.get("/populate-street-db", async function (req: any, res: any, next: any) {
+	try {
+		await populateTree();
+		res.status(200).send();
 	} catch (e) {
 		console.error(e);
 		return next(error(500));

@@ -5,6 +5,8 @@ function n3Namespace(uri: string) {
 	return namespace(uri, { factory: DataFactory });
 }
 
+export const example = n3Namespace("https://example.org/");
+
 export const tree = n3Namespace("https://w3id.org/tree#");
 
 export const xml = n3Namespace("http://www.w3.org/2001/XMLSchema#");
