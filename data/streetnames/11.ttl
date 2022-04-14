@@ -1,0 +1,22 @@
+<http://mu.semte.ch/services/ldes-time-fragmenter/street-stream> a <http://w3id.org/ldes#EventStream>, <https://w3id.org/tree#Collection>;
+    <https://w3id.org/tree#view> </pages/1>;
+    <https://w3id.org/tree#member> <https://example.org/Molenstraat>, <https://example.org/Maarkedal>, <https://example.org/Moerkerkestraat>, <https://example.org/Molenlei>, <https://example.org/Moleneind>, <https://example.org/Maldegem>.
+</streetnames/11> a <https://w3id.org/tree#Node>;
+    <https://w3id.org/tree#relation> <http://mu.semte.ch/services/ldes-time-fragmenter/relations/c2631ac0-bb2d-11ec-9e1c-9f7fba25c1e1>.
+<http://mu.semte.ch/services/ldes-time-fragmenter/relations/c2631ac0-bb2d-11ec-9e1c-9f7fba25c1e1> a <https://w3id.org/tree#PrefixRelation>;
+    <https://w3id.org/tree#value> "Me";
+    <https://w3id.org/tree#node> </streetnames/28>;
+    <https://w3id.org/tree#path> <https://example.org/name>.
+<https://example.org/Molenstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Molenstraat".
+<https://example.org/Maarkedal> a <https://example.org/Street>;
+    <https://example.org/name> "Maarkedal".
+<https://example.org/Moerkerkestraat> a <https://example.org/Street>;
+    <https://example.org/name> "Moerkerkestraat".
+<https://example.org/Molenlei> a <https://example.org/Street>;
+    <https://example.org/name> "Molenlei".
+<https://example.org/Moleneind> a <https://example.org/Street>;
+    <https://example.org/name> "Moleneind".
+<https://example.org/Maldegem> a <https://example.org/Street>;
+    <https://example.org/name> "Maldegem".
+    

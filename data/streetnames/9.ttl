@@ -1,0 +1,20 @@
+<http://mu.semte.ch/services/ldes-time-fragmenter/street-stream> a <http://w3id.org/ldes#EventStream>, <https://w3id.org/tree#Collection>;
+    <https://w3id.org/tree#view> </pages/1>;
+    <https://w3id.org/tree#member> <https://example.org/Terheydestraat>, <https://example.org/Tongerlostraat>, <https://example.org/Turnhoutsebaan>, <https://example.org/Tessenderlo>, <https://example.org/Tremelo>, <https://example.org/Tiensesteenweg>, <https://example.org/Tulpenlaan>, <https://example.org/Torhout>.
+</streetnames/9> a <https://w3id.org/tree#Node>.
+<https://example.org/Terheydestraat> a <https://example.org/Street>;
+    <https://example.org/name> "Terheydestraat".
+<https://example.org/Tongerlostraat> a <https://example.org/Street>;
+    <https://example.org/name> "Tongerlostraat".
+<https://example.org/Turnhoutsebaan> a <https://example.org/Street>;
+    <https://example.org/name> "Turnhoutsebaan".
+<https://example.org/Tessenderlo> a <https://example.org/Street>;
+    <https://example.org/name> "Tessenderlo".
+<https://example.org/Tremelo> a <https://example.org/Street>;
+    <https://example.org/name> "Tremelo".
+<https://example.org/Tiensesteenweg> a <https://example.org/Street>;
+    <https://example.org/name> "Tiensesteenweg".
+<https://example.org/Tulpenlaan> a <https://example.org/Street>;
+    <https://example.org/name> "Tulpenlaan".
+<https://example.org/Torhout> a <https://example.org/Street>;
+    <https://example.org/name> "Torhout".

@@ -1,0 +1,12 @@
+<http://mu.semte.ch/services/ldes-time-fragmenter/street-stream> a <http://w3id.org/ldes#EventStream>, <https://w3id.org/tree#Collection>;
+    <https://w3id.org/tree#view> </pages/1>;
+    <https://w3id.org/tree#member> <https://example.org/Groot-Bijgaardenstraat>, <https://example.org/Grote_Steenweg>, <https://example.org/Grote_steenweg>, <https://example.org/Groendyk>.
+</streetnames/30> a <https://w3id.org/tree#Node>.
+<https://example.org/Groot-Bijgaardenstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Groot-Bijgaardenstraat".
+<https://example.org/Grote_Steenweg> a <https://example.org/Street>;
+    <https://example.org/name> "Grote Steenweg".
+<https://example.org/Grote_steenweg> a <https://example.org/Street>;
+    <https://example.org/name> "Grote steenweg".
+<https://example.org/Groendyk> a <https://example.org/Street>;
+    <https://example.org/name> "Groendyk".

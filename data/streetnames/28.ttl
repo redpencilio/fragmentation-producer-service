@@ -1,0 +1,22 @@
+<http://mu.semte.ch/services/ldes-time-fragmenter/street-stream> a <http://w3id.org/ldes#EventStream>, <https://w3id.org/tree#Collection>;
+    <https://w3id.org/tree#view> </pages/1>;
+    <https://w3id.org/tree#member> <https://example.org/Merelbeke>, <https://example.org/Meldertsebaan>, <https://example.org/Merchtem>, <https://example.org/Merelstraat>, <https://example.org/Meerhout>, <https://example.org/Meysveld>, <https://example.org/Mezenstraat>, <https://example.org/Menenstraat>, <https://example.org/Meise>.
+</streetnames/28> a <https://w3id.org/tree#Node>.
+<https://example.org/Merelbeke> a <https://example.org/Street>;
+    <https://example.org/name> "Merelbeke".
+<https://example.org/Meldertsebaan> a <https://example.org/Street>;
+    <https://example.org/name> "Meldertsebaan".
+<https://example.org/Merchtem> a <https://example.org/Street>;
+    <https://example.org/name> "Merchtem".
+<https://example.org/Merelstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Merelstraat".
+<https://example.org/Meerhout> a <https://example.org/Street>;
+    <https://example.org/name> "Meerhout".
+<https://example.org/Meysveld> a <https://example.org/Street>;
+    <https://example.org/name> "Meysveld".
+<https://example.org/Mezenstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Mezenstraat".
+<https://example.org/Menenstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Menenstraat".
+<https://example.org/Meise> a <https://example.org/Street>;
+    <https://example.org/name> "Meise".

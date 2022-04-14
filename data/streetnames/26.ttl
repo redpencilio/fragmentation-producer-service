@@ -1,0 +1,18 @@
+<http://mu.semte.ch/services/ldes-time-fragmenter/street-stream> a <http://w3id.org/ldes#EventStream>, <https://w3id.org/tree#Collection>;
+    <https://w3id.org/tree#view> </pages/1>;
+    <https://w3id.org/tree#member> <https://example.org/Herselt>, <https://example.org/Het_Schoemeken>, <https://example.org/Herne>, <https://example.org/Heesterweg>, <https://example.org/Heilig_Hartlaan>, <https://example.org/Heist-op-den-Berg>, <https://example.org/Heelblok>.
+</streetnames/26> a <https://w3id.org/tree#Node>.
+<https://example.org/Herselt> a <https://example.org/Street>;
+    <https://example.org/name> "Herselt".
+<https://example.org/Het_Schoemeken> a <https://example.org/Street>;
+    <https://example.org/name> "Het Schoemeken".
+<https://example.org/Herne> a <https://example.org/Street>;
+    <https://example.org/name> "Herne".
+<https://example.org/Heesterweg> a <https://example.org/Street>;
+    <https://example.org/name> "Heesterweg".
+<https://example.org/Heilig_Hartlaan> a <https://example.org/Street>;
+    <https://example.org/name> "Heilig Hartlaan".
+<https://example.org/Heist-op-den-Berg> a <https://example.org/Street>;
+    <https://example.org/name> "Heist-op-den-Berg".
+<https://example.org/Heelblok> a <https://example.org/Street>;
+    <https://example.org/name> "Heelblok".

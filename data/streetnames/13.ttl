@@ -1,0 +1,14 @@
+<http://mu.semte.ch/services/ldes-time-fragmenter/street-stream> a <http://w3id.org/ldes#EventStream>, <https://w3id.org/tree#Collection>;
+    <https://w3id.org/tree#view> </pages/1>;
+    <https://w3id.org/tree#member> <https://example.org/Langenbos>, <https://example.org/Larenstraat>, <https://example.org/Lange_Haagstraat>, <https://example.org/Lange_Zavelstraat>, <https://example.org/Langemark-Poelkapelle>.
+</streetnames/13> a <https://w3id.org/tree#Node>.
+<https://example.org/Langenbos> a <https://example.org/Street>;
+    <https://example.org/name> "Langenbos".
+<https://example.org/Larenstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Larenstraat".
+<https://example.org/Lange_Haagstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Lange Haagstraat".
+<https://example.org/Lange_Zavelstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Lange Zavelstraat".
+<https://example.org/Langemark-Poelkapelle> a <https://example.org/Street>;
+    <https://example.org/name> "Langemark-Poelkapelle".

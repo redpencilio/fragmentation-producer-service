@@ -1,0 +1,12 @@
+<http://mu.semte.ch/services/ldes-time-fragmenter/street-stream> a <http://w3id.org/ldes#EventStream>, <https://w3id.org/tree#Collection>;
+    <https://w3id.org/tree#view> </pages/1>;
+    <https://w3id.org/tree#member> <https://example.org/Schilde>, <https://example.org/Schipdonkstraat>, <https://example.org/Schoonzichtstraat>, <https://example.org/Scheldestraat>.
+</streetnames/24> a <https://w3id.org/tree#Node>.
+<https://example.org/Schilde> a <https://example.org/Street>;
+    <https://example.org/name> "Schilde".
+<https://example.org/Schipdonkstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Schipdonkstraat".
+<https://example.org/Schoonzichtstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Schoonzichtstraat".
+<https://example.org/Scheldestraat> a <https://example.org/Street>;
+    <https://example.org/name> "Scheldestraat".

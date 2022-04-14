@@ -1,0 +1,29 @@
+<http://mu.semte.ch/services/ldes-time-fragmenter/street-stream> a <http://w3id.org/ldes#EventStream>, <https://w3id.org/tree#Collection>;
+    <https://w3id.org/tree#view> </pages/1>;
+    <https://w3id.org/tree#member> <https://example.org/Hooglede>, <https://example.org/Hasselt>, <https://example.org/Harelbeke>, <https://example.org/Hulsterweg>, <https://example.org/Hamme>, <https://example.org/Humbeeksebaan>, <https://example.org/Hoveniersstraat>, <https://example.org/Hogeweg>, <https://example.org/Hoogstraat>, <https://example.org/Hoevensebaan>.
+</streetnames/3> a <https://w3id.org/tree#Node>;
+    <https://w3id.org/tree#relation> <http://mu.semte.ch/services/ldes-time-fragmenter/relations/c25a6830-bb2d-11ec-9e1c-9f7fba25c1e1>.
+<http://mu.semte.ch/services/ldes-time-fragmenter/relations/c25a6830-bb2d-11ec-9e1c-9f7fba25c1e1> a <https://w3id.org/tree#PrefixRelation>;
+    <https://w3id.org/tree#value> "He";
+    <https://w3id.org/tree#node> </streetnames/26>;
+    <https://w3id.org/tree#path> <https://example.org/name>.
+<https://example.org/Hooglede> a <https://example.org/Street>;
+    <https://example.org/name> "Hooglede".
+<https://example.org/Hasselt> a <https://example.org/Street>;
+    <https://example.org/name> "Hasselt".
+<https://example.org/Harelbeke> a <https://example.org/Street>;
+    <https://example.org/name> "Harelbeke".
+<https://example.org/Hulsterweg> a <https://example.org/Street>;
+    <https://example.org/name> "Hulsterweg".
+<https://example.org/Hamme> a <https://example.org/Street>;
+    <https://example.org/name> "Hamme".
+<https://example.org/Humbeeksebaan> a <https://example.org/Street>;
+    <https://example.org/name> "Humbeeksebaan".
+<https://example.org/Hoveniersstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Hoveniersstraat".
+<https://example.org/Hogeweg> a <https://example.org/Street>;
+    <https://example.org/name> "Hogeweg".
+<https://example.org/Hoogstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Hoogstraat".
+<https://example.org/Hoevensebaan> a <https://example.org/Street>;
+    <https://example.org/name> "Hoevensebaan".

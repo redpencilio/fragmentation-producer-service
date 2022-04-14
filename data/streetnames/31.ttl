@@ -1,0 +1,18 @@
+<http://mu.semte.ch/services/ldes-time-fragmenter/street-stream> a <http://w3id.org/ldes#EventStream>, <https://w3id.org/tree#Collection>;
+    <https://w3id.org/tree#view> </pages/1>;
+    <https://w3id.org/tree#member> <https://example.org/Steenweg_Asse>, <https://example.org/Stwg_op_Aalst>, <https://example.org/Steenweg>, <https://example.org/Stationsstraat>, <https://example.org/Staden>, <https://example.org/Steenhuffelstraat>, <https://example.org/Steenweg_op_Drogenbos>.
+</streetnames/31> a <https://w3id.org/tree#Node>.
+<https://example.org/Steenweg_Asse> a <https://example.org/Street>;
+    <https://example.org/name> "Steenweg Asse".
+<https://example.org/Stwg_op_Aalst> a <https://example.org/Street>;
+    <https://example.org/name> "Stwg op Aalst".
+<https://example.org/Steenweg> a <https://example.org/Street>;
+    <https://example.org/name> "Steenweg".
+<https://example.org/Stationsstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Stationsstraat".
+<https://example.org/Staden> a <https://example.org/Street>;
+    <https://example.org/name> "Staden".
+<https://example.org/Steenhuffelstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Steenhuffelstraat".
+<https://example.org/Steenweg_op_Drogenbos> a <https://example.org/Street>;
+    <https://example.org/name> "Steenweg op Drogenbos".

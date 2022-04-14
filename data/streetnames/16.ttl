@@ -1,0 +1,10 @@
+<http://mu.semte.ch/services/ldes-time-fragmenter/street-stream> a <http://w3id.org/ldes#EventStream>, <https://w3id.org/tree#Collection>;
+    <https://w3id.org/tree#view> </pages/1>;
+    <https://w3id.org/tree#member> <https://example.org/Félix_Wittouckstraat>, <https://example.org/Fregatstraat>, <https://example.org/Fazantweg>.
+</streetnames/16> a <https://w3id.org/tree#Node>.
+<https://example.org/Félix_Wittouckstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Félix Wittouckstraat".
+<https://example.org/Fregatstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Fregatstraat".
+<https://example.org/Fazantweg> a <https://example.org/Street>;
+    <https://example.org/name> "Fazantweg".

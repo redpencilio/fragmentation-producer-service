@@ -1,0 +1,14 @@
+<http://mu.semte.ch/services/ldes-time-fragmenter/street-stream> a <http://w3id.org/ldes#EventStream>, <https://w3id.org/tree#Collection>;
+    <https://w3id.org/tree#view> </pages/1>;
+    <https://w3id.org/tree#member> <https://example.org/O_L_Vrouwstraat>, <https://example.org/Oostrozebeke>, <https://example.org/Opwijk>, <https://example.org/Oostveld_Kouter>, <https://example.org/Oude_Vijverweg>.
+</streetnames/23> a <https://w3id.org/tree#Node>.
+<https://example.org/O_L_Vrouwstraat> a <https://example.org/Street>;
+    <https://example.org/name> "O L Vrouwstraat".
+<https://example.org/Oostrozebeke> a <https://example.org/Street>;
+    <https://example.org/name> "Oostrozebeke".
+<https://example.org/Opwijk> a <https://example.org/Street>;
+    <https://example.org/name> "Opwijk".
+<https://example.org/Oostveld_Kouter> a <https://example.org/Street>;
+    <https://example.org/name> "Oostveld Kouter".
+<https://example.org/Oude_Vijverweg> a <https://example.org/Street>;
+    <https://example.org/name> "Oude Vijverweg".

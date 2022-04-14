@@ -1,0 +1,25 @@
+<http://mu.semte.ch/services/ldes-time-fragmenter/street-stream> a <http://w3id.org/ldes#EventStream>, <https://w3id.org/tree#Collection>;
+    <https://w3id.org/tree#view> </pages/1>;
+    <https://w3id.org/tree#member> <https://example.org/Goorbaan>, <https://example.org/Gaversesteenweg>, <https://example.org/Geraniumlaan>, <https://example.org/Ganzenkoor>, <https://example.org/Genk>, <https://example.org/Gotemstraat>, <https://example.org/Geel>.
+</streetnames/4> a <https://w3id.org/tree#Node>;
+    <https://w3id.org/tree#relation> <http://mu.semte.ch/services/ldes-time-fragmenter/relations/c270af50-bb2d-11ec-9e1c-9f7fba25c1e1>.
+<http://mu.semte.ch/services/ldes-time-fragmenter/relations/c270af50-bb2d-11ec-9e1c-9f7fba25c1e1> a <https://w3id.org/tree#PrefixRelation>;
+    <https://w3id.org/tree#value> "Gr";
+    <https://w3id.org/tree#node> </streetnames/30>;
+    <https://w3id.org/tree#path> <https://example.org/name>.
+<https://example.org/Goorbaan> a <https://example.org/Street>;
+    <https://example.org/name> "Goorbaan".
+<https://example.org/Gaversesteenweg> a <https://example.org/Street>;
+    <https://example.org/name> "Gaversesteenweg".
+<https://example.org/Geraniumlaan> a <https://example.org/Street>;
+    <https://example.org/name> "Geraniumlaan".
+<https://example.org/Ganzenkoor> a <https://example.org/Street>;
+    <https://example.org/name> "Ganzenkoor".
+<https://example.org/Genk> a <https://example.org/Street>;
+    <https://example.org/name> "Genk".
+<https://example.org/Gotemstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Gotemstraat".
+<https://example.org/Geel> a <https://example.org/Street>;
+    <https://example.org/name> "Geel".
+https://example.org/Street>;
+    <https://example.org/name> "Gotemstraat".

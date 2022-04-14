@@ -1,0 +1,14 @@
+<http://mu.semte.ch/services/ldes-time-fragmenter/street-stream> a <http://w3id.org/ldes#EventStream>, <https://w3id.org/tree#Collection>;
+    <https://w3id.org/tree#view> </pages/1>;
+    <https://w3id.org/tree#member> <https://example.org/Kleine_Daelvenne>, <https://example.org/Kleine_d'Oyestraat>, <https://example.org/Kleine_Stadenstraat>, <https://example.org/Kleistraat>, <https://example.org/Kluisdreef>.
+</streetnames/27> a <https://w3id.org/tree#Node>.
+<https://example.org/Kleine_Daelvenne> a <https://example.org/Street>;
+    <https://example.org/name> "Kleine Daelvenne".
+<https://example.org/Kleine_d'Oyestraat> a <https://example.org/Street>;
+    <https://example.org/name> "Kleine d'Oyestraat".
+<https://example.org/Kleine_Stadenstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Kleine Stadenstraat".
+<https://example.org/Kleistraat> a <https://example.org/Street>;
+    <https://example.org/name> "Kleistraat".
+<https://example.org/Kluisdreef> a <https://example.org/Street>;
+    <https://example.org/name> "Kluisdreef".

@@ -1,0 +1,18 @@
+<http://mu.semte.ch/services/ldes-time-fragmenter/street-stream> a <http://w3id.org/ldes#EventStream>, <https://w3id.org/tree#Collection>;
+    <https://w3id.org/tree#view> </pages/1>;
+    <https://w3id.org/tree#member> <https://example.org/Puurs>, <https://example.org/Provenplein>, <https://example.org/Poperinge>, <https://example.org/Polderstraat>, <https://example.org/Putstraat>, <https://example.org/Pastoor_Verwilghenplein>, <https://example.org/Pelikaanstraat>.
+</streetnames/15> a <https://w3id.org/tree#Node>.
+<https://example.org/Puurs> a <https://example.org/Street>;
+    <https://example.org/name> "Puurs".
+<https://example.org/Provenplein> a <https://example.org/Street>;
+    <https://example.org/name> "Provenplein".
+<https://example.org/Poperinge> a <https://example.org/Street>;
+    <https://example.org/name> "Poperinge".
+<https://example.org/Polderstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Polderstraat".
+<https://example.org/Putstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Putstraat".
+<https://example.org/Pastoor_Verwilghenplein> a <https://example.org/Street>;
+    <https://example.org/name> "Pastoor Verwilghenplein".
+<https://example.org/Pelikaanstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Pelikaanstraat".

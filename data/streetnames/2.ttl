@@ -1,0 +1,27 @@
+<http://mu.semte.ch/services/ldes-time-fragmenter/street-stream> a <http://w3id.org/ldes#EventStream>, <https://w3id.org/tree#Collection>;
+    <https://w3id.org/tree#view> </pages/1>;
+    <https://w3id.org/tree#member> <https://example.org/Brandstraat>, <https://example.org/Bruggestraat>, <https://example.org/Blaarstraat>, <https://example.org/Burgemeester_Lemmensstraat>, <https://example.org/Brouwersstraat>, <https://example.org/Bassegembosstraat>, <https://example.org/Blankenberge>.
+</streetnames/2> a <https://w3id.org/tree#Node>;
+    <https://w3id.org/tree#relation> <http://mu.semte.ch/services/ldes-time-fragmenter/relations/c2444820-bb2d-11ec-9e1c-9f7fba25c1e1>, <http://mu.semte.ch/services/ldes-time-fragmenter/relations/c259f300-bb2d-11ec-9e1c-9f7fba25c1e1>.
+<http://mu.semte.ch/services/ldes-time-fragmenter/relations/c2444820-bb2d-11ec-9e1c-9f7fba25c1e1> a <https://w3id.org/tree#PrefixRelation>;
+    <https://w3id.org/tree#value> "Bo";
+    <https://w3id.org/tree#node> </streetnames/17>;
+    <https://w3id.org/tree#path> <https://example.org/name>.
+<http://mu.semte.ch/services/ldes-time-fragmenter/relations/c259f300-bb2d-11ec-9e1c-9f7fba25c1e1> a <https://w3id.org/tree#PrefixRelation>;
+    <https://w3id.org/tree#value> "Be";
+    <https://w3id.org/tree#node> </streetnames/25>;
+    <https://w3id.org/tree#path> <https://example.org/name>.
+<https://example.org/Brandstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Brandstraat".
+<https://example.org/Bruggestraat> a <https://example.org/Street>;
+    <https://example.org/name> "Bruggestraat".
+<https://example.org/Blaarstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Blaarstraat".
+<https://example.org/Burgemeester_Lemmensstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Burgemeester Lemmensstraat".
+<https://example.org/Brouwersstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Brouwersstraat".
+<https://example.org/Bassegembosstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Bassegembosstraat".
+<https://example.org/Blankenberge> a <https://example.org/Street>;
+    <https://example.org/name> "Blankenberge".

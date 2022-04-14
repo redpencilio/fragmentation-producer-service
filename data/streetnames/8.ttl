@@ -1,0 +1,12 @@
+<http://mu.semte.ch/services/ldes-time-fragmenter/street-stream> a <http://w3id.org/ldes#EventStream>, <https://w3id.org/tree#Collection>;
+    <https://w3id.org/tree#view> </pages/1>;
+    <https://w3id.org/tree#member> <https://example.org/Rijweg>, <https://example.org/Ravels>, <https://example.org/Roeselarestraat>, <https://example.org/Rozenlaan>.
+</streetnames/8> a <https://w3id.org/tree#Node>.
+<https://example.org/Rijweg> a <https://example.org/Street>;
+    <https://example.org/name> "Rijweg".
+<https://example.org/Ravels> a <https://example.org/Street>;
+    <https://example.org/name> "Ravels".
+<https://example.org/Roeselarestraat> a <https://example.org/Street>;
+    <https://example.org/name> "Roeselarestraat".
+<https://example.org/Rozenlaan> a <https://example.org/Street>;
+    <https://example.org/name> "Rozenlaan".

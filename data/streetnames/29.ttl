@@ -1,0 +1,16 @@
+<http://mu.semte.ch/services/ldes-time-fragmenter/street-stream> a <http://w3id.org/ldes#EventStream>, <https://w3id.org/tree#Collection>;
+    <https://w3id.org/tree#view> </pages/1>;
+    <https://w3id.org/tree#member> <https://example.org/Alken>, <https://example.org/Aartrijkestraat>, <https://example.org/Asse>, <https://example.org/Anzegem>, <https://example.org/Annuntiatenstraat>, <https://example.org/Anjerstraat>.
+</streetnames/29> a <https://w3id.org/tree#Node>.
+<https://example.org/Alken> a <https://example.org/Street>;
+    <https://example.org/name> "Alken".
+<https://example.org/Aartrijkestraat> a <https://example.org/Street>;
+    <https://example.org/name> "Aartrijkestraat".
+<https://example.org/Asse> a <https://example.org/Street>;
+    <https://example.org/name> "Asse".
+<https://example.org/Anzegem> a <https://example.org/Street>;
+    <https://example.org/name> "Anzegem".
+<https://example.org/Annuntiatenstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Annuntiatenstraat".
+<https://example.org/Anjerstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Anjerstraat".

@@ -1,0 +1,29 @@
+<http://mu.semte.ch/services/ldes-time-fragmenter/street-stream> a <http://w3id.org/ldes#EventStream>, <https://w3id.org/tree#Collection>;
+    <https://w3id.org/tree#view> </pages/1>;
+    <https://w3id.org/tree#member> <https://example.org/Lummen>, <https://example.org/Luciëndallaan>, <https://example.org/Lochterdijk>, <https://example.org/Louisastraat>, <https://example.org/Lovendegem>, <https://example.org/Lubbeek>.
+</streetnames/6> a <https://w3id.org/tree#Node>;
+    <https://w3id.org/tree#relation> <http://mu.semte.ch/services/ldes-time-fragmenter/relations/c232bbf0-bb2d-11ec-9e1c-9f7fba25c1e1>, <http://mu.semte.ch/services/ldes-time-fragmenter/relations/c251dcb0-bb2d-11ec-9e1c-9f7fba25c1e1>, <http://mu.semte.ch/services/ldes-time-fragmenter/relations/c27ae880-bb2d-11ec-9e1c-9f7fba25c1e1>.
+<http://mu.semte.ch/services/ldes-time-fragmenter/relations/c232bbf0-bb2d-11ec-9e1c-9f7fba25c1e1> a <https://w3id.org/tree#PrefixRelation>;
+    <https://w3id.org/tree#value> "La";
+    <https://w3id.org/tree#node> </streetnames/13>;
+    <https://w3id.org/tree#path> <https://example.org/name>.
+<http://mu.semte.ch/services/ldes-time-fragmenter/relations/c251dcb0-bb2d-11ec-9e1c-9f7fba25c1e1> a <https://w3id.org/tree#PrefixRelation>;
+    <https://w3id.org/tree#value> "Li";
+    <https://w3id.org/tree#node> </streetnames/21>;
+    <https://w3id.org/tree#path> <https://example.org/name>.
+<http://mu.semte.ch/services/ldes-time-fragmenter/relations/c27ae880-bb2d-11ec-9e1c-9f7fba25c1e1> a <https://w3id.org/tree#PrefixRelation>;
+    <https://w3id.org/tree#value> "Le";
+    <https://w3id.org/tree#node> </streetnames/32>;
+    <https://w3id.org/tree#path> <https://example.org/name>.
+<https://example.org/Lummen> a <https://example.org/Street>;
+    <https://example.org/name> "Lummen".
+<https://example.org/Luciëndallaan> a <https://example.org/Street>;
+    <https://example.org/name> "Luciëndallaan".
+<https://example.org/Lochterdijk> a <https://example.org/Street>;
+    <https://example.org/name> "Lochterdijk".
+<https://example.org/Louisastraat> a <https://example.org/Street>;
+    <https://example.org/name> "Louisastraat".
+<https://example.org/Lovendegem> a <https://example.org/Street>;
+    <https://example.org/name> "Lovendegem".
+<https://example.org/Lubbeek> a <https://example.org/Street>;
+    <https://example.org/name> "Lubbeek".

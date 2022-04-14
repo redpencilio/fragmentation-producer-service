@@ -1,0 +1,12 @@
+<http://mu.semte.ch/services/ldes-time-fragmenter/street-stream> a <http://w3id.org/ldes#EventStream>, <https://w3id.org/tree#Collection>;
+    <https://w3id.org/tree#view> </pages/1>;
+    <https://w3id.org/tree#member> <https://example.org/Korte_Lindenstraat>, <https://example.org/Koorstraat>, <https://example.org/Koksijde>, <https://example.org/Kortenaken>.
+</streetnames/19> a <https://w3id.org/tree#Node>.
+<https://example.org/Korte_Lindenstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Korte Lindenstraat".
+<https://example.org/Koorstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Koorstraat".
+<https://example.org/Koksijde> a <https://example.org/Street>;
+    <https://example.org/name> "Koksijde".
+<https://example.org/Kortenaken> a <https://example.org/Street>;
+    <https://example.org/name> "Kortenaken".

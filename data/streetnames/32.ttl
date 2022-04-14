@@ -1,0 +1,14 @@
+<http://mu.semte.ch/services/ldes-time-fragmenter/street-stream> a <http://w3id.org/ldes#EventStream>, <https://w3id.org/tree#Collection>;
+    <https://w3id.org/tree#view> </pages/1>;
+    <https://w3id.org/tree#member> <https://example.org/Lennik>, <https://example.org/Leuvenselaan>, <https://example.org/Lede>, <https://example.org/Lebbeke>, <https://example.org/Leynseelstraat>.
+</streetnames/32> a <https://w3id.org/tree#Node>.
+<https://example.org/Lennik> a <https://example.org/Street>;
+    <https://example.org/name> "Lennik".
+<https://example.org/Leuvenselaan> a <https://example.org/Street>;
+    <https://example.org/name> "Leuvenselaan".
+<https://example.org/Lede> a <https://example.org/Street>;
+    <https://example.org/name> "Lede".
+<https://example.org/Lebbeke> a <https://example.org/Street>;
+    <https://example.org/name> "Lebbeke".
+<https://example.org/Leynseelstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Leynseelstraat".

@@ -1,0 +1,16 @@
+<http://mu.semte.ch/services/ldes-time-fragmenter/street-stream> a <http://w3id.org/ldes#EventStream>, <https://w3id.org/tree#Collection>;
+    <https://w3id.org/tree#view> </pages/1>;
+    <https://w3id.org/tree#member> <https://example.org/Vogelkerslaan>, <https://example.org/Vaartstraat>, <https://example.org/Veldstraat>, <https://example.org/Vuurmolenstraat>, <https://example.org/Vennestraat>, <https://example.org/Vissersstraat>.
+</streetnames/12> a <https://w3id.org/tree#Node>.
+<https://example.org/Vogelkerslaan> a <https://example.org/Street>;
+    <https://example.org/name> "Vogelkerslaan".
+<https://example.org/Vaartstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Vaartstraat".
+<https://example.org/Veldstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Veldstraat".
+<https://example.org/Vuurmolenstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Vuurmolenstraat".
+<https://example.org/Vennestraat> a <https://example.org/Street>;
+    <https://example.org/name> "Vennestraat".
+<https://example.org/Vissersstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Vissersstraat".

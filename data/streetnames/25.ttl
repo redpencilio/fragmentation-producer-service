@@ -1,0 +1,18 @@
+<http://mu.semte.ch/services/ldes-time-fragmenter/street-stream> a <http://w3id.org/ldes#EventStream>, <https://w3id.org/tree#Collection>;
+    <https://w3id.org/tree#view> </pages/1>;
+    <https://w3id.org/tree#member> <https://example.org/Beerse>, <https://example.org/Beringen>, <https://example.org/Bellevuestraat>, <https://example.org/Berlare>, <https://example.org/Belvédèreweg>, <https://example.org/Beveren>, <https://example.org/Beersel>.
+</streetnames/25> a <https://w3id.org/tree#Node>.
+<https://example.org/Beerse> a <https://example.org/Street>;
+    <https://example.org/name> "Beerse".
+<https://example.org/Beringen> a <https://example.org/Street>;
+    <https://example.org/name> "Beringen".
+<https://example.org/Bellevuestraat> a <https://example.org/Street>;
+    <https://example.org/name> "Bellevuestraat".
+<https://example.org/Berlare> a <https://example.org/Street>;
+    <https://example.org/name> "Berlare".
+<https://example.org/Belvédèreweg> a <https://example.org/Street>;
+    <https://example.org/name> "Belvédèreweg".
+<https://example.org/Beveren> a <https://example.org/Street>;
+    <https://example.org/name> "Beveren".
+<https://example.org/Beersel> a <https://example.org/Street>;
+    <https://example.org/name> "Beersel".

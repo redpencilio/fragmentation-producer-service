@@ -1,0 +1,33 @@
+<http://mu.semte.ch/services/ldes-time-fragmenter/street-stream> a <http://w3id.org/ldes#EventStream>, <https://w3id.org/tree#Collection>;
+    <https://w3id.org/tree#view> </pages/1>;
+    <https://w3id.org/tree#member> <https://example.org/Knokke-Heist>, <https://example.org/Kruisbergstraat>, <https://example.org/Kwakkelstraat>, <https://example.org/Kruibeke>, <https://example.org/Kerkplein>, <https://example.org/Knesselare>, <https://example.org/Kikvorsstraat>, <https://example.org/Kerkkouterstraat>.
+</streetnames/7> a <https://w3id.org/tree#Node>;
+    <https://w3id.org/tree#relation> <http://mu.semte.ch/services/ldes-time-fragmenter/relations/c24a3b90-bb2d-11ec-9e1c-9f7fba25c1e1>, <http://mu.semte.ch/services/ldes-time-fragmenter/relations/c2531530-bb2d-11ec-9e1c-9f7fba25c1e1>, <http://mu.semte.ch/services/ldes-time-fragmenter/relations/c260f7e0-bb2d-11ec-9e1c-9f7fba25c1e1>.
+<http://mu.semte.ch/services/ldes-time-fragmenter/relations/c24a3b90-bb2d-11ec-9e1c-9f7fba25c1e1> a <https://w3id.org/tree#PrefixRelation>;
+    <https://w3id.org/tree#value> "Ko";
+    <https://w3id.org/tree#node> </streetnames/19>;
+    <https://w3id.org/tree#path> <https://example.org/name>.
+<http://mu.semte.ch/services/ldes-time-fragmenter/relations/c2531530-bb2d-11ec-9e1c-9f7fba25c1e1> a <https://w3id.org/tree#PrefixRelation>;
+    <https://w3id.org/tree#value> "Ka";
+    <https://w3id.org/tree#node> </streetnames/22>;
+    <https://w3id.org/tree#path> <https://example.org/name>.
+<http://mu.semte.ch/services/ldes-time-fragmenter/relations/c260f7e0-bb2d-11ec-9e1c-9f7fba25c1e1> a <https://w3id.org/tree#PrefixRelation>;
+    <https://w3id.org/tree#value> "Kl";
+    <https://w3id.org/tree#node> </streetnames/27>;
+    <https://w3id.org/tree#path> <https://example.org/name>.
+<https://example.org/Knokke-Heist> a <https://example.org/Street>;
+    <https://example.org/name> "Knokke-Heist".
+<https://example.org/Kruisbergstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Kruisbergstraat".
+<https://example.org/Kwakkelstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Kwakkelstraat".
+<https://example.org/Kruibeke> a <https://example.org/Street>;
+    <https://example.org/name> "Kruibeke".
+<https://example.org/Kerkplein> a <https://example.org/Street>;
+    <https://example.org/name> "Kerkplein".
+<https://example.org/Knesselare> a <https://example.org/Street>;
+    <https://example.org/name> "Knesselare".
+<https://example.org/Kikvorsstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Kikvorsstraat".
+<https://example.org/Kerkkouterstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Kerkkouterstraat".

@@ -1,0 +1,54 @@
+<http://mu.semte.ch/services/ldes-time-fragmenter/example-stream> a <http://w3id.org/ldes#EventStream>, <https://w3id.org/tree#Collection>;
+    <https://w3id.org/tree#view> </pages?page=1>;
+    <https://w3id.org/tree#member> <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/654e8170-ba70-11ec-8a95-411f5a14cc1a>, <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/d278d340-ba70-11ec-92e3-75c87f858f23>, <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/d37b0100-ba70-11ec-92e3-75c87f858f23>, <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/d3e18b00-ba70-11ec-92e3-75c87f858f23>, <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/dc5a9470-ba70-11ec-92e3-75c87f858f23>, <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/dcb5acc0-ba70-11ec-92e3-75c87f858f23>, <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/dd11fd90-ba70-11ec-92e3-75c87f858f23>, <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/dd5d1050-ba70-11ec-92e3-75c87f858f23>, <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/dda8e660-ba70-11ec-92e3-75c87f858f23>, <http://mu.semte.ch/services/ldes-time-fragmenter/versioned/ddee7ae0-ba70-11ec-92e3-75c87f858f23>.
+</pages?page=4> a <https://w3id.org/tree#Node>.
+<http://mu.semte.ch/services/ldes-time-fragmenter/versioned/654e8170-ba70-11ec-8a95-411f5a14cc1a> a <http://mu.semte.ch/services/tests/Test>;
+    <http://www.w3.org/ns/prov#generatedAtTime> "2022-04-12T14:54:04.039Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
+    <http://mu.semte.ch/services/tests/description> "44";
+    <http://mu.semte.ch/services/tests/name> "44 test";
+    <http://purl.org/dc/terms/isVersionOf> <http://mu.semte.ch/services/ldes-time-fragmenter/example-stream>.
+<http://mu.semte.ch/services/ldes-time-fragmenter/versioned/d278d340-ba70-11ec-92e3-75c87f858f23> a <http://mu.semte.ch/services/tests/Test>;
+    <http://www.w3.org/ns/prov#generatedAtTime> "2022-04-12T14:57:07.189Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
+    <http://mu.semte.ch/services/tests/description> "44";
+    <http://mu.semte.ch/services/tests/name> "44 test";
+    <http://purl.org/dc/terms/isVersionOf> <http://mu.semte.ch/services/ldes-time-fragmenter/example-stream>.
+<http://mu.semte.ch/services/ldes-time-fragmenter/versioned/d37b0100-ba70-11ec-92e3-75c87f858f23> a <http://mu.semte.ch/services/tests/Test>;
+    <http://www.w3.org/ns/prov#generatedAtTime> "2022-04-12T14:57:08.880Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
+    <http://mu.semte.ch/services/tests/description> "44";
+    <http://mu.semte.ch/services/tests/name> "44 test";
+    <http://purl.org/dc/terms/isVersionOf> <http://mu.semte.ch/services/ldes-time-fragmenter/example-stream>.
+<http://mu.semte.ch/services/ldes-time-fragmenter/versioned/d3e18b00-ba70-11ec-92e3-75c87f858f23> a <http://mu.semte.ch/services/tests/Test>;
+    <http://www.w3.org/ns/prov#generatedAtTime> "2022-04-12T14:57:09.552Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
+    <http://mu.semte.ch/services/tests/description> "44";
+    <http://mu.semte.ch/services/tests/name> "44 test";
+    <http://purl.org/dc/terms/isVersionOf> <http://mu.semte.ch/services/ldes-time-fragmenter/example-stream>.
+<http://mu.semte.ch/services/ldes-time-fragmenter/versioned/dc5a9470-ba70-11ec-92e3-75c87f858f23> a <http://mu.semte.ch/services/tests/Test>;
+    <http://www.w3.org/ns/prov#generatedAtTime> "2022-04-12T14:57:23.767Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
+    <http://mu.semte.ch/services/tests/description> "46";
+    <http://mu.semte.ch/services/tests/name> "46 test";
+    <http://purl.org/dc/terms/isVersionOf> <http://mu.semte.ch/services/ldes-time-fragmenter/example-stream>.
+<http://mu.semte.ch/services/ldes-time-fragmenter/versioned/dcb5acc0-ba70-11ec-92e3-75c87f858f23> a <http://mu.semte.ch/services/tests/Test>;
+    <http://www.w3.org/ns/prov#generatedAtTime> "2022-04-12T14:57:24.365Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
+    <http://mu.semte.ch/services/tests/description> "46";
+    <http://mu.semte.ch/services/tests/name> "46 test";
+    <http://purl.org/dc/terms/isVersionOf> <http://mu.semte.ch/services/ldes-time-fragmenter/example-stream>.
+<http://mu.semte.ch/services/ldes-time-fragmenter/versioned/dd11fd90-ba70-11ec-92e3-75c87f858f23> a <http://mu.semte.ch/services/tests/Test>;
+    <http://www.w3.org/ns/prov#generatedAtTime> "2022-04-12T14:57:24.969Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
+    <http://mu.semte.ch/services/tests/description> "46";
+    <http://mu.semte.ch/services/tests/name> "46 test";
+    <http://purl.org/dc/terms/isVersionOf> <http://mu.semte.ch/services/ldes-time-fragmenter/example-stream>.
+<http://mu.semte.ch/services/ldes-time-fragmenter/versioned/dd5d1050-ba70-11ec-92e3-75c87f858f23> a <http://mu.semte.ch/services/tests/Test>;
+    <http://www.w3.org/ns/prov#generatedAtTime> "2022-04-12T14:57:25.461Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
+    <http://mu.semte.ch/services/tests/description> "46";
+    <http://mu.semte.ch/services/tests/name> "46 test";
+    <http://purl.org/dc/terms/isVersionOf> <http://mu.semte.ch/services/ldes-time-fragmenter/example-stream>.
+<http://mu.semte.ch/services/ldes-time-fragmenter/versioned/dda8e660-ba70-11ec-92e3-75c87f858f23> a <http://mu.semte.ch/services/tests/Test>;
+    <http://www.w3.org/ns/prov#generatedAtTime> "2022-04-12T14:57:25.958Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
+    <http://mu.semte.ch/services/tests/description> "46";
+    <http://mu.semte.ch/services/tests/name> "46 test";
+    <http://purl.org/dc/terms/isVersionOf> <http://mu.semte.ch/services/ldes-time-fragmenter/example-stream>.
+<http://mu.semte.ch/services/ldes-time-fragmenter/versioned/ddee7ae0-ba70-11ec-92e3-75c87f858f23> a <http://mu.semte.ch/services/tests/Test>;
+    <http://www.w3.org/ns/prov#generatedAtTime> "2022-04-12T14:57:26.414Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
+    <http://mu.semte.ch/services/tests/description> "46";
+    <http://mu.semte.ch/services/tests/name> "46 test";
+    <http://purl.org/dc/terms/isVersionOf> <http://mu.semte.ch/services/ldes-time-fragmenter/example-stream>.

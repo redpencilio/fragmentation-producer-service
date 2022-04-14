@@ -1,0 +1,22 @@
+<http://mu.semte.ch/services/ldes-time-fragmenter/street-stream> a <http://w3id.org/ldes#EventStream>, <https://w3id.org/tree#Collection>;
+    <https://w3id.org/tree#view> </pages/1>;
+    <https://w3id.org/tree#member> <https://example.org/Wolterslaan>, <https://example.org/Waregem>, <https://example.org/Wallestraat>, <https://example.org/Wetteren>, <https://example.org/Winterslagstraat>, <https://example.org/Waesbergdries>, <https://example.org/Wevelgem>, <https://example.org/Waasmunster>, <https://example.org/Wilbroek>.
+</streetnames/5> a <https://w3id.org/tree#Node>.
+<https://example.org/Wolterslaan> a <https://example.org/Street>;
+    <https://example.org/name> "Wolterslaan".
+<https://example.org/Waregem> a <https://example.org/Street>;
+    <https://example.org/name> "Waregem".
+<https://example.org/Wallestraat> a <https://example.org/Street>;
+    <https://example.org/name> "Wallestraat".
+<https://example.org/Wetteren> a <https://example.org/Street>;
+    <https://example.org/name> "Wetteren".
+<https://example.org/Winterslagstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Winterslagstraat".
+<https://example.org/Waesbergdries> a <https://example.org/Street>;
+    <https://example.org/name> "Waesbergdries".
+<https://example.org/Wevelgem> a <https://example.org/Street>;
+    <https://example.org/name> "Wevelgem".
+<https://example.org/Waasmunster> a <https://example.org/Street>;
+    <https://example.org/name> "Waasmunster".
+<https://example.org/Wilbroek> a <https://example.org/Street>;
+    <https://example.org/name> "Wilbroek".

@@ -1,0 +1,25 @@
+<http://mu.semte.ch/services/ldes-time-fragmenter/street-stream> a <http://w3id.org/ldes#EventStream>, <https://w3id.org/tree#Collection>;
+    <https://w3id.org/tree#view> </pages/1>;
+    <https://w3id.org/tree#member> <https://example.org/Sint-Pieters-Leeuw>, <https://example.org/Sparrenstraat>, <https://example.org/Sint-Katarinastraat>, <https://example.org/Sint-Martens-Latem>, <https://example.org/Spiegelhofstraat>, <https://example.org/Sint-Lievens-Houtem>.
+</streetnames/10> a <https://w3id.org/tree#Node>;
+    <https://w3id.org/tree#relation> <http://mu.semte.ch/services/ldes-time-fragmenter/relations/c2589370-bb2d-11ec-9e1c-9f7fba25c1e1>, <http://mu.semte.ch/services/ldes-time-fragmenter/relations/c2751c20-bb2d-11ec-9e1c-9f7fba25c1e1>.
+<http://mu.semte.ch/services/ldes-time-fragmenter/relations/c2589370-bb2d-11ec-9e1c-9f7fba25c1e1> a <https://w3id.org/tree#PrefixRelation>;
+    <https://w3id.org/tree#value> "Sc";
+    <https://w3id.org/tree#node> </streetnames/24>;
+    <https://w3id.org/tree#path> <https://example.org/name>.
+<http://mu.semte.ch/services/ldes-time-fragmenter/relations/c2751c20-bb2d-11ec-9e1c-9f7fba25c1e1> a <https://w3id.org/tree#PrefixRelation>;
+    <https://w3id.org/tree#value> "St";
+    <https://w3id.org/tree#node> </streetnames/31>;
+    <https://w3id.org/tree#path> <https://example.org/name>.
+<https://example.org/Sint-Pieters-Leeuw> a <https://example.org/Street>;
+    <https://example.org/name> "Sint-Pieters-Leeuw".
+<https://example.org/Sparrenstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Sparrenstraat".
+<https://example.org/Sint-Katarinastraat> a <https://example.org/Street>;
+    <https://example.org/name> "Sint-Katarinastraat".
+<https://example.org/Sint-Martens-Latem> a <https://example.org/Street>;
+    <https://example.org/name> "Sint-Martens-Latem".
+<https://example.org/Spiegelhofstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Spiegelhofstraat".
+<https://example.org/Sint-Lievens-Houtem> a <https://example.org/Street>;
+    <https://example.org/name> "Sint-Lievens-Houtem".

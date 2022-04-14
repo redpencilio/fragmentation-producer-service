@@ -1,0 +1,16 @@
+<http://mu.semte.ch/services/ldes-time-fragmenter/street-stream> a <http://w3id.org/ldes#EventStream>, <https://w3id.org/tree#Collection>;
+    <https://w3id.org/tree#view> </pages/1>;
+    <https://w3id.org/tree#member> <https://example.org/Linter>, <https://example.org/Lijsterlaan>, <https://example.org/Lindestraat>, <https://example.org/Lippenslaan>, <https://example.org/Lierde>, <https://example.org/Lille>.
+</streetnames/21> a <https://w3id.org/tree#Node>.
+<https://example.org/Linter> a <https://example.org/Street>;
+    <https://example.org/name> "Linter".
+<https://example.org/Lijsterlaan> a <https://example.org/Street>;
+    <https://example.org/name> "Lijsterlaan".
+<https://example.org/Lindestraat> a <https://example.org/Street>;
+    <https://example.org/name> "Lindestraat".
+<https://example.org/Lippenslaan> a <https://example.org/Street>;
+    <https://example.org/name> "Lippenslaan".
+<https://example.org/Lierde> a <https://example.org/Street>;
+    <https://example.org/name> "Lierde".
+<https://example.org/Lille> a <https://example.org/Street>;
+    <https://example.org/name> "Lille".

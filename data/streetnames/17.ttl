@@ -1,0 +1,18 @@
+<http://mu.semte.ch/services/ldes-time-fragmenter/street-stream> a <http://w3id.org/ldes#EventStream>, <https://w3id.org/tree#Collection>;
+    <https://w3id.org/tree#view> </pages/1>;
+    <https://w3id.org/tree#member> <https://example.org/Boelenaar>, <https://example.org/Boudewijnlaan>, <https://example.org/Boezingestraat>, <https://example.org/Boortmeerbeek>, <https://example.org/Bollestraat>, <https://example.org/Bollenberg>, <https://example.org/Boom>.
+</streetnames/17> a <https://w3id.org/tree#Node>.
+<https://example.org/Boelenaar> a <https://example.org/Street>;
+    <https://example.org/name> "Boelenaar".
+<https://example.org/Boudewijnlaan> a <https://example.org/Street>;
+    <https://example.org/name> "Boudewijnlaan".
+<https://example.org/Boezingestraat> a <https://example.org/Street>;
+    <https://example.org/name> "Boezingestraat".
+<https://example.org/Boortmeerbeek> a <https://example.org/Street>;
+    <https://example.org/name> "Boortmeerbeek".
+<https://example.org/Bollestraat> a <https://example.org/Street>;
+    <https://example.org/name> "Bollestraat".
+<https://example.org/Bollenberg> a <https://example.org/Street>;
+    <https://example.org/name> "Bollenberg".
+<https://example.org/Boom> a <https://example.org/Street>;
+    <https://example.org/name> "Boom".

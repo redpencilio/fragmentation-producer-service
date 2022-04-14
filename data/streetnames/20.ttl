@@ -1,0 +1,10 @@
+<http://mu.semte.ch/services/ldes-time-fragmenter/street-stream> a <http://w3id.org/ldes#EventStream>, <https://w3id.org/tree#Collection>;
+    <https://w3id.org/tree#view> </pages/1>;
+    <https://w3id.org/tree#member> <https://example.org/Ingelmunster>, <https://example.org/Izegem>, <https://example.org/Ichtegem>.
+</streetnames/20> a <https://w3id.org/tree#Node>.
+<https://example.org/Ingelmunster> a <https://example.org/Street>;
+    <https://example.org/name> "Ingelmunster".
+<https://example.org/Izegem> a <https://example.org/Street>;
+    <https://example.org/name> "Izegem".
+<https://example.org/Ichtegem> a <https://example.org/Street>;
+    <https://example.org/name> "Ichtegem".

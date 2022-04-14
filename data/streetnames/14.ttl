@@ -1,0 +1,20 @@
+<http://mu.semte.ch/services/ldes-time-fragmenter/street-stream> a <http://w3id.org/ldes#EventStream>, <https://w3id.org/tree#Collection>;
+    <https://w3id.org/tree#view> </pages/1>;
+    <https://w3id.org/tree#member> <https://example.org/Dilbeek>, <https://example.org/Duffel>, <https://example.org/Dokter_Willemsstraat>, <https://example.org/Deinze>, <https://example.org/Dendermondsesteenweg>, <https://example.org/De_Bosschaertstraat>, <https://example.org/De_Pinte>, <https://example.org/Denderleeuw>.
+</streetnames/14> a <https://w3id.org/tree#Node>.
+<https://example.org/Dilbeek> a <https://example.org/Street>;
+    <https://example.org/name> "Dilbeek".
+<https://example.org/Duffel> a <https://example.org/Street>;
+    <https://example.org/name> "Duffel".
+<https://example.org/Dokter_Willemsstraat> a <https://example.org/Street>;
+    <https://example.org/name> "Dokter Willemsstraat".
+<https://example.org/Deinze> a <https://example.org/Street>;
+    <https://example.org/name> "Deinze".
+<https://example.org/Dendermondsesteenweg> a <https://example.org/Street>;
+    <https://example.org/name> "Dendermondsesteenweg".
+<https://example.org/De_Bosschaertstraat> a <https://example.org/Street>;
+    <https://example.org/name> "De Bosschaertstraat".
+<https://example.org/De_Pinte> a <https://example.org/Street>;
+    <https://example.org/name> "De Pinte".
+<https://example.org/Denderleeuw> a <https://example.org/Street>;
+    <https://example.org/name> "Denderleeuw".
