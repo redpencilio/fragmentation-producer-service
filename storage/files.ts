@@ -42,10 +42,30 @@ export function triplesFileAsString(file: string): string {
 
 export function readTriplesStream(file: string): RDF.Stream<Quad> {
 	const fileStream = jsstream.Readable.from(triplesFileAsString(file));
-	return rdfParser.parse(fileStream, {
-		contentType: "text/turtle",
-		baseIRI: "/",
-	});
+	const transformStream = new jsstream.Transform({ objectMode: true });
+	transformStream._transform = (quadObj: Quad, encoding, callback) => {
+		let subject = quadObj.subject;
+		let predicate = quadObj.predicate;
+		let object = quadObj.object;
+		if (predicate.equals(tree("node")) || predicate.equals(tree("view"))) {
+			object = convertToRelativeURI(object);
+		}
+		if (
+			(predicate.equals(rdf("type")) && object.equals(tree("Node"))) ||
+			predicate.equals(tree("relation"))
+		) {
+			subject = convertToRelativeURI(subject);
+		}
+		let newQuad: Quad = quad(subject, predicate, object);
+		transformStream.push(newQuad);
+		callback();
+	};
+	return rdfParser
+		.parse(fileStream, {
+			contentType: "text/turtle",
+			baseIRI: "/",
+		})
+		.pipe(transformStream);
 }
 
 export function createStore(quadStream: RDF.Stream<Quad>): Promise<Store> {
@@ -160,9 +180,8 @@ export async function readNode(path: string): Promise<Node> {
 	)?.subject;
 	let view = getFirstMatch(store, null, tree("view"))?.object;
 	if (id && stream && view) {
-		view = convertToRelativeURI(view);
 		let node: Node = new Node(
-			convertToRelativeURI(id) as RDF.NamedNode,
+			id as RDF.NamedNode,
 			stream as RDF.NamedNode,
 			view as RDF.NamedNode
 		);
@@ -182,7 +201,6 @@ export async function readNode(path: string): Promise<Node> {
 			let path = getFirstMatch(store, relationId, tree("path"))?.object;
 
 			if (type && value && target && path) {
-				target = convertToRelativeURI(target);
 				node.add_relation(
 					new Relation(
 						relationId as RDF.NamedNode,
