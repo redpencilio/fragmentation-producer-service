@@ -80,10 +80,10 @@ export function writeTriplesStream(store: Store, file: string): Promise<void> {
 	return new Promise((resolve, reject) => {
 		turtleStream.on("error", reject);
 		turtleStream.on("end", () => {
-			// writeStream.end();
 			fileCache[file] = fileData;
-			console.log("DATA", fileData);
-			resolve();
+			writeStream.end(() => {
+				resolve();
+			});
 		});
 	});
 }
