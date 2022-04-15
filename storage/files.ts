@@ -1,6 +1,6 @@
 import fs from "fs";
-import { Quad, Store, DataFactory, NamedNode } from "n3";
-const { quad } = DataFactory;
+import { Quad, Store, DataFactory, NamedNode, Term } from "n3";
+const { quad, namedNode } = DataFactory;
 import rdfParser from "rdf-parse";
 import rdfSerializer from "rdf-serialize";
 import jsstream from "stream";
@@ -143,23 +143,26 @@ export function updateLastPage(folder: string, value: number) {
 	lastPageCache[folder] = value;
 }
 
-export function getFile(nodeId: RDF.NamedNode): string {
-	return `/data${nodeId.value}.ttl`;
+function convertToRelativeURI(nn: Term): NamedNode {
+	return namedNode(`.${nn.value}`);
 }
 
 export async function readNode(path: string): Promise<Node> {
+	console.log(path);
 	let store = await createStore(readTriplesStream(path));
-	const id = getFirstMatch(store, null, rdf("type"), tree("Node"))?.subject;
+
+	let id = getFirstMatch(store, null, rdf("type"), tree("Node"))?.subject;
 	const stream = getFirstMatch(
 		store,
 		null,
 		rdf("type"),
 		ldes("EventStream")
 	)?.subject;
-	const view = getFirstMatch(store, null, tree("view"))?.object;
+	let view = getFirstMatch(store, null, tree("view"))?.object;
 	if (id && stream && view) {
+		view = convertToRelativeURI(view);
 		let node: Node = new Node(
-			id as RDF.NamedNode,
+			convertToRelativeURI(id) as RDF.NamedNode,
 			stream as RDF.NamedNode,
 			view as RDF.NamedNode
 		);
@@ -179,6 +182,7 @@ export async function readNode(path: string): Promise<Node> {
 			let path = getFirstMatch(store, relationId, tree("path"))?.object;
 
 			if (type && value && target && path) {
+				target = convertToRelativeURI(target);
 				node.add_relation(
 					new Relation(
 						relationId as RDF.NamedNode,

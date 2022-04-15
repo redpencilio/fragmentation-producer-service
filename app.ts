@@ -37,7 +37,7 @@ const UPDATE_QUEUE = new PromiseQueue<Node>();
 const stream = ldesTime("example-stream");
 
 const FRAGMENTER = new PrefixTreeFragmenter(
-	"/pagesPrefix",
+	"/data/pagesPrefix",
 	stream,
 	10,
 	new NamedNode("http://mu.semte.ch/services/tests/name")

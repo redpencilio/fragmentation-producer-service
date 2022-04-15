@@ -7,7 +7,7 @@ import {
 import Fragmenter from "./Fragmenter";
 import * as RDF from "rdf-js";
 
-const { namedNode, quad, literal } = DataFactory;
+const { quad } = DataFactory;
 
 import { ldes, prov, purl, rdf, tree } from "../utils/namespaces";
 import {
@@ -82,7 +82,7 @@ export default class TimeFragmenter extends Fragmenter {
 
 			// create a store with the new graph for the new file
 			const currentNode = this.constructNewNode();
-			clearLastPageCache("/data" + this.folder);
+			clearLastPageCache(this.folder);
 			return currentNode;
 		} catch (e) {
 			throw e;
@@ -91,9 +91,9 @@ export default class TimeFragmenter extends Fragmenter {
 
 	async writeVersionedResource(versionedResource: Resource): Promise<Node> {
 		try {
-			const lastPageNr = lastPage("/data" + this.folder);
+			const lastPageNr = lastPage(this.folder);
 			console.log(lastPageNr);
-			let pageFile = this.fileForNode(lastPageNr);
+			let pageFile = this.fileForNode(lastPageNr.toString());
 
 			let currentNode = await readNode(pageFile);
 
@@ -104,7 +104,9 @@ export default class TimeFragmenter extends Fragmenter {
 
 				// link the current dataset to the new dataset but don't save yet
 				const closingPageFile = pageFile;
-				const nextPageFile = this.fileForNode(lastPageNr + 1);
+				const nextPageFile = this.fileForNode(
+					(lastPageNr + 1).toString()
+				);
 
 				// create a store with the new graph for the new file
 				currentNode = await this.closeDataset(closingNode, lastPageNr);

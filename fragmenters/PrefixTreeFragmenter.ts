@@ -4,12 +4,7 @@ import { RdfParser } from "rdf-parse";
 import Node from "../models/node";
 import Relation from "../models/relation";
 import Resource from "../models/resource";
-import {
-	clearLastPageCache,
-	getFile,
-	readNode,
-	writeNode,
-} from "../storage/files";
+import { clearLastPageCache, readNode, writeNode } from "../storage/files";
 import { ldes, rdf, tree } from "../utils/namespaces";
 import { generateTreeRelation, getFirstMatch } from "../utils/utils";
 import * as RDF from "rdf-js";
@@ -39,7 +34,7 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 		} catch (e) {
 			console.log("No viewnode");
 			viewNode = this.constructNewNode();
-			await writeNode(viewNode, this.fileForNode(1));
+			await writeNode(viewNode, this.getViewFile());
 		}
 
 		const result = await this._addResource(resource, viewNode);
@@ -76,7 +71,7 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 							resourceTermValue == childRelation.value.value)
 					) {
 						const childNode = await readNode(
-							getFile(childRelation.target)
+							this.fileForNode(childRelation.target.value)
 						);
 						return await this._addResource(
 							resource,
@@ -97,7 +92,7 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 			// we can simply add the new resource to the current node as a member
 			node.add_member(resource);
 			if (node.id.value) {
-				await writeNode(node, getFile(node.id));
+				await writeNode(node, this.fileForNode(node.id.value));
 			}
 		}
 
@@ -144,8 +139,8 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 
 		newNode.add_members(memberGroups[mostOccuringToken]);
 
-		await writeNode(node, getFile(node.id));
+		await writeNode(node, this.fileForNode(node.id.value));
 
-		await writeNode(newNode, getFile(newNode.id));
+		await writeNode(newNode, this.fileForNode(newNode.id.value));
 	}
 }

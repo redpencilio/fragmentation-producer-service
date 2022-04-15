@@ -14,14 +14,14 @@ const UPDATE_QUEUE = new PromiseQueue<Node>();
 const stream = ldesTime("street-stream");
 
 const FRAGMENTER = new PrefixTreeFragmenter(
-	"streetnames",
+	"/data/streetnames",
 	stream,
 	100,
 	example("name")
 );
 
 export default function populateTree(): Promise<void> {
-	const fileStream = fs.createReadStream("/datasets/straatnamen50.txt");
+	const fileStream = fs.createReadStream("/datasets/straatnamen2k.txt");
 	const readLineInterface = readline.createInterface({
 		input: fileStream,
 	});
