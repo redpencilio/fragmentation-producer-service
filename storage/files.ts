@@ -10,6 +10,7 @@ import { getFirstMatch } from "../utils/utils";
 import { ldes, rdf, tree } from "../utils/namespaces";
 import Resource from "../models/resource";
 import Relation from "../models/relation";
+import path from "path";
 
 /**
  * Contains abstractions for working with files containing turtle
@@ -89,6 +90,12 @@ export function writeTriplesStream(store: Store, file: string): Promise<void> {
 	const turtleStream = rdfSerializer.serialize(quadStream, {
 		contentType: "text/turtle",
 	});
+	if (!fs.existsSync(path.dirname(file))) {
+		fs.mkdir(path.dirname(file), { recursive: true }, (err) => {
+			if (err) throw err;
+		});
+	}
+
 	const writeStream = fs.createWriteStream(file);
 	let fileData = "";
 	turtleStream.on("data", (turtleChunk) => {
@@ -132,6 +139,9 @@ export function clearLastPageCache(folder: string): void {
  * if no numbered pages were found.
  */
 export function lastPage(folder: string): number {
+	if (!fs.existsSync(folder)) {
+		return 0;
+	}
 	if (!lastPageCache[folder]) {
 		const files = fs.readdirSync(folder);
 		const fileNumbers = files
