@@ -29,8 +29,7 @@ export default function populateTree(): Promise<void> {
 	return new Promise<void>((resolve, reject) =>
 		readLineInterface
 			.on("line", async (input) => {
-				let id = example(input.replace(/ +/g, "_"));
-				console.log(input);
+				let id = example(encodeURIComponent(input));
 				let store = new Store([
 					quad(id, rdf("type"), example("Street")),
 					quad(id, example("name"), literal(input)),
