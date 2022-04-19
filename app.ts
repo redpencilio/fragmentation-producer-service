@@ -1,4 +1,4 @@
-import { app, uuid, errorHandler } from "mu";
+import { app, uuid, errorHandler } from "mu-javascript-library";
 import bodyParser from "body-parser";
 import rdfParser from "rdf-parse";
 import rdfSerializer from "rdf-serialize";

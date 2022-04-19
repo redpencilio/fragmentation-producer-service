@@ -12,17 +12,6 @@ import * as RDF from "rdf-js";
 import Fragmenter from "./Fragmenter";
 
 export default class PrefixTreeFragmenter extends Fragmenter {
-	path: RDF.NamedNode;
-
-	constructor(
-		folder: string,
-		stream: RDF.NamedNode,
-		maxResourcesPerPage: number,
-		path: RDF.NamedNode
-	) {
-		super(folder, stream, maxResourcesPerPage);
-		this.path = path;
-	}
 	async addResource(resource: Resource): Promise<Node> {
 		console.log("add resource start");
 		const viewFile = this.getViewFile();
