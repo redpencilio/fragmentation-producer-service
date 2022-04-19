@@ -6,10 +6,13 @@ import Node from "./models/node";
 import PromiseQueue from "./promise-queue";
 import { example, ldesTime, rdf } from "./utils/namespaces";
 import fs from "fs";
-import readline from "readline";
-import Resource from "./models/resource";
 import Fragmenter from "./fragmenters/Fragmenter";
 import TimeFragmenter from "./fragmenters/TimeFragmenter";
+import DefaultTransformer from "./dataset-transformers/default-transformer";
+import { DatasetConfiguration } from "./utils/utils";
+import DatasetTransformer from "./dataset-transformers/dataset-transformer";
+import CSVTransformer from "./dataset-transformers/csv-transformer";
+import path from "path";
 
 export type Newable<T> = { new (...args: any[]): T };
 
@@ -18,10 +21,11 @@ const fragmenterMap = new Map<String, Newable<Fragmenter>>();
 fragmenterMap.set("time-fragmenter", TimeFragmenter);
 fragmenterMap.set("prefix-tree-fragmenter", PrefixTreeFragmenter);
 
-interface DatasetConfiguration {
-	stream: string;
-	resourceType: string;
-	propertyType: string;
+const transformerMap = new Map<String, DatasetTransformer>();
+transformerMap.set(".csv", new CSVTransformer());
+
+function getTransformer(extension: string): DatasetTransformer {
+	return transformerMap.get(extension) || new DefaultTransformer();
 }
 
 const UPDATE_QUEUE = new PromiseQueue<Node>();
@@ -75,40 +79,24 @@ export default function fragmentDataset(
 	fragmenterClass: Newable<Fragmenter>,
 	outputFolder: string
 ): Promise<void> {
-	console.log("fragment");
 	const fragmenter = new fragmenterClass(
 		outputFolder,
 		namedNode(datasetConfiguration.stream),
-		2,
+		100,
 		example("name")
 	);
 	const fileStream = fs.createReadStream(datasetFile);
-	const readLineInterface = readline.createInterface({
-		input: fileStream,
-	});
 
-	return new Promise<void>((resolve) =>
-		readLineInterface
-			.on("line", async (input) => {
-				let id = example(encodeURIComponent(input));
-				let store = new Store([
-					quad(
-						id,
-						rdf("type"),
-						namedNode(datasetConfiguration.resourceType)
-					),
-					quad(
-						id,
-						namedNode(datasetConfiguration.propertyType),
-						literal(input)
-					),
-				]);
-				let resource = new Resource(id, store);
+	const transformer = getTransformer(path.extname(datasetFile));
+	return new Promise<void>((resolve) => {
+		transformer
+			.transform(fileStream, datasetConfiguration)
+			.on("data", async (resource) => {
 				await UPDATE_QUEUE.push(() => fragmenter.addResource(resource));
 			})
 			.once("close", () => {
-				console.log("finished loading streets");
+				console.log("finished loading resources");
 				resolve();
-			})
-	);
+			});
+	});
 }

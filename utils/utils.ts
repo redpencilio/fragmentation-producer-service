@@ -10,6 +10,12 @@ interface Error {
 	status?: number;
 }
 
+export interface DatasetConfiguration {
+	stream: string;
+	resourceType: string;
+	resourceIdPrefix: string;
+}
+
 export type QuadElement =
 	| RDF.Quad_Subject
 	| RDF.Quad_Predicate
