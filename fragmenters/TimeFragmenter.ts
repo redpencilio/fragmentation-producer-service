@@ -92,10 +92,17 @@ export default class TimeFragmenter extends Fragmenter {
 	async writeVersionedResource(versionedResource: Resource): Promise<Node> {
 		try {
 			const lastPageNr = lastPage(this.folder);
-			console.log(lastPageNr);
-			let pageFile = this.fileForNode(lastPageNr.toString());
-
-			let currentNode = await readNode(pageFile);
+			let currentNode: Node;
+			let pageFile;
+			if (lastPageNr) {
+				pageFile = this.fileForNode(lastPageNr.toString());
+				currentNode = await readNode(pageFile);
+			} else {
+				console.log("No viewnode");
+				currentNode = this.constructNewNode();
+				pageFile = this.fileForNode(currentNode.id.value);
+				await writeNode(currentNode, pageFile);
+			}
 
 			// let currentDataset = await createStore(readTriplesStream(pageFile));
 

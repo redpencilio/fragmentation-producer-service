@@ -140,7 +140,7 @@ export function clearLastPageCache(folder: string): void {
  */
 export function lastPage(folder: string): number {
 	if (!fs.existsSync(folder)) {
-		return 0;
+		return NaN;
 	}
 	if (!lastPageCache[folder]) {
 		const files = fs.readdirSync(folder);

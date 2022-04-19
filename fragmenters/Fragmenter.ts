@@ -24,6 +24,7 @@ export default abstract class Fragmenter {
 	}
 	constructNewNode(): Node {
 		const nodeId = (lastPage(this.folder) || 0) + 1;
+		console.log(nodeId);
 		updateLastPage(this.folder, nodeId);
 		const node = new Node(
 			this.generatePageResource(nodeId),

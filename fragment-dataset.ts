@@ -1,6 +1,6 @@
 import { Command, Option } from "commander";
 import { Store, DataFactory } from "n3";
-const { quad, literal } = DataFactory;
+const { quad, literal, namedNode } = DataFactory;
 import PrefixTreeFragmenter from "./fragmenters/PrefixTreeFragmenter";
 import Node from "./models/node";
 import PromiseQueue from "./promise-queue";
@@ -18,9 +18,14 @@ const fragmenterMap = new Map<String, Newable<Fragmenter>>();
 fragmenterMap.set("time-fragmenter", TimeFragmenter);
 fragmenterMap.set("prefix-tree-fragmenter", PrefixTreeFragmenter);
 
+interface DatasetConfiguration {
+	stream: string;
+	resourceType: string;
+	propertyType: string;
+}
+
 const UPDATE_QUEUE = new PromiseQueue<Node>();
 
-const stream = ldesTime("street-stream");
 const program = new Command();
 
 program
@@ -51,7 +56,7 @@ program
 		const fragmenterClass = fragmenterMap.get(options.fragmenter);
 		console.log(options.config);
 		const jsonData = fs.readFileSync(options.config, "utf8");
-		const datasetConfig = JSON.parse(jsonData);
+		const datasetConfig: DatasetConfiguration = JSON.parse(jsonData);
 		if (fragmenterClass) {
 			await fragmentDataset(
 				datasetFile,
@@ -66,15 +71,15 @@ program.parse();
 
 export default function fragmentDataset(
 	datasetFile: string,
-	datasetConfiguration: object,
+	datasetConfiguration: DatasetConfiguration,
 	fragmenterClass: Newable<Fragmenter>,
 	outputFolder: string
 ): Promise<void> {
 	console.log("fragment");
 	const fragmenter = new fragmenterClass(
 		outputFolder,
-		stream,
-		10,
+		namedNode(datasetConfiguration.stream),
+		2,
 		example("name")
 	);
 	const fileStream = fs.createReadStream(datasetFile);
@@ -87,8 +92,16 @@ export default function fragmentDataset(
 			.on("line", async (input) => {
 				let id = example(encodeURIComponent(input));
 				let store = new Store([
-					quad(id, rdf("type"), example("Street")),
-					quad(id, example("name"), literal(input)),
+					quad(
+						id,
+						rdf("type"),
+						namedNode(datasetConfiguration.resourceType)
+					),
+					quad(
+						id,
+						namedNode(datasetConfiguration.propertyType),
+						literal(input)
+					),
 				]);
 				let resource = new Resource(id, store);
 				await UPDATE_QUEUE.push(() => fragmenter.addResource(resource));
