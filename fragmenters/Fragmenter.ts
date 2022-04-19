@@ -1,15 +1,16 @@
 import { DataFactory } from "n3";
 import Node from "../models/node";
 import Resource from "../models/resource";
-import { lastPage, updateLastPage } from "../storage/files";
 import * as RDF from "rdf-js";
 import path from "path";
+import Cache from "../storage/cache";
 const { namedNode } = DataFactory;
 export default abstract class Fragmenter {
 	folder: string;
 	maxResourcesPerPage: number;
 	stream: RDF.NamedNode;
 	path: RDF.NamedNode;
+	cache: Cache;
 
 	constructor(
 		folder: string,
@@ -21,11 +22,12 @@ export default abstract class Fragmenter {
 		this.stream = stream;
 		this.maxResourcesPerPage = maxResourcesPerPage;
 		this.path = path;
+		this.cache = new Cache();
 	}
 	constructNewNode(): Node {
-		const nodeId = (lastPage(this.folder) || 0) + 1;
+		const nodeId = (this.cache.getLastPage(this.folder) || 0) + 1;
 		console.log(nodeId);
-		updateLastPage(this.folder, nodeId);
+		this.cache.updateLastPage(this.folder, nodeId);
 		const node = new Node(
 			this.generatePageResource(nodeId),
 			this.stream,

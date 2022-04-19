@@ -24,7 +24,7 @@ export default class DefaultTransformer implements DatasetTransformer {
 
 		readLineInterface
 			.on("line", async (input) => {
-				let id = example(encodeURIComponent(input));
+				let id = namedNode(encodeURI(config.resourceIdPrefix + input));
 				let store = new Store([
 					quad(id, rdf("type"), namedNode(config.resourceType)),
 					quad(id, namedNode(config.propertyType), literal(input)),

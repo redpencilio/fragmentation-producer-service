@@ -82,7 +82,7 @@ export default function fragmentDataset(
 	const fragmenter = new fragmenterClass(
 		outputFolder,
 		namedNode(datasetConfiguration.stream),
-		100,
+		20,
 		example("name")
 	);
 	const fileStream = fs.createReadStream(datasetFile);

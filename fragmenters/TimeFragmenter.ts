@@ -10,12 +10,6 @@ import * as RDF from "rdf-js";
 const { quad } = DataFactory;
 
 import { ldes, prov, purl, rdf, tree } from "../utils/namespaces";
-import {
-	clearLastPageCache,
-	readNode,
-	lastPage,
-	writeNode,
-} from "../storage/files";
 import Resource from "../models/resource";
 import Node from "../models/node";
 import Relation from "../models/relation";
@@ -82,7 +76,6 @@ export default class TimeFragmenter extends Fragmenter {
 
 			// create a store with the new graph for the new file
 			const currentNode = this.constructNewNode();
-			clearLastPageCache(this.folder);
 			return currentNode;
 		} catch (e) {
 			throw e;
@@ -91,17 +84,17 @@ export default class TimeFragmenter extends Fragmenter {
 
 	async writeVersionedResource(versionedResource: Resource): Promise<Node> {
 		try {
-			const lastPageNr = lastPage(this.folder);
+			const lastPageNr = this.cache.getLastPage(this.folder);
 			let currentNode: Node;
 			let pageFile;
 			if (lastPageNr) {
 				pageFile = this.fileForNode(lastPageNr.toString());
-				currentNode = await readNode(pageFile);
+				currentNode = await this.cache.getNode(pageFile);
 			} else {
 				console.log("No viewnode");
 				currentNode = this.constructNewNode();
 				pageFile = this.fileForNode(currentNode.id.value);
-				await writeNode(currentNode, pageFile);
+				await this.cache.setNode(pageFile, currentNode);
 			}
 
 			// let currentDataset = await createStore(readTriplesStream(pageFile));
@@ -120,14 +113,14 @@ export default class TimeFragmenter extends Fragmenter {
 
 				currentNode.add_member(versionedResource);
 
-				await writeNode(currentNode, nextPageFile);
-				await writeNode(closingNode, closingPageFile);
+				await this.cache.setNode(nextPageFile, currentNode);
+				await this.cache.setNode(closingPageFile, closingNode);
+
 				// Clear the last page cache
-				clearLastPageCache(this.folder);
 			} else {
 				currentNode.add_member(versionedResource);
 
-				await writeNode(currentNode, pageFile);
+				await this.cache.setNode(pageFile, currentNode);
 			}
 			return currentNode;
 		} catch (e) {

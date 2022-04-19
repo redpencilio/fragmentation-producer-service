@@ -22,17 +22,6 @@ interface FileCache {
 }
 
 const fileCache: FileCache = {};
-/**
- * Loads a file as a string.
- *
- * @param {string} file The file path as a string.
- * @return {string} Contents of the file, read as UTF-8.
- */
-export function triplesFileAsString(file: string): string {
-	if (!fileCache[file]) fileCache[file] = fs.readFileSync(file, "utf8");
-
-	return fileCache[file];
-}
 
 /**
  * Reads the triples in a file, assuming text/turtle.
@@ -41,8 +30,11 @@ export function triplesFileAsString(file: string): string {
  * @return {Stream} Stream containing all triples which were downloaded.
  */
 
-export function readTriplesStream(file: string): RDF.Stream<Quad> {
-	const fileStream = jsstream.Readable.from(triplesFileAsString(file));
+export function readTriplesStream(file: string): RDF.Stream<Quad> | null {
+	if (!fs.existsSync(file)) {
+		return null;
+	}
+	const fileStream = fs.createReadStream(file);
 	const transformStream = new jsstream.Transform({ objectMode: true });
 	transformStream._transform = (quadObj: Quad, encoding, callback) => {
 		let subject = quadObj.subject;
@@ -97,17 +89,15 @@ export function writeTriplesStream(store: Store, file: string): Promise<void> {
 	}
 
 	const writeStream = fs.createWriteStream(file);
-	let fileData = "";
+
 	turtleStream.on("data", (turtleChunk) => {
 		turtleStream.pause();
 		writeStream.write(turtleChunk);
-		fileData += turtleChunk;
 		turtleStream.resume();
 	});
 	return new Promise((resolve, reject) => {
 		turtleStream.on("error", reject);
 		turtleStream.on("end", () => {
-			fileCache[file] = fileData;
 			writeStream.end(() => {
 				resolve();
 			});
@@ -120,15 +110,6 @@ interface PageCache {
 }
 
 const lastPageCache: PageCache = {};
-
-/**
- * Clears the last page cache for the supplied folder.
- *
- * @param {string} folder The folder for which the last page cache will be cleared.
- */
-export function clearLastPageCache(folder: string): void {
-	delete lastPageCache[folder];
-}
 
 /**
  * Returns the last page number currently available.
@@ -169,17 +150,17 @@ export function lastPage(folder: string): number {
 	return lastPageCache[folder];
 }
 
-export function updateLastPage(folder: string, value: number) {
-	lastPageCache[folder] = value;
-}
-
 function convertToRelativeURI(nn: Term): NamedNode {
 	return namedNode(`.${nn.value}`);
 }
 
 export async function readNode(path: string): Promise<Node> {
 	console.log(path);
-	let store = await createStore(readTriplesStream(path));
+	const triplesStream = readTriplesStream(path);
+	if (!triplesStream) {
+		throw Error("File does not exist");
+	}
+	let store = await createStore(triplesStream);
 
 	let id = getFirstMatch(store, null, rdf("type"), tree("Node"))?.subject;
 	const stream = getFirstMatch(
