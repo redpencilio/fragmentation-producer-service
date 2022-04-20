@@ -136,38 +136,11 @@ app.get(
 	}
 );
 
-app.get("/count", async function (_req: any, res: any, next: any) {
-	try {
-		const page = lastPage(PAGES_FOLDER);
-		if (page === NaN) return next(error(404, "No pages found"));
-
-		const file = fileForPage(PAGES_FOLDER, page);
-		console.log(`Reading from ${file}`);
-		const currentNode = await readNode(file);
-		console.log(currentNode.id);
-		const count = currentNode.count();
-		res.status(200).send(`{"count": ${count}}`);
-	} catch (e) {
-		console.error(e);
-		return next(error(500));
-	}
-});
-
 app.get("/last-page", function (_req: any, res: any, next: any) {
 	try {
 		const page = lastPage(PAGES_FOLDER);
 		if (page === NaN) return next(error(404, "No pages found"));
 		else res.status(200).send(`{"lastPage": ${page}}`);
-	} catch (e) {
-		console.error(e);
-		return next(error(500));
-	}
-});
-
-app.get("/populate-street-db", async function (req: any, res: any, next: any) {
-	try {
-		await populateTree();
-		res.status(200).send();
 	} catch (e) {
 		console.error(e);
 		return next(error(500));
