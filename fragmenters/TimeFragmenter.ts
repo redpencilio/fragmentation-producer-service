@@ -60,22 +60,20 @@ export default class TimeFragmenter extends Fragmenter {
 
 	async closeDataset(node: Node, pageNr: number): Promise<Node> {
 		try {
-			const relationResource = generateTreeRelation();
 			const nextPageResource = this.generatePageResource(pageNr + 1);
-			const dateLiteral = nowLiteral();
-
-			node.add_relation(
-				new Relation(
-					relationResource,
-					tree("GreaterThanOrEqualRelation"),
-					dateLiteral,
-					nextPageResource,
-					prov("generatedAtTime")
-				)
-			);
 
 			// create a store with the new graph for the new file
 			const currentNode = this.constructNewNode();
+			node.add_relation(
+				new Relation(
+					generateTreeRelation(),
+					tree("GreaterThanOrEqualRelation"),
+					nowLiteral(),
+					this.getRelationReference(node.id, currentNode.id),
+					currentNode.id,
+					prov("generatedAtTime")
+				)
+			);
 			return currentNode;
 		} catch (e) {
 			throw e;
@@ -88,12 +86,12 @@ export default class TimeFragmenter extends Fragmenter {
 			let currentNode: Node;
 			let pageFile;
 			if (lastPageNr) {
-				pageFile = this.fileForNode(lastPageNr.toString());
+				pageFile = this.fileForNode(lastPageNr);
 				currentNode = await this.cache.getNode(pageFile);
 			} else {
 				console.log("No viewnode");
 				currentNode = this.constructNewNode();
-				pageFile = this.fileForNode(currentNode.id.value);
+				pageFile = this.fileForNode(currentNode.id);
 				await this.cache.setNode(pageFile, currentNode);
 			}
 
@@ -104,9 +102,7 @@ export default class TimeFragmenter extends Fragmenter {
 
 				// link the current dataset to the new dataset but don't save yet
 				const closingPageFile = pageFile;
-				const nextPageFile = this.fileForNode(
-					(lastPageNr + 1).toString()
-				);
+				const nextPageFile = this.fileForNode(lastPageNr + 1);
 
 				// create a store with the new graph for the new file
 				currentNode = await this.closeDataset(closingNode, lastPageNr);

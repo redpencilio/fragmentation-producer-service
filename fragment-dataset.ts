@@ -28,7 +28,7 @@ function getTransformer(extension: string): DatasetTransformer {
 	return transformerMap.get(extension) || new DefaultTransformer();
 }
 
-const UPDATE_QUEUE = new PromiseQueue<Node>();
+const UPDATE_QUEUE = new PromiseQueue<Node | void>();
 
 const program = new Command();
 
@@ -82,20 +82,28 @@ export default function fragmentDataset(
 	const fragmenter = new fragmenterClass(
 		outputFolder,
 		namedNode(datasetConfiguration.stream),
-		20,
-		example("name")
+		100,
+		example("name"),
+		100
 	);
 	const fileStream = fs.createReadStream(datasetFile);
 
 	const transformer = getTransformer(path.extname(datasetFile));
 	return new Promise<void>((resolve) => {
-		transformer
-			.transform(fileStream, datasetConfiguration)
+		const transformedStream = transformer.transform(
+			fileStream,
+			datasetConfiguration
+		);
+		transformedStream
 			.on("data", async (resource) => {
+				transformedStream.pause();
+
 				await UPDATE_QUEUE.push(() => fragmenter.addResource(resource));
+				transformedStream.resume();
 			})
-			.once("close", () => {
+			.on("close", async () => {
 				console.log("finished loading resources");
+				await UPDATE_QUEUE.push(() => fragmenter.cache.flush());
 				resolve();
 			});
 	});

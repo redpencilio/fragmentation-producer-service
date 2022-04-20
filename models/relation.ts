@@ -5,6 +5,7 @@ export default class Relation {
 	type: RDF.NamedNode;
 	value: RDF.Literal;
 	target: RDF.NamedNode;
+	targetId: number;
 	path: RDF.NamedNode;
 
 	constructor(
@@ -12,12 +13,14 @@ export default class Relation {
 		type: RDF.NamedNode,
 		value: RDF.Literal,
 		target: RDF.NamedNode,
+		targetId: number,
 		path: RDF.NamedNode
 	) {
 		this.id = id;
 		this.type = type;
 		this.value = value;
 		this.target = target;
+		this.targetId = targetId;
 		this.path = path;
 	}
 }

@@ -1,9 +1,7 @@
-import jsstream from "stream";
+import { Readable, Stream, PassThrough } from "stream";
+
 import { DatasetConfiguration } from "../utils/utils";
 
 export default interface DatasetTransformer {
-	transform(
-		input: jsstream.Readable,
-		config: DatasetConfiguration
-	): jsstream.Stream;
+	transform(input: Readable, config: DatasetConfiguration): Readable;
 }

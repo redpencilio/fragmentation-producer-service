@@ -4,8 +4,8 @@
   
     "compilerOptions": {
       "lib": ["es2015"],
-      // "module": "commonjs",
-      // "target": "es2015",
+      "module": "commonjs",
+      "target": "es2015",
       "noEmitOnError": false,
       "noImplicitAny": false,
       "downlevelIteration": true,

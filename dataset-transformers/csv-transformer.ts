@@ -12,7 +12,7 @@ interface CSVDatasetConfiguration extends DatasetConfiguration {
 }
 
 export default class CSVTransformer implements DatasetTransformer {
-	transform(input: Readable, config: CSVDatasetConfiguration): Stream {
+	transform(input: Readable, config: CSVDatasetConfiguration): Readable {
 		const resultStream = new PassThrough({ objectMode: true });
 
 		input
@@ -39,7 +39,7 @@ export default class CSVTransformer implements DatasetTransformer {
 				resultStream.push(resource);
 			})
 			.on("end", () => {
-				resultStream.emit("close");
+				resultStream.end();
 			});
 		return resultStream;
 	}

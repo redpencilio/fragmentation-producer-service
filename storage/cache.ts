@@ -1,34 +1,52 @@
 import Node from "../models/node";
 import { readNode, writeNode } from "./files";
 import fs from "fs";
-export default class Cache {
-	nodes: Map<String, Node> = new Map();
+import onChange from "on-change";
 
-	lastPages: Map<String, number> = new Map();
+interface CacheEntry {
+	node: Node;
+	modified: boolean;
+}
+export default class Cache {
+	nodes: Map<string, CacheEntry> = new Map();
+
+	lastPages: Map<string, number> = new Map();
 
 	async getNode(path: string) {
 		if (this.nodes.has(path)) {
-			return this.nodes.get(path)!;
+			return this.nodes.get(path)!.node;
 		}
 		try {
 			const node = await readNode(path);
-			this.nodes.set(path, node);
+			this.nodes.set(path, { node, modified: false });
+			onChange(node, () => {
+				console.log("change");
+				this.nodes.set(path, { node, modified: true });
+			});
 			return node;
 		} catch (e) {
 			throw e;
 		}
 	}
 
+	addNode(path: string, node: Node) {
+		this.nodes.set(path, { node, modified: true });
+		onChange(node, () => {
+			console.log("change");
+			this.nodes.set(path, { node, modified: true });
+		});
+	}
+
 	async setNode(path: string, node: Node) {
-		this.nodes.set(path, node);
+		this.nodes.set(path, { node, modified: true });
 		await writeNode(node, path);
 	}
 
 	getLastPage(folder: string): number {
-		if (!fs.existsSync(folder)) {
-			return NaN;
-		}
 		if (!this.lastPages.has(folder)) {
+			if (!fs.existsSync(folder)) {
+				return NaN;
+			}
 			const files = fs.readdirSync(folder);
 			const fileNumbers = files
 				.map((path) => {
@@ -57,5 +75,16 @@ export default class Cache {
 
 	updateLastPage(folder: string, value: number) {
 		this.lastPages.set(folder, value);
+	}
+
+	async flush() {
+		console.log("Start flush");
+		for (const [path, cacheEntry] of this.nodes) {
+			if (cacheEntry.modified) {
+				await writeNode(cacheEntry.node, path);
+				cacheEntry.modified = false;
+			}
+		}
+		console.log("Flushed");
 	}
 }

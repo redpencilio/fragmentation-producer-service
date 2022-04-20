@@ -1,19 +1,24 @@
-import { Term } from "n3";
+import { NamedNode, Term, DataFactory } from "n3";
+const { namedNode } = DataFactory;
 import Relation from "./relation";
 import Resource from "./resource";
 import * as RDF from "rdf-js";
 
 export default class Node {
-	id: RDF.NamedNode;
+	id: number;
 	members: Set<Resource> = new Set();
 	relations: Relation[] = [];
 	view: RDF.NamedNode;
 	stream: RDF.NamedNode;
 
-	constructor(id: RDF.NamedNode, stream: RDF.NamedNode, view: RDF.NamedNode) {
+	constructor(id: number, stream: RDF.NamedNode, view: RDF.NamedNode) {
 		this.id = id;
 		this.stream = stream;
 		this.view = view;
+	}
+
+	get idNamedNode() {
+		return namedNode(`./${this.id}`);
 	}
 
 	add_member(resource: Resource) {

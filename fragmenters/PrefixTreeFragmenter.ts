@@ -11,7 +11,6 @@ import Fragmenter from "./Fragmenter";
 
 export default class PrefixTreeFragmenter extends Fragmenter {
 	async addResource(resource: Resource): Promise<Node> {
-		console.log("add resource start");
 		const viewFile = this.getViewFile();
 		let viewNode: Node;
 		// Check if the view node exists, if not, create one
@@ -21,12 +20,12 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 		} catch (e) {
 			console.log("No viewnode");
 			viewNode = this.constructNewNode();
-			await this.cache.setNode(this.getViewFile(), viewNode);
+			this.cache.addNode(this.getViewFile(), viewNode);
+			// await this.cache.setNode(this.getViewFile(), viewNode);
 		}
 
 		const result = await this._addResource(resource, viewNode);
 
-		console.log("add resource end");
 		return result;
 	}
 
@@ -58,7 +57,7 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 							resourceTermValue == childRelation.value.value)
 					) {
 						const childNode = await this.cache.getNode(
-							this.fileForNode(childRelation.target.value)
+							this.fileForNode(childRelation.targetId)
 						);
 						return await this._addResource(
 							resource,
@@ -78,9 +77,7 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 		} else {
 			// we can simply add the new resource to the current node as a member
 			node.add_member(resource);
-			if (node.id.value) {
-				await this.cache.setNode(this.fileForNode(node.id.value), node);
-			}
+			// await this.cache.setNode(this.fileForNode(node.id.value), node);
 		}
 
 		return node;
@@ -117,6 +114,7 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 				generateTreeRelation(),
 				newRelationType,
 				literal(currentValue + mostOccuringToken),
+				this.getRelationReference(node.id, newNode.id),
 				newNode.id,
 				this.path
 			)
@@ -126,7 +124,8 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 
 		newNode.add_members(memberGroups[mostOccuringToken]);
 
-		await this.cache.setNode(this.fileForNode(node.id.value), node);
-		await this.cache.setNode(this.fileForNode(newNode.id.value), newNode);
+		this.cache.addNode(this.fileForNode(newNode.id), newNode);
+		// await this.cache.setNode(this.fileForNode(node.id.value), node);
+		// await this.cache.setNode(this.fileForNode(newNode.id.value), newNode);
 	}
 }

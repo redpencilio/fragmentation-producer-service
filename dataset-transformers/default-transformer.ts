@@ -1,4 +1,6 @@
 import DatasetTransformer from "./dataset-transformer";
+import { Readable, Stream, PassThrough } from "stream";
+
 import jsstream from "stream";
 import readline from "readline";
 import { example, rdf } from "../utils/namespaces";
@@ -12,15 +14,12 @@ interface DefaultDatasetConfiguration extends DatasetConfiguration {
 }
 
 export default class DefaultTransformer implements DatasetTransformer {
-	transform(
-		input: jsstream.Readable,
-		config: DefaultDatasetConfiguration
-	): jsstream.Stream {
+	transform(input: Readable, config: DefaultDatasetConfiguration): Readable {
 		const readLineInterface = readline.createInterface({
 			input: input,
 		});
 
-		const resultStream = new jsstream.PassThrough({ objectMode: true });
+		const resultStream = new PassThrough({ objectMode: true });
 
 		readLineInterface
 			.on("line", async (input) => {
@@ -32,8 +31,8 @@ export default class DefaultTransformer implements DatasetTransformer {
 				let resource = new Resource(id, store);
 				resultStream.push(resource);
 			})
-			.once("close", () => {
-				resultStream.emit("close");
+			.on("close", () => {
+				resultStream.end();
 			});
 		return resultStream;
 	}

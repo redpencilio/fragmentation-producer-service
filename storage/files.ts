@@ -77,14 +77,20 @@ export function createStore(quadStream: RDF.Stream<Quad>): Promise<Store> {
  * @param {NamedNode} graph The graph which will be written to the file.
  * @param {string} file Path of the file to which we will write the content.
  */
-export function writeTriplesStream(store: Store, file: string): Promise<void> {
+export async function writeTriplesStream(
+	store: Store,
+	file: string
+): Promise<void> {
 	const quadStream = jsstream.Readable.from(store);
 	const turtleStream = rdfSerializer.serialize(quadStream, {
 		contentType: "text/turtle",
 	});
 	if (!fs.existsSync(path.dirname(file))) {
-		fs.mkdir(path.dirname(file), { recursive: true }, (err) => {
-			if (err) throw err;
+		await new Promise<void>((resolve, reject) => {
+			fs.mkdir(path.dirname(file), { recursive: true }, (err) => {
+				if (err) reject(err);
+				resolve();
+			});
 		});
 	}
 
@@ -154,9 +160,8 @@ function convertToRelativeURI(nn: Term): NamedNode {
 	return namedNode(`.${nn.value}`);
 }
 
-export async function readNode(path: string): Promise<Node> {
-	console.log(path);
-	const triplesStream = readTriplesStream(path);
+export async function readNode(filePath: string): Promise<Node> {
+	const triplesStream = readTriplesStream(filePath);
 	if (!triplesStream) {
 		throw Error("File does not exist");
 	}
@@ -172,7 +177,7 @@ export async function readNode(path: string): Promise<Node> {
 	let view = getFirstMatch(store, null, tree("view"))?.object;
 	if (id && stream && view) {
 		let node: Node = new Node(
-			id as RDF.NamedNode,
+			parseInt(path.parse(id.value).base),
 			stream as RDF.NamedNode,
 			view as RDF.NamedNode
 		);
@@ -189,16 +194,21 @@ export async function readNode(path: string): Promise<Node> {
 
 			let target = getFirstMatch(store, relationId, tree("node"))?.object;
 
-			let path = getFirstMatch(store, relationId, tree("path"))?.object;
+			let relationPath = getFirstMatch(
+				store,
+				relationId,
+				tree("path")
+			)?.object;
 
-			if (type && value && target && path) {
+			if (type && value && target && relationPath) {
 				node.add_relation(
 					new Relation(
 						relationId as RDF.NamedNode,
 						type as RDF.NamedNode,
 						value as RDF.Literal,
 						target as RDF.NamedNode,
-						path as RDF.NamedNode
+						parseInt(path.parse(target.value).base),
+						relationPath as RDF.NamedNode
 					)
 				);
 			}
@@ -231,11 +241,11 @@ export async function writeNode(node: Node, path: string) {
 	]);
 
 	// Add node id
-	store.add(quad(node.id, rdf("type"), tree("Node")));
+	store.add(quad(node.idNamedNode, rdf("type"), tree("Node")));
 
 	// Add the different relations to the store
 	node.relations.forEach((relation) => {
-		store.add(quad(node.id, tree("relation"), relation.id));
+		store.add(quad(node.idNamedNode, tree("relation"), relation.id));
 		store.addQuads([
 			quad(relation.id, rdf("type"), relation.type),
 			quad(relation.id, tree("value"), relation.value),
