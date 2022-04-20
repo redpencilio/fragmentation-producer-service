@@ -81,9 +81,5 @@ export default abstract class Fragmenter {
 		return node.count() >= this.maxResourcesPerPage;
 	}
 
-	generatePageResource(number: number) {
-		return namedNode(`./${number}`);
-	}
-
 	abstract addResource(resource: Resource): Promise<Node>;
 }

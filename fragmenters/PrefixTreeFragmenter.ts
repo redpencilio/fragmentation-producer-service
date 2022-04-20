@@ -1,4 +1,4 @@
-import { Store, Quad, NamedNode, DataFactory, Term, Literal } from "n3";
+import { DataFactory } from "n3";
 const { literal } = DataFactory;
 import Node from "../models/node";
 import Relation from "../models/relation";
@@ -21,7 +21,6 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 			console.log("No viewnode");
 			viewNode = this.constructNewNode();
 			this.cache.addNode(this.getViewFile(), viewNode);
-			// await this.cache.setNode(this.getViewFile(), viewNode);
 		}
 
 		const result = await this._addResource(resource, viewNode);
@@ -77,7 +76,6 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 		} else {
 			// we can simply add the new resource to the current node as a member
 			node.add_member(resource);
-			// await this.cache.setNode(this.fileForNode(node.id.value), node);
 		}
 
 		return node;
@@ -125,7 +123,5 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 		newNode.add_members(memberGroups[mostOccuringToken]);
 
 		this.cache.addNode(this.fileForNode(newNode.id), newNode);
-		// await this.cache.setNode(this.fileForNode(node.id.value), node);
-		// await this.cache.setNode(this.fileForNode(newNode.id.value), newNode);
 	}
 }
