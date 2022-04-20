@@ -16,12 +16,7 @@ app.use(
 	})
 );
 
-import {
-	readTriplesStream,
-	lastPage,
-	createStore,
-	readNode,
-} from "./storage/files";
+import { readTriplesStream, createStore, readNode } from "./storage/files";
 import PromiseQueue from "./promise-queue";
 import TimeFragmenter from "./fragmenters/TimeFragmenter";
 import { error, getFirstMatch } from "./utils/utils";
@@ -29,20 +24,19 @@ import { ldesTime } from "./utils/namespaces";
 import Resource from "./models/resource";
 import Node from "./models/node";
 import PrefixTreeFragmenter from "./fragmenters/PrefixTreeFragmenter";
-import populateTree from "./populateStreetNameTree";
 import Cache from "./storage/cache";
 
 const PAGES_FOLDER = "/data/pages";
 
-const UPDATE_QUEUE = new PromiseQueue<Node>();
+const UPDATE_QUEUE = new PromiseQueue<Node | void>();
 
 const stream = ldesTime("example-stream");
 
 const FRAGMENTER = new PrefixTreeFragmenter(
-	"/data/pagesPrefix",
+	"/data/movieslarge",
 	stream,
 	100,
-	new NamedNode("http://mu.semte.ch/services/tests/name"),
+	new NamedNode("https://example.org/name"),
 	100
 );
 
@@ -76,9 +70,14 @@ app.post("/resource", async function (req: any, res: any, next: any) {
 			FRAGMENTER.addResource(resource)
 		);
 
-		res.status(201).send(
-			`{"message": "ok", "triplesInPage": ${currentDataset.count()}}`
-		);
+		await UPDATE_QUEUE.push(() => FRAGMENTER.cache.flush());
+
+		if (currentDataset) {
+			console.log(currentDataset.id)
+			res.status(201).send(
+				`{"message": "ok", "triplesInPage": ${currentDataset.count()}}`
+			);
+		}
 	} catch (e) {
 		console.error(e);
 		return next(error(500));
@@ -106,7 +105,7 @@ app.get(
 				return next(error(406));
 			}
 
-			if (page < lastPage(pagesFolder))
+			if (page < cache.getLastPage(pagesFolder))
 				res.header("Cache-Control", "public, immutable");
 
 			const rdfStream = readTriplesStream(
@@ -138,7 +137,7 @@ app.get(
 
 app.get("/last-page", function (_req: any, res: any, next: any) {
 	try {
-		const page = lastPage(PAGES_FOLDER);
+		const page = cache.getLastPage(PAGES_FOLDER);
 		if (page === NaN) return next(error(404, "No pages found"));
 		else res.status(200).send(`{"lastPage": ${page}}`);
 	} catch (e) {

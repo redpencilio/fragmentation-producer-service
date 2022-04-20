@@ -5,7 +5,6 @@ import {
 	nowLiteral,
 } from "../utils/utils";
 import Fragmenter from "./Fragmenter";
-import * as RDF from "rdf-js";
 
 const { quad } = DataFactory;
 
@@ -60,8 +59,6 @@ export default class TimeFragmenter extends Fragmenter {
 
 	async closeDataset(node: Node, pageNr: number): Promise<Node> {
 		try {
-			const nextPageResource = this.generatePageResource(pageNr + 1);
-
 			// create a store with the new graph for the new file
 			const currentNode = this.constructNewNode();
 			node.add_relation(
@@ -74,6 +71,7 @@ export default class TimeFragmenter extends Fragmenter {
 					prov("generatedAtTime")
 				)
 			);
+			this.cache.addNode(this.fileForNode(currentNode.id), currentNode);
 			return currentNode;
 		} catch (e) {
 			throw e;
@@ -92,7 +90,7 @@ export default class TimeFragmenter extends Fragmenter {
 				console.log("No viewnode");
 				currentNode = this.constructNewNode();
 				pageFile = this.fileForNode(currentNode.id);
-				await this.cache.setNode(pageFile, currentNode);
+				this.cache.addNode(pageFile, currentNode);
 			}
 
 			// let currentDataset = await createStore(readTriplesStream(pageFile));
@@ -100,23 +98,14 @@ export default class TimeFragmenter extends Fragmenter {
 			if (this.shouldCreateNewPage(currentNode)) {
 				const closingNode = currentNode;
 
-				// link the current dataset to the new dataset but don't save yet
-				const closingPageFile = pageFile;
-				const nextPageFile = this.fileForNode(lastPageNr + 1);
-
 				// create a store with the new graph for the new file
 				currentNode = await this.closeDataset(closingNode, lastPageNr);
 
 				currentNode.add_member(versionedResource);
 
-				await this.cache.setNode(nextPageFile, currentNode);
-				await this.cache.setNode(closingPageFile, closingNode);
-
 				// Clear the last page cache
 			} else {
 				currentNode.add_member(versionedResource);
-
-				await this.cache.setNode(pageFile, currentNode);
 			}
 			return currentNode;
 		} catch (e) {

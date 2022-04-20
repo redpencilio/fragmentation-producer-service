@@ -1,5 +1,5 @@
 import fs from "fs";
-import { Quad, Store, DataFactory, NamedNode, Term } from "n3";
+import { Quad, Store, DataFactory, NamedNode, Term, StreamParser } from "n3";
 const { quad, namedNode } = DataFactory;
 import rdfParser from "rdf-parse";
 import rdfSerializer from "rdf-serialize";
@@ -41,24 +41,40 @@ export function readTriplesStream(file: string): RDF.Stream<Quad> | null {
 		let predicate = quadObj.predicate;
 		let object = quadObj.object;
 		if (predicate.equals(tree("node")) || predicate.equals(tree("view"))) {
-			object = convertToRelativeURI(object);
+			if (object.value.startsWith("/")) {
+				object = convertToRelativeURI(object);
+			} else if (object.value.startsWith("...")) {
+				object = namedNode(object.value.substring(1));
+			} else if (object.value.startsWith(".")) {
+				object = namedNode(`./${object.value.substring(1)}`);
+			}
 		}
 		if (
 			(predicate.equals(rdf("type")) && object.equals(tree("Node"))) ||
 			predicate.equals(tree("relation"))
 		) {
-			subject = convertToRelativeURI(subject);
+			if (subject.value.startsWith("/")) {
+				subject = convertToRelativeURI(subject);
+			} else if (subject.value.startsWith("...")) {
+				subject = namedNode(subject.value.substring(1));
+			} else if (subject.value.startsWith(".")) {
+				subject = namedNode(`./${subject.value.substring(1)}`);
+			}
 		}
 		let newQuad: Quad = quad(subject, predicate, object);
 		transformStream.push(newQuad);
 		callback();
 	};
-	return rdfParser
-		.parse(fileStream, {
-			contentType: "text/turtle",
-			baseIRI: "/",
-		})
+	return fileStream
+		.pipe(new StreamParser({ baseIRI: "." }))
 		.pipe(transformStream);
+	// new StreamParser.
+	// return rdfParser
+	// 	.parse(fileStream, {
+	// 		contentType: "text/turtle",
+	// 		baseIRI: new String(),
+	// 	})
+	// 	.pipe(transformStream);
 }
 
 export function createStore(quadStream: RDF.Stream<Quad>): Promise<Store> {

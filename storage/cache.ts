@@ -21,7 +21,7 @@ export default class Cache {
 			const node = await readNode(path);
 			this.nodes.set(path, { node, modified: false });
 			onChange(node, () => {
-				console.log("change");
+				console.log("MODIFICATION");
 				this.nodes.set(path, { node, modified: true });
 			});
 			return node;
@@ -87,10 +87,10 @@ export default class Cache {
 	async flush() {
 		console.log("Start flush");
 		for (const [path, cacheEntry] of this.nodes) {
-			if (cacheEntry.modified) {
-				await writeNode(cacheEntry.node, path);
-				cacheEntry.modified = false;
-			}
+			// if (cacheEntry.modified) {
+			await writeNode(cacheEntry.node, path);
+			cacheEntry.modified = false;
+			// }
 		}
 		console.log("Flushed");
 	}
