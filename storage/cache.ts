@@ -19,11 +19,24 @@ export default class Cache {
 		}
 		try {
 			const node = await readNode(path);
-			this.nodes.set(path, { node, modified: false });
-			onChange(node, () => {
-				console.log("MODIFICATION");
-				this.nodes.set(path, { node, modified: true });
-			});
+			let cacheEntry: CacheEntry = { node, modified: true };
+
+			var nodeChangeHandler = {
+				set: function (target, property, value, receiver) {
+					console.log("MODIFIED");
+					target[property] = value;
+					cacheEntry.modified = true;
+					// you have to return true to accept the changes
+					return true;
+				},
+			};
+			let cacheEntryProxy = new Proxy(cacheEntry, nodeChangeHandler);
+			this.nodes.set(path, cacheEntryProxy);
+			// this.nodes.set(path, { node, modified: false });
+			// onChange(node, () => {
+			// 	console.log("MODIFICATION");
+			// 	this.nodes.set(path, { node, modified: true });
+			// });
 			return node;
 		} catch (e) {
 			throw e;
@@ -31,11 +44,18 @@ export default class Cache {
 	}
 
 	addNode(path: string, node: Node) {
-		this.nodes.set(path, { node, modified: true });
-		onChange(node, () => {
-			console.log("change");
-			this.nodes.set(path, { node, modified: true });
-		});
+		let cacheEntry: CacheEntry = { node, modified: true };
+
+		var nodeChangeHandler = {
+			set: function (target, property, value, receiver) {
+				target[property] = value;
+				cacheEntry.modified = true;
+				// you have to return true to accept the changes
+				return true;
+			},
+		};
+		let cacheEntryProxy = new Proxy(node, nodeChangeHandler);
+		this.nodes.set(path, cacheEntryProxy);
 	}
 
 	async setNode(path: string, node: Node) {

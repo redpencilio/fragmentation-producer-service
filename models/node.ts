@@ -22,6 +22,7 @@ export default class Node {
 	}
 
 	add_member(resource: Resource) {
+		this.members = new Set([...this.members, resource]);
 		this.members.add(resource);
 	}
 
