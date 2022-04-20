@@ -5,6 +5,7 @@ import rdfSerializer from "rdf-serialize";
 import jsstream from "stream";
 import { Store, DataFactory, NamedNode } from "n3";
 import cors from "cors";
+import path from "path";
 const { namedNode } = DataFactory;
 app.use(cors());
 app.use(
@@ -29,6 +30,7 @@ import Resource from "./models/resource";
 import Node from "./models/node";
 import PrefixTreeFragmenter from "./fragmenters/PrefixTreeFragmenter";
 import populateTree from "./populateStreetNameTree";
+import Cache from "./storage/cache";
 
 const PAGES_FOLDER = "/data/pages";
 
@@ -39,9 +41,12 @@ const stream = ldesTime("example-stream");
 const FRAGMENTER = new PrefixTreeFragmenter(
 	"/data/pagesPrefix",
 	stream,
-	10,
-	new NamedNode("http://mu.semte.ch/services/tests/name")
+	100,
+	new NamedNode("http://mu.semte.ch/services/tests/name"),
+	100
 );
+
+const cache = new Cache();
 
 /**
  * Yields the file path on which the specified page number is described.
@@ -80,45 +85,56 @@ app.post("/resource", async function (req: any, res: any, next: any) {
 	}
 });
 
-app.get("/:folder/:nodeId", async function (req: any, res: any, next: any) {
-	try {
-		const page = parseInt(req.params.nodeId);
-		const pagesFolder = `/data/${req.params.folder}`;
-		if (page > lastPage(pagesFolder)) {
-			return next(error(404, "Page not found"));
+app.get(
+	"/:folder/:subfolder?/:nodeId",
+	async function (req: any, res: any, next: any) {
+		try {
+			const page = parseInt(req.params.nodeId);
+			console.log(page);
+			const pagesFolder = `/data/${req.params.folder}`;
+
+			console.log(cache.getLastPage(pagesFolder));
+			if (page > cache.getLastPage(pagesFolder)) {
+				return next(error(404, "Page not found"));
+			}
+
+			const contentTypes = await rdfSerializer.getContentTypes();
+
+			const contentType = req.accepts(contentTypes);
+			console.log(contentType);
+			if (!contentType) {
+				return next(error(406));
+			}
+
+			if (page < lastPage(pagesFolder))
+				res.header("Cache-Control", "public, immutable");
+
+			const rdfStream = readTriplesStream(
+				fileForPage(
+					path.join(pagesFolder, req.params.subfolder || ""),
+					page
+				)
+			);
+
+			res.header("Content-Type", contentType);
+
+			rdfSerializer
+				.serialize(rdfStream, {
+					contentType: contentType,
+				})
+				.on("data", (d) => res.write(d))
+				.on("error", (error) => {
+					next(error(500, "Serializing error"));
+				})
+				.on("end", () => {
+					res.end();
+				});
+		} catch (e) {
+			console.error(e);
+			return next(error(500));
 		}
-
-		const contentTypes = await rdfSerializer.getContentTypes();
-
-		const contentType = req.accepts(contentTypes);
-		console.log(contentType);
-		if (!contentType) {
-			return next(error(406));
-		}
-
-		if (page < lastPage(pagesFolder))
-			res.header("Cache-Control", "public, immutable");
-
-		const rdfStream = readTriplesStream(fileForPage(pagesFolder, page));
-
-		res.header("Content-Type", contentType);
-
-		rdfSerializer
-			.serialize(rdfStream, {
-				contentType: contentType,
-			})
-			.on("data", (d) => res.write(d))
-			.on("error", (error) => {
-				next(error(500, "Serializing error"));
-			})
-			.on("end", () => {
-				res.end();
-			});
-	} catch (e) {
-		console.error(e);
-		return next(error(500));
 	}
-});
+);
 
 app.get("/count", async function (_req: any, res: any, next: any) {
 	try {

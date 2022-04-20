@@ -2,6 +2,7 @@ import Node from "../models/node";
 import { readNode, writeNode } from "./files";
 import fs from "fs";
 import onChange from "on-change";
+import path from "path";
 
 interface CacheEntry {
 	node: Node;
@@ -42,25 +43,31 @@ export default class Cache {
 		await writeNode(node, path);
 	}
 
+	*getFilesRecurs(folder: string) {
+		const files = fs.readdirSync(folder, { withFileTypes: true });
+		for (const file of files) {
+			if (file.isDirectory()) {
+				yield* this.getFilesRecurs(path.join(folder, file.name));
+			} else {
+				yield file.name;
+			}
+		}
+	}
+
 	getLastPage(folder: string): number {
 		if (!this.lastPages.has(folder)) {
 			if (!fs.existsSync(folder)) {
 				return NaN;
 			}
-			const files = fs.readdirSync(folder);
-			const fileNumbers = files
-				.map((path) => {
-					const match = path.match(/\d*/);
-					if (match) {
-						const parsedNumber = match.length && parseInt(match[0]);
-						if (parsedNumber && parsedNumber !== NaN)
-							return parsedNumber;
-						else return NaN;
-					} else {
-						return NaN;
-					}
-				})
-				.filter((x) => x !== NaN);
+			let fileNumbers: number[] = [];
+			for (const file of this.getFilesRecurs(folder)) {
+				const match = file.match(/\d*/);
+				if (match) {
+					const parsedNumber = match.length && parseInt(match[0]);
+					if (parsedNumber && parsedNumber !== NaN)
+						fileNumbers.push(parsedNumber);
+				}
+			}
 
 			fileNumbers.sort((a, b) => b - a);
 			if (fileNumbers.length) {
