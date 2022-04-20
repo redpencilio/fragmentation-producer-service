@@ -1,7 +1,6 @@
 import fs from "fs";
 import { Quad, Store, DataFactory, NamedNode, Term, StreamParser } from "n3";
 const { quad, namedNode } = DataFactory;
-import rdfParser from "rdf-parse";
 import rdfSerializer from "rdf-serialize";
 import jsstream from "stream";
 import * as RDF from "rdf-js";
@@ -68,13 +67,6 @@ export function readTriplesStream(file: string): RDF.Stream<Quad> | null {
 	return fileStream
 		.pipe(new StreamParser({ baseIRI: "." }))
 		.pipe(transformStream);
-	// new StreamParser.
-	// return rdfParser
-	// 	.parse(fileStream, {
-	// 		contentType: "text/turtle",
-	// 		baseIRI: new String(),
-	// 	})
-	// 	.pipe(transformStream);
 }
 
 export function createStore(quadStream: RDF.Stream<Quad>): Promise<Store> {
@@ -125,51 +117,6 @@ export async function writeTriplesStream(
 			});
 		});
 	});
-}
-
-interface PageCache {
-	[folder: string]: number;
-}
-
-const lastPageCache: PageCache = {};
-
-/**
- * Returns the last page number currently available.
- *
- * @param {string} folder The folder in which the files are stored.
- *
- * @return {number | NaN} Biggest page index currently available or NaN
- * if no numbered pages were found.
- */
-export function lastPage(folder: string): number {
-	if (!fs.existsSync(folder)) {
-		return NaN;
-	}
-	if (!lastPageCache[folder]) {
-		const files = fs.readdirSync(folder);
-		const fileNumbers = files
-			.map((path) => {
-				const match = path.match(/\d*/);
-				if (match) {
-					const parsedNumber = match.length && parseInt(match[0]);
-					if (parsedNumber && parsedNumber !== NaN)
-						return parsedNumber;
-					else return NaN;
-				} else {
-					return NaN;
-				}
-			})
-			.filter((x) => x !== NaN);
-
-		fileNumbers.sort((a, b) => b - a);
-		if (fileNumbers.length) {
-			lastPageCache[folder] = fileNumbers[0];
-		} else {
-			return NaN; // let's not cache this as it's a starting point
-		}
-	}
-
-	return lastPageCache[folder];
 }
 
 function convertToRelativeURI(nn: Term): NamedNode {

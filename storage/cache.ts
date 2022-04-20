@@ -1,7 +1,6 @@
 import Node from "../models/node";
 import { readNode, writeNode } from "./files";
 import fs from "fs";
-import onChange from "on-change";
 import path from "path";
 
 interface CacheEntry {
