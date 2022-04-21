@@ -11,7 +11,6 @@ interface CacheEntry {
 function wrapInProxy(cacheEntry: CacheEntry) {
 	let nodeChangeHandler = {
 		set: function (target, property, value, receiver) {
-			console.log("MODIFIED");
 			target[property] = value;
 			cacheEntry.modified = true;
 			// you have to return true to accept the changes

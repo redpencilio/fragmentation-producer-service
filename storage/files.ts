@@ -11,16 +11,17 @@ import Resource from "../models/resource";
 import Relation from "../models/relation";
 import path from "path";
 
-/**
- * Contains abstractions for working with files containing turtle
- * content.
- */
-
-interface FileCache {
-	[file: string]: string;
+function fixRelativePath(nn: NamedNode) {
+	let result: NamedNode = nn;
+	if (nn.value.startsWith("/")) {
+		result = namedNode(`.${nn.value}`);
+	} else if (nn.value.startsWith("...")) {
+		result = namedNode(nn.value.substring(1));
+	} else if (nn.value.startsWith(".")) {
+		result = namedNode(`./${nn.value.substring(1)}`);
+	}
+	return result;
 }
-
-const fileCache: FileCache = {};
 
 /**
  * Reads the triples in a file, assuming text/turtle.
@@ -39,26 +40,19 @@ export function readTriplesStream(file: string): RDF.Stream<Quad> | null {
 		let subject = quadObj.subject;
 		let predicate = quadObj.predicate;
 		let object = quadObj.object;
-		if (predicate.equals(tree("node")) || predicate.equals(tree("view"))) {
-			if (object.value.startsWith("/")) {
-				object = convertToRelativeURI(object);
-			} else if (object.value.startsWith("...")) {
-				object = namedNode(object.value.substring(1));
-			} else if (object.value.startsWith(".")) {
-				object = namedNode(`./${object.value.substring(1)}`);
-			}
+		if (
+			(predicate.equals(tree("node")) ||
+				predicate.equals(tree("view"))) &&
+			object instanceof NamedNode
+		) {
+			object = fixRelativePath(object);
 		}
 		if (
-			(predicate.equals(rdf("type")) && object.equals(tree("Node"))) ||
-			predicate.equals(tree("relation"))
+			((predicate.equals(rdf("type")) && object.equals(tree("Node"))) ||
+				predicate.equals(tree("relation"))) &&
+			subject instanceof NamedNode
 		) {
-			if (subject.value.startsWith("/")) {
-				subject = convertToRelativeURI(subject);
-			} else if (subject.value.startsWith("...")) {
-				subject = namedNode(subject.value.substring(1));
-			} else if (subject.value.startsWith(".")) {
-				subject = namedNode(`./${subject.value.substring(1)}`);
-			}
+			subject = fixRelativePath(subject);
 		}
 		let newQuad: Quad = quad(subject, predicate, object);
 		transformStream.push(newQuad);
@@ -117,10 +111,6 @@ export async function writeTriplesStream(
 			});
 		});
 	});
-}
-
-function convertToRelativeURI(nn: Term): NamedNode {
-	return namedNode(`.${nn.value}`);
 }
 
 export async function readNode(filePath: string): Promise<Node> {

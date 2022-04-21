@@ -19,7 +19,7 @@ app.use(
 import { readTriplesStream, createStore, readNode } from "./storage/files";
 import PromiseQueue from "./promise-queue";
 import TimeFragmenter from "./fragmenters/TimeFragmenter";
-import { error, getFirstMatch } from "./utils/utils";
+import { error } from "./utils/utils";
 import { ldesTime } from "./utils/namespaces";
 import Resource from "./models/resource";
 import Node from "./models/node";
@@ -73,7 +73,7 @@ app.post("/resource", async function (req: any, res: any, next: any) {
 		await UPDATE_QUEUE.push(() => FRAGMENTER.cache.flush());
 
 		if (currentDataset) {
-			console.log(currentDataset.id)
+			console.log(currentDataset.id);
 			res.status(201).send(
 				`{"message": "ok", "triplesInPage": ${currentDataset.count()}}`
 			);
