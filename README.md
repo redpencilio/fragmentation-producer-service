@@ -89,10 +89,32 @@ In this case, the supplied Content-Type header should be `text/turtle`.
 
 ### Fragmenters
 
+`fragmenters/Fragmenter.ts` provides a base abstract class which can be used to implement new types of fragmenters. It provides the following methods:
+
+-   `constructNewNode` constructs a new node with an incremented id
+-   `fileForNode` returns the file location of a node given a node id
+-   `determineSubFolder` determines the folder the node should be located in
+-   `shouldCreateNewPage` determines whether a node has reached its limit in terms of resource count
+-   `addResource` is an abstract method which is responsible to add a new resource to a dataset and is the main method which should be implemented by new fragmenters.
+
+`fragmenters/TimeFragmenter.ts` implements a versioning time-based LDES fragmenter. When adding a resource to a dataset using this fragmenter, it adds a timestamp and a version to the resource. The relations it uses are GreaterThanRelations.
+
+`fragmenters/PrefixTreeFragmenter.ts` stores resources in a prefix-tree based dataset. The relations it uses are PrefixRelations.
+
 ### Models
 
 ### Caching
 
+The cache stores a list of nodes in combination with their `modified` status. It also provides a `flush` function which is responsible for writing back all modified nodes.
+
 ### Dataset Transformers
+
+Dataset transformers provide a way in order to convert Readable text streams to a stream of `Resource` instances each containing an id and a triplestore. `dataset-transformers/dataset-transformer.ts` provides an interface containing a `transform` method which emits a stream of resources based on a readable stream and a configuration.
+
+`default-transformer.ts` is an implementation which is to be used for ordinary text files and converts each line to a resource.
+
+`csv-transformer.ts` reads each line of a provided csv filestream and converts it based on a csv json configuration.
+
+These transformers are mainly used by the CLI tool which can be found in `fragment-dataset.ts`
 
 Prefix tree implementation based on https://github.com/Dexagod/linked_data_tree.
