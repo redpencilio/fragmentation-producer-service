@@ -12,18 +12,6 @@ import Relation from "../models/relation";
 import path from "path";
 import ttl_read from "@graphy/content.ttl.read";
 
-function fixRelativePath(nn: NamedNode) {
-	let result: NamedNode = nn;
-	if (nn.value.startsWith("/")) {
-		result = namedNode(`.${nn.value}`);
-	} else if (nn.value.startsWith("...")) {
-		result = namedNode(nn.value.substring(1));
-	} else if (nn.value.startsWith(".")) {
-		result = namedNode(`./${nn.value.substring(1)}`);
-	}
-	return result;
-}
-
 /**
  * Reads the triples in a file, assuming text/turtle.
  *
