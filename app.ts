@@ -113,59 +113,54 @@ app.post("/:folder", async function (req: any, res: any, next: any) {
 	}
 });
 
-app.get(
-	"/:folder/:subfolder?/:nodeId",
-	async function (req: any, res: any, next: any) {
-		try {
-			const page = parseInt(req.params.nodeId);
-			console.log(page);
+app.get("/:folder*/:nodeId", async function (req: any, res: any, next: any) {
+	try {
+		console.log(req.params["0"]);
+		const page = parseInt(req.params.nodeId);
+		console.log(page);
 
-			const pagesFolder = path.join(BASE_FOLDER, req.params.folder);
+		const pagesFolder = path.join(BASE_FOLDER, req.params.folder);
 
-			console.log(cache.getLastPage(pagesFolder));
-			if (page > cache.getLastPage(pagesFolder)) {
-				return next(error(404, "Page not found"));
-			}
-
-			const contentTypes = await rdfSerializer.getContentTypes();
-
-			const contentType = req.accepts(contentTypes);
-			console.log(contentType);
-			if (!contentType) {
-				return next(error(406));
-			}
-
-			if (page < cache.getLastPage(pagesFolder))
-				res.header("Cache-Control", "public, immutable");
-
-			const rdfStream = readTriplesStream(
-				fileForPage(
-					path.join(pagesFolder, req.params.subfolder || ""),
-					page
-				)
-			);
-
-			res.header("Content-Type", contentType);
-			if (rdfStream) {
-				rdfSerializer
-					.serialize(rdfStream, {
-						contentType: contentType,
-					})
-					.on("data", (d) => res.write(d))
-					.on("error", (error) => {
-						next(error(500, "Serializing error"));
-					})
-					.on("end", () => {
-						res.end();
-					});
-			} else {
-				next(error(500));
-			}
-		} catch (e) {
-			console.error(e);
-			return next(error(500));
+		console.log(cache.getLastPage(pagesFolder));
+		if (page > cache.getLastPage(pagesFolder)) {
+			return next(error(404, "Page not found"));
 		}
+
+		const contentTypes = await rdfSerializer.getContentTypes();
+
+		const contentType = req.accepts(contentTypes);
+		console.log(contentType);
+		if (!contentType) {
+			return next(error(406));
+		}
+
+		if (page < cache.getLastPage(pagesFolder))
+			res.header("Cache-Control", "public, immutable");
+
+		const rdfStream = readTriplesStream(
+			fileForPage(path.join(pagesFolder, req.params[0] || ""), page)
+		);
+
+		res.header("Content-Type", contentType);
+		if (rdfStream) {
+			rdfSerializer
+				.serialize(rdfStream, {
+					contentType: contentType,
+				})
+				.on("data", (d) => res.write(d))
+				.on("error", (error) => {
+					next(error(500, "Serializing error"));
+				})
+				.on("end", () => {
+					res.end();
+				});
+		} else {
+			next(error(500));
+		}
+	} catch (e) {
+		console.error(e);
+		return next(error(500));
 	}
-);
+});
 
 app.use(errorHandler);

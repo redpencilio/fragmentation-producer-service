@@ -12,23 +12,29 @@ export default abstract class Fragmenter {
 	path: RDF.NamedNode;
 	cache: Cache;
 	maxNodeCountPerFolder: number;
+	folderDepth: number;
 
 	constructor(
 		folder: string,
 		stream: RDF.NamedNode,
 		maxResourcesPerPage: number,
 		path: RDF.NamedNode,
-		maxNodeCountPerFolder: number
+		maxNodeCountPerFolder: number,
+		folderDepth: number = 2
 	) {
 		this.folder = folder;
 		this.stream = stream;
 		this.maxResourcesPerPage = maxResourcesPerPage;
 		this.path = path;
 		this.maxNodeCountPerFolder = maxNodeCountPerFolder;
+		this.folderDepth = folderDepth;
 		this.cache = new Cache();
 	}
 	constructNewNode(): Node {
 		const nodeId = (this.cache.getLastPage(this.folder) || 0) + 1;
+		if (nodeId === 1) {
+			console.log("view");
+		}
 		this.cache.updateLastPage(this.folder, nodeId);
 		const node = new Node(
 			nodeId,
@@ -39,7 +45,7 @@ export default abstract class Fragmenter {
 	}
 
 	fileForNode(nodeId: number): string {
-		//Determine in which subfolder nodeId should be located
+		// Determine in which subfolder nodeId should be located
 		let subFolder: string = this.determineSubFolder(nodeId);
 		return path.join(this.folder, subFolder, `${nodeId}.ttl`);
 	}
@@ -48,9 +54,18 @@ export default abstract class Fragmenter {
 		if (nodeId === 1) {
 			return "";
 		} else {
-			return (
-				Math.floor(nodeId / this.maxNodeCountPerFolder) + 1
-			).toString();
+			let folderChain: string[] = [];
+			let rest = nodeId;
+			let divider = this.maxNodeCountPerFolder;
+			for (let i = 1; i < this.folderDepth; i++) {
+				let wholeDiv = Math.floor(rest / divider) % divider;
+				let folderNumber = wholeDiv + 1;
+				folderChain.unshift(folderNumber.toString());
+				rest = rest - wholeDiv * this.maxNodeCountPerFolder;
+				divider = divider * this.maxNodeCountPerFolder;
+			}
+			folderChain.unshift("");
+			return path.join(...folderChain);
 		}
 	}
 
@@ -60,17 +75,13 @@ export default abstract class Fragmenter {
 	): NamedNode {
 		let sourceSubFolder: string = this.determineSubFolder(sourceNodeId);
 		let targetSubFolder: string = this.determineSubFolder(targetNodeId);
-		if (sourceSubFolder === targetSubFolder) {
-			return namedNode(`./${targetNodeId}`);
-		} else if (sourceSubFolder === "") {
-			return namedNode(
-				path.join(".", targetSubFolder, targetNodeId.toString())
-			);
-		} else {
-			return namedNode(
-				path.join("..", targetSubFolder, targetNodeId.toString())
-			);
-		}
+
+		let relativePath = path.join(
+			path.relative(sourceSubFolder, targetSubFolder),
+			targetNodeId.toString()
+		);
+
+		return namedNode(`./${relativePath}`);
 	}
 
 	getViewFile() {
