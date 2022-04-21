@@ -19,26 +19,31 @@ app.use(
 import { readTriplesStream, createStore, readNode } from "./storage/files";
 import PromiseQueue from "./promise-queue";
 import TimeFragmenter from "./fragmenters/TimeFragmenter";
-import { error } from "./utils/utils";
+import { BASE_FOLDER, error, Newable } from "./utils/utils";
 import { ldesTime } from "./utils/namespaces";
 import Resource from "./models/resource";
 import Node from "./models/node";
 import PrefixTreeFragmenter from "./fragmenters/PrefixTreeFragmenter";
 import Cache from "./storage/cache";
-
-const PAGES_FOLDER = "/data/pages";
+import Fragmenter from "./fragmenters/Fragmenter";
 
 const UPDATE_QUEUE = new PromiseQueue<Node | void>();
 
 const stream = ldesTime("example-stream");
 
 const FRAGMENTER = new PrefixTreeFragmenter(
-	"/data/movieslarge",
+	path.join(BASE_FOLDER, "movieslarge"),
 	stream,
 	100,
 	new NamedNode("https://example.org/name"),
 	100
 );
+
+const FRAGMENTERS = new Map<string, Newable<Fragmenter>>();
+
+FRAGMENTERS.set("time-fragmenter", TimeFragmenter);
+
+FRAGMENTERS.set("prefix-tree-fragmenter", PrefixTreeFragmenter);
 
 const cache = new Cache();
 
@@ -52,9 +57,33 @@ function fileForPage(folder: string, page: number) {
 	return `${folder}/${page}.ttl`;
 }
 
-app.post("/resource", async function (req: any, res: any, next: any) {
+app.post("/:folder", async function (req: any, res: any, next: any) {
 	try {
-		console.log(rdfSerializer.getContentTypes);
+		if (
+			!(
+				req.query.resource &&
+				req.query.stream &&
+				req.query["relation-path"]
+			)
+		) {
+			throw new Error(
+				"Resource, stream or relationPath parameters where not supplied"
+			);
+		}
+		if (req.query.fragmenter && !FRAGMENTERS.has(req.query.fragmenter)) {
+			throw new Error("Supplied fragmenter type does not exist");
+		}
+
+		const fragmenterClass =
+			FRAGMENTERS.get(req.query.fragmenter) || TimeFragmenter;
+		const fragmenter = new fragmenterClass(
+			path.join(BASE_FOLDER, req.params.folder),
+			namedNode(req.query.stream),
+			100,
+			namedNode(req.query["relation-path"]),
+			100
+		);
+		console.log(fragmenter);
 		const contentTypes = await rdfParser.getContentTypes();
 		if (!contentTypes.includes(req.headers["content-type"])) {
 			return next(error(400, "Content-Type not recognized"));
@@ -67,10 +96,10 @@ app.post("/resource", async function (req: any, res: any, next: any) {
 		const resource = new Resource(namedNode(req.query.resource), store);
 
 		const currentDataset = await UPDATE_QUEUE.push(() =>
-			FRAGMENTER.addResource(resource)
+			fragmenter.addResource(resource)
 		);
 
-		await UPDATE_QUEUE.push(() => FRAGMENTER.cache.flush());
+		await UPDATE_QUEUE.push(() => fragmenter.cache.flush());
 
 		if (currentDataset) {
 			console.log(currentDataset.id);
@@ -90,7 +119,8 @@ app.get(
 		try {
 			const page = parseInt(req.params.nodeId);
 			console.log(page);
-			const pagesFolder = `/data/${req.params.folder}`;
+
+			const pagesFolder = path.join(BASE_FOLDER, req.params.folder);
 
 			console.log(cache.getLastPage(pagesFolder));
 			if (page > cache.getLastPage(pagesFolder)) {
@@ -116,34 +146,26 @@ app.get(
 			);
 
 			res.header("Content-Type", contentType);
-
-			rdfSerializer
-				.serialize(rdfStream, {
-					contentType: contentType,
-				})
-				.on("data", (d) => res.write(d))
-				.on("error", (error) => {
-					next(error(500, "Serializing error"));
-				})
-				.on("end", () => {
-					res.end();
-				});
+			if (rdfStream) {
+				rdfSerializer
+					.serialize(rdfStream, {
+						contentType: contentType,
+					})
+					.on("data", (d) => res.write(d))
+					.on("error", (error) => {
+						next(error(500, "Serializing error"));
+					})
+					.on("end", () => {
+						res.end();
+					});
+			} else {
+				next(error(500));
+			}
 		} catch (e) {
 			console.error(e);
 			return next(error(500));
 		}
 	}
 );
-
-app.get("/last-page", function (_req: any, res: any, next: any) {
-	try {
-		const page = cache.getLastPage(PAGES_FOLDER);
-		if (page === NaN) return next(error(404, "No pages found"));
-		else res.status(200).send(`{"lastPage": ${page}}`);
-	} catch (e) {
-		console.error(e);
-		return next(error(500));
-	}
-});
 
 app.use(errorHandler);

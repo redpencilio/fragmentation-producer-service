@@ -9,12 +9,10 @@ import fs from "fs";
 import Fragmenter from "./fragmenters/Fragmenter";
 import TimeFragmenter from "./fragmenters/TimeFragmenter";
 import DefaultTransformer from "./dataset-transformers/default-transformer";
-import { DatasetConfiguration } from "./utils/utils";
+import { DatasetConfiguration, Newable } from "./utils/utils";
 import DatasetTransformer from "./dataset-transformers/dataset-transformer";
 import CSVTransformer from "./dataset-transformers/csv-transformer";
 import path from "path";
-
-export type Newable<T> = { new (...args: any[]): T };
 
 const fragmenterMap = new Map<String, Newable<Fragmenter>>();
 
