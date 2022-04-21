@@ -4,6 +4,8 @@ import { ldesTime, tree, xml } from "./namespaces";
 import * as RDF from "rdf-js";
 const { namedNode, quad, literal } = DataFactory;
 
+export const BASE_FOLDER = process.env.DATA_FOLDER || "./data";
+
 interface Error {
 	name: string;
 	message: string;
@@ -59,3 +61,5 @@ export function getFirstMatch(
 	}
 	return null;
 }
+
+export type Newable<T> = { new (...args: any[]): T };

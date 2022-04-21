@@ -1,7 +1,6 @@
 import DatasetTransformer from "./dataset-transformer";
 import { Readable, Stream, PassThrough } from "stream";
 
-import jsstream from "stream";
 import readline from "readline";
 import { example, rdf } from "../utils/namespaces";
 import { DataFactory, Store } from "n3";
