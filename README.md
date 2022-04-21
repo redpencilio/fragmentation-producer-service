@@ -101,8 +101,6 @@ In this case, the supplied Content-Type header should be `text/turtle`.
 
 `fragmenters/PrefixTreeFragmenter.ts` stores resources in a prefix-tree based dataset. The relations it uses are PrefixRelations.
 
-### Models
-
 ### Caching
 
 The cache stores a list of nodes in combination with their `modified` status. It also provides a `flush` function which is responsible for writing back all modified nodes.
