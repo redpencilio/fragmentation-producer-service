@@ -10,6 +10,7 @@ import { ldes, rdf, tree } from "../utils/namespaces";
 import Resource from "../models/resource";
 import Relation from "../models/relation";
 import path from "path";
+import ttl_read from "@graphy/content.ttl.read";
 
 function fixRelativePath(nn: NamedNode) {
 	let result: NamedNode = nn;
@@ -35,32 +36,8 @@ export function readTriplesStream(file: string): RDF.Stream<Quad> | null {
 		return null;
 	}
 	const fileStream = fs.createReadStream(file);
-	const transformStream = new jsstream.Transform({ objectMode: true });
-	transformStream._transform = (quadObj: Quad, encoding, callback) => {
-		let subject = quadObj.subject;
-		let predicate = quadObj.predicate;
-		let object = quadObj.object;
-		if (
-			(predicate.equals(tree("node")) ||
-				predicate.equals(tree("view"))) &&
-			object instanceof NamedNode
-		) {
-			object = fixRelativePath(object);
-		}
-		if (
-			((predicate.equals(rdf("type")) && object.equals(tree("Node"))) ||
-				predicate.equals(tree("relation"))) &&
-			subject instanceof NamedNode
-		) {
-			subject = fixRelativePath(subject);
-		}
-		let newQuad: Quad = quad(subject, predicate, object);
-		transformStream.push(newQuad);
-		callback();
-	};
-	return fileStream
-		.pipe(new StreamParser({ baseIRI: "." }))
-		.pipe(transformStream);
+
+	return fileStream.pipe(ttl_read());
 }
 
 export function createStore(quadStream: RDF.Stream<Quad>): Promise<Store> {

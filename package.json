@@ -9,6 +9,7 @@
 	"author": "",
 	"license": "MIT",
 	"dependencies": {
+		"@graphy/content.ttl.read": "^4.3.4",
 		"@rdfjs/data-model": "^2.0.0",
 		"@rdfjs/namespace": "^1.1.0",
 		"@rdfjs/types": "^1.1.0",
