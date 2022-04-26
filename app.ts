@@ -31,14 +31,6 @@ const UPDATE_QUEUE = new PromiseQueue<Node | void>();
 
 const stream = ldesTime("example-stream");
 
-const FRAGMENTER = new PrefixTreeFragmenter(
-	path.join(BASE_FOLDER, "movieslarge"),
-	stream,
-	100,
-	new NamedNode("https://example.org/name"),
-	100
-);
-
 const FRAGMENTERS = new Map<string, Newable<Fragmenter>>();
 
 FRAGMENTERS.set("time-fragmenter", TimeFragmenter);

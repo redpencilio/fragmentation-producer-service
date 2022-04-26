@@ -13,6 +13,7 @@ import { DatasetConfiguration, Newable } from "./utils/utils";
 import DatasetTransformer from "./dataset-transformers/dataset-transformer";
 import CSVTransformer from "./dataset-transformers/csv-transformer";
 import path from "path";
+import { IPFSIndexTransformer } from "./dataset-transformers/ipfs-index-transformer";
 
 const fragmenterMap = new Map<String, Newable<Fragmenter>>();
 
@@ -20,10 +21,15 @@ fragmenterMap.set("time-fragmenter", TimeFragmenter);
 fragmenterMap.set("prefix-tree-fragmenter", PrefixTreeFragmenter);
 
 const transformerMap = new Map<String, DatasetTransformer>();
-transformerMap.set(".csv", new CSVTransformer());
+transformerMap.set("csv-transformer", new CSVTransformer());
+transformerMap.set("default-transformer", new DefaultTransformer());
+transformerMap.set("ipfs-transformer", new IPFSIndexTransformer());
+
+const extensionMap = new Map<String, DatasetTransformer>();
+extensionMap.set(".csv", new CSVTransformer());
 
 function getTransformer(extension: string): DatasetTransformer {
-	return transformerMap.get(extension) || new DefaultTransformer();
+	return extensionMap.get(extension) || new DefaultTransformer();
 }
 
 const UPDATE_QUEUE = new PromiseQueue<Node | void>();
@@ -54,13 +60,26 @@ program
 			.choices([...fragmenterMap.keys()] as string[])
 			.default("time-fragmenter")
 	)
+	.addOption(
+		new Option(
+			"-t, --transformer <dataset_transformer>",
+			"The dataset transformer which should be applied, overrides automatic selection of transformer based on file extension"
+		).choices([...transformerMap.keys()] as string[])
+	)
 	.action(async (datasetFile, options) => {
 		const fragmenterClass = fragmenterMap.get(options.fragmenter);
 		console.log(options.config);
 		const jsonData = fs.readFileSync(options.config, "utf8");
 		const datasetConfig: DatasetConfiguration = JSON.parse(jsonData);
+		let transformer: DatasetTransformer;
+		if (options.transformer) {
+			transformer = transformerMap.get(options.transformer)!;
+		} else {
+			transformer = getTransformer(path.extname(datasetFile));
+		}
 		if (fragmenterClass) {
 			await fragmentDataset(
+				transformer,
 				datasetFile,
 				datasetConfig,
 				fragmenterClass,
@@ -72,6 +91,7 @@ program
 program.parse();
 
 export default function fragmentDataset(
+	transformer: DatasetTransformer,
 	datasetFile: string,
 	datasetConfiguration: DatasetConfiguration,
 	fragmenterClass: Newable<Fragmenter>,
@@ -80,22 +100,29 @@ export default function fragmentDataset(
 	const fragmenter = new fragmenterClass(
 		outputFolder,
 		namedNode(datasetConfiguration.stream),
-		10,
+		100,
 		example("name"),
-		10,
+		20,
 		5
 	);
 	const fileStream = fs.createReadStream(datasetFile);
 
-	const transformer = getTransformer(path.extname(datasetFile));
 	return new Promise<void>((resolve) => {
 		const transformedStream = transformer.transform(
 			fileStream,
 			datasetConfiguration
 		);
+		let i = 0;
+		console.log(i);
 		transformedStream
 			.on("data", async (resource) => {
 				transformedStream.pause();
+				i += 1;
+				console.log(`\r${i}`);
+
+				if (i % 10000 === 0) {
+					await UPDATE_QUEUE.push(() => fragmenter.cache.flush());
+				}
 
 				await UPDATE_QUEUE.push(() => fragmenter.addResource(resource));
 				transformedStream.resume();

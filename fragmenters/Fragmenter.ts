@@ -80,8 +80,10 @@ export default abstract class Fragmenter {
 			path.relative(sourceSubFolder, targetSubFolder),
 			targetNodeId.toString()
 		);
-
-		return namedNode(`./${relativePath}`);
+		if(!relativePath.startsWith('..')){
+			relativePath = `./${relativePath}`
+		}
+		return namedNode(relativePath);
 	}
 
 	getViewFile() {

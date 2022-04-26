@@ -1,18 +1,14 @@
+import { Readable, PassThrough } from "stream";
+import { DatasetConfiguration } from "../utils/utils";
 import DatasetTransformer from "./dataset-transformer";
-import { Readable, Stream, PassThrough } from "stream";
-
 import readline from "readline";
 import { example, rdf } from "../utils/namespaces";
 import { DataFactory, Store } from "n3";
 import Resource from "../models/resource";
-import { DatasetConfiguration } from "../utils/utils";
+import { DefaultDatasetConfiguration } from "./default-transformer";
 const { quad, literal, namedNode } = DataFactory;
 
-export interface DefaultDatasetConfiguration extends DatasetConfiguration {
-	propertyType: string;
-}
-
-export default class DefaultTransformer implements DatasetTransformer {
+export class IPFSIndexTransformer implements DatasetTransformer {
 	transform(input: Readable, config: DefaultDatasetConfiguration): Readable {
 		const readLineInterface = readline.createInterface({
 			input: input,
@@ -22,17 +18,28 @@ export default class DefaultTransformer implements DatasetTransformer {
 
 		readLineInterface
 			.on("line", async (input) => {
-				let id = namedNode(encodeURI(config.resourceIdPrefix + input));
+				readLineInterface.pause();
+				const list = JSON.parse(input);
+				const id = namedNode(
+					encodeURI(config.resourceIdPrefix + list[0])
+				);
 				let store = new Store([
 					quad(id, rdf("type"), namedNode(config.resourceType)),
-					quad(id, namedNode(config.propertyType), literal(input)),
+					quad(id, namedNode(config.propertyType), literal(list[1])),
 				]);
 				let resource = new Resource(id, store);
 				resultStream.push(resource);
+				readLineInterface.resume();
 			})
 			.on("close", () => {
 				resultStream.end();
 			});
+		resultStream.on("pause", () => {
+			readLineInterface.pause();
+		});
+		resultStream.on("resume", () => {
+			readLineInterface.resume();
+		});
 		return resultStream;
 	}
 }

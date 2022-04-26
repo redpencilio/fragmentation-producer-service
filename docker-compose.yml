@@ -10,3 +10,8 @@ services:
         volumes:
             - .:/app/
             - ./data/:/data/
+        networks:
+            - ldes-network
+networks:
+    ldes-network:
+        name: ldes-network
