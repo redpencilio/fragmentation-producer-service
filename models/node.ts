@@ -22,7 +22,6 @@ export default class Node {
 	}
 
 	add_member(resource: Resource) {
-		this.members = new Set([...this.members, resource]);
 		this.members.add(resource);
 	}
 
@@ -30,11 +29,11 @@ export default class Node {
 		this.relationsMap.set(relationValue, relation);
 	}
 
-	add_members(resources: Resource[]) {
+	add_members(resources: Set<Resource>) {
 		resources.forEach((resource) => this.members.add(resource));
 	}
 
-	delete_members(resources: Resource[]) {
+	delete_members(resources: Set<Resource>) {
 		resources.forEach((resource) => this.members.delete(resource));
 	}
 

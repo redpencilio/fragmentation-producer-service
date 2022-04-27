@@ -33,7 +33,7 @@ export default class Cache {
 		try {
 			const node = await readNode(path);
 			let cacheEntry: CacheEntry = { node, modified: true };
-			this.nodes.set(path, wrapInProxy(cacheEntry));
+			this.nodes.set(path, cacheEntry);
 			return node;
 		} catch (e) {
 			throw e;
@@ -41,7 +41,7 @@ export default class Cache {
 	}
 
 	async addNode(path: string, node: Node) {
-		let cacheEntry: CacheEntry = { node, modified: true };
+		// let cacheEntry: CacheEntry = { node, modified: true };
 		// if (this.nodes.size > this.cacheLimit) {
 		// 	// If cache has reached its node limit, select a random node, remove it and write it back
 		// 	let keys = Array.from(this.nodes.keys());
@@ -52,12 +52,8 @@ export default class Cache {
 		// 	}
 		// 	this.nodes.delete(selectedKey);
 		// }
-		this.nodes.set(path, wrapInProxy(cacheEntry));
-	}
 
-	async setNode(path: string, node: Node) {
-		this.nodes.set(path, { node, modified: true });
-		await writeNode(node, path);
+		this.nodes.set(path, { node: node, modified: true });
 	}
 
 	*getFilesRecurs(folder: string) {
@@ -106,7 +102,7 @@ export default class Cache {
 		for (const [path, cacheEntry] of this.nodes) {
 			if (cacheEntry.modified) {
 				await writeNode(cacheEntry.node, path);
-				cacheEntry.modified = false;
+				// cacheEntry.modified = false;
 			}
 		}
 		console.log("Flushed");

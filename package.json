@@ -5,13 +5,14 @@
 	"main": "app.js",
 	"scripts": {
 		"start": "ts-node app.ts",
-		"fragment-dataset": "node -r ts-node/register --prof --no-logfile-per-isolate fragment-dataset.ts"
+		"fragment-dataset": "node -r ts-node/register --prof --no-logfile-per-isolate fragment-dataset.ts",
+		"fragment-dataset-debug": "node -r ts-node/register --inspect fragment-dataset.ts"
 	},
 	"author": "",
 	"license": "MIT",
 	"dependencies": {
 		"@graphy/content.ttl.read": "^4.3.4",
-		"@rdfjs/data-model": "^2.0.0",
+		"@rdfjs/data-model": "^1.3.4",
 		"@rdfjs/namespace": "^1.1.0",
 		"@rdfjs/types": "^1.1.0",
 		"body-parser": "^1.19.2",
@@ -29,6 +30,7 @@
 	"devDependencies": {
 		"@types/body-parser": "^1.19.2",
 		"@types/cors": "^2.8.12",
+		"@types/rdfjs__data-model": "^2.0.1",
 		"@types/rdfjs__namespace": "^2.0.0",
 		"ts-node": "^10.7.0",
 		"typescript": "^4.6.3"

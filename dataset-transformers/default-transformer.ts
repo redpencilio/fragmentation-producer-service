@@ -7,6 +7,7 @@ import { DataFactory, Store } from "n3";
 import Resource from "../models/resource";
 import { DatasetConfiguration } from "../utils/utils";
 const { quad, literal, namedNode } = DataFactory;
+import dataFactory from "@rdfjs/data-model";
 
 export interface DefaultDatasetConfiguration extends DatasetConfiguration {
 	propertyType: string;
@@ -22,17 +23,30 @@ export default class DefaultTransformer implements DatasetTransformer {
 
 		readLineInterface
 			.on("line", async (input) => {
-				let id = namedNode(encodeURI(config.resourceIdPrefix + input));
+				let id = dataFactory.namedNode(
+					encodeURI(config.resourceIdPrefix + input)
+				);
 				let store = new Store([
-					quad(id, rdf("type"), namedNode(config.resourceType)),
-					quad(id, namedNode(config.propertyType), literal(input)),
+					quad(
+						id,
+						rdf("type"),
+						dataFactory.namedNode(config.resourceType)
+					),
+					quad(
+						id,
+						dataFactory.namedNode(config.propertyType),
+						dataFactory.literal(input)
+					),
 				]);
 				let resource = new Resource(id, store);
 				resource.addProperty(
 					rdf("type").value,
-					namedNode(config.resourceType)
+					dataFactory.namedNode(config.resourceType)
 				);
-				resource.addProperty(config.propertyType, literal(input));
+				resource.addProperty(
+					config.propertyType,
+					dataFactory.literal(input)
+				);
 				resultStream.push(resource);
 			})
 			.on("close", () => {

@@ -6,6 +6,7 @@ import { DataFactory, Store } from "n3";
 import { rdf } from "../utils/namespaces";
 import Resource from "../models/resource";
 const { quad, literal, namedNode } = DataFactory;
+import dataFactory from "@rdfjs/data-model";
 interface CSVDatasetConfiguration extends DatasetConfiguration {
 	resourceIdField: string;
 	propertyMappings: object;
@@ -24,28 +25,32 @@ export default class CSVTransformer implements DatasetTransformer {
 					)
 				);
 				let store = new Store([
-					quad(id, rdf("type"), namedNode(config.resourceType)),
+					dataFactory.quad(
+						id,
+						rdf("type"),
+						dataFactory.namedNode(config.resourceType)
+					),
 				]);
 
 				Object.entries(config.propertyMappings).forEach(
 					([propertyName, predicateUri]) => {
 						store.addQuad(
 							id,
-							namedNode(predicateUri),
-							literal(data[propertyName])
+							dataFactory.namedNode(predicateUri),
+							dataFactory.literal(data[propertyName])
 						);
 					}
 				);
 				let resource = new Resource(id, store);
 				resource.addProperty(
 					rdf("type").value,
-					namedNode(config.resourceType)
+					dataFactory.namedNode(config.resourceType)
 				);
 				Object.entries(config.propertyMappings).forEach(
 					([propertyName, predicateUri]) => {
 						resource.addProperty(
 							predicateUri,
-							literal(data[propertyName])
+							dataFactory.literal(data[propertyName])
 						);
 					}
 				);

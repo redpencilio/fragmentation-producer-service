@@ -1,4 +1,5 @@
-import { Store, Term } from "n3";
+import { Term } from "@rdfjs/types";
+import { Store } from "n3";
 import * as RDF from "rdf-js";
 
 export default class Resource {
