@@ -120,6 +120,7 @@ export async function readNode(filePath: string): Promise<Node> {
 
 			if (type && value && target && relationPath) {
 				node.add_relation(
+					value.value,
 					new Relation(
 						relationId as RDF.NamedNode,
 						type as RDF.NamedNode,
@@ -137,7 +138,17 @@ export async function readNode(filePath: string): Promise<Node> {
 			.map((quad) => quad.object);
 		memberIds.forEach((memberId) => {
 			let content = new Store(store.getQuads(memberId, null, null, null));
-			node.add_member(new Resource(memberId as RDF.NamedNode, content));
+			let resource = new Resource(memberId as RDF.NamedNode, content);
+			content.forEach(
+				(quad) => {
+					resource.addProperty(quad.predicate.value, quad.object);
+				},
+				null,
+				null,
+				null,
+				null
+			);
+			node.add_member(resource);
 		});
 
 		return node;
@@ -162,7 +173,7 @@ export async function writeNode(node: Node, path: string) {
 	store.add(quad(node.idNamedNode, rdf("type"), tree("Node")));
 
 	// Add the different relations to the store
-	node.relations.forEach((relation) => {
+	node.relationsMap.forEach((relation) => {
 		store.add(quad(node.idNamedNode, tree("relation"), relation.id));
 		store.addQuads([
 			quad(relation.id, rdf("type"), relation.type),

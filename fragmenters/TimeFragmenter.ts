@@ -61,11 +61,13 @@ export default class TimeFragmenter extends Fragmenter {
 		try {
 			// create a store with the new graph for the new file
 			const currentNode = this.constructNewNode();
+			const time = nowLiteral();
 			node.add_relation(
+				time.value,
 				new Relation(
 					generateTreeRelation(),
 					tree("GreaterThanOrEqualRelation"),
-					nowLiteral(),
+					time,
 					this.getRelationReference(node.id, currentNode.id),
 					currentNode.id,
 					prov("generatedAtTime")

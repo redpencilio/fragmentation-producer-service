@@ -28,8 +28,9 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 		let node = viewNode;
 		let currentValue = "";
 		// Find longest prefix which is stored in prefixCache
-		let resourceValue = getFirstMatch(resource.data, null, this.path)
-			?.object.value;
+		let resourceValue = resource.dataMap.get(this.path.value)?.value;
+		// let resourceValue = getFirstMatch(resource.data, null, this.path)
+		// 	?.object.value;
 		if (resourceValue) {
 			const match = this.prefixCache.getLongestMatch(resourceValue);
 			if (match) {
@@ -57,8 +58,6 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 		depth: number = 0
 	): Promise<Node> {
 		// Check if we have to add the resource to a child of the current node, to the current node itself or if we have to split the current node.
-		const children = node.relations;
-
 		const childMatch = node.relationsMap.get(
 			prefixValue + resourceValue[depth]
 		);
@@ -91,7 +90,8 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 		// Determine the token at the given depth which occurs the most and split off members matching that specific token
 		let memberGroups: { [key: string]: Resource[] } = {};
 		node.members.forEach((member) => {
-			let pathValue = getFirstMatch(member.data, null, this.path)?.object;
+			let pathValue = member.dataMap.get(this.path.value);
+			// let pathValue = getFirstMatch(member.data, null, this.path)?.object;
 			if (pathValue) {
 				let character = pathValue.value.substring(depth, depth + 1);
 				if (memberGroups[character]) {
@@ -113,18 +113,8 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 			// else create a new relation and node with prefix value containing mostOccuringToken
 		}
 		let newNode: Node = this.constructNewNode();
-		node.add_relation(
-			new Relation(
-				generateTreeRelation(),
-				newRelationType,
-				literal(currentValue + mostOccuringToken),
-				this.getRelationReference(node.id, newNode.id),
-				newNode.id,
-				this.path
-			)
-		);
 
-		node.add_prefix_relation(
+		node.add_relation(
 			currentValue + mostOccuringToken,
 			new Relation(
 				generateTreeRelation(),

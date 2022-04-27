@@ -26,6 +26,7 @@ export default class CSVTransformer implements DatasetTransformer {
 				let store = new Store([
 					quad(id, rdf("type"), namedNode(config.resourceType)),
 				]);
+
 				Object.entries(config.propertyMappings).forEach(
 					([propertyName, predicateUri]) => {
 						store.addQuad(
@@ -36,6 +37,18 @@ export default class CSVTransformer implements DatasetTransformer {
 					}
 				);
 				let resource = new Resource(id, store);
+				resource.addProperty(
+					rdf("type").value,
+					namedNode(config.resourceType)
+				);
+				Object.entries(config.propertyMappings).forEach(
+					([propertyName, predicateUri]) => {
+						resource.addProperty(
+							predicateUri,
+							literal(data[propertyName])
+						);
+					}
+				);
 				resultStream.push(resource);
 			})
 			.on("end", () => {

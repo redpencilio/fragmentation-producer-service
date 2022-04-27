@@ -8,7 +8,6 @@ export default class Node {
 	id: number;
 	members: Set<Resource> = new Set();
 	relationsMap: Map<string, Relation> = new Map();
-	relations: Relation[] = [];
 	view: RDF.NamedNode;
 	stream: RDF.NamedNode;
 
@@ -27,11 +26,7 @@ export default class Node {
 		this.members.add(resource);
 	}
 
-	add_relation(relation: Relation) {
-		this.relations.push(relation);
-	}
-
-	add_prefix_relation(relationValue: string, relation: Relation) {
+	add_relation(relationValue: string, relation: Relation) {
 		this.relationsMap.set(relationValue, relation);
 	}
 

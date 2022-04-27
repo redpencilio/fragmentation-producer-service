@@ -28,6 +28,11 @@ export class IPFSIndexTransformer implements DatasetTransformer {
 					quad(id, namedNode(config.propertyType), literal(list[1])),
 				]);
 				let resource = new Resource(id, store);
+				resource.addProperty(
+					rdf("type").value,
+					namedNode(config.resourceType)
+				);
+				resource.addProperty(config.propertyType, literal(list[1]));
 				resultStream.push(resource);
 				readLineInterface.resume();
 			})

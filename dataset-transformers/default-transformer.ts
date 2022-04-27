@@ -28,6 +28,11 @@ export default class DefaultTransformer implements DatasetTransformer {
 					quad(id, namedNode(config.propertyType), literal(input)),
 				]);
 				let resource = new Resource(id, store);
+				resource.addProperty(
+					rdf("type").value,
+					namedNode(config.resourceType)
+				);
+				resource.addProperty(config.propertyType, literal(input));
 				resultStream.push(resource);
 			})
 			.on("close", () => {
