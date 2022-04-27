@@ -16,45 +16,21 @@ import Relation from "../models/relation";
 export default class TimeFragmenter extends Fragmenter {
 	constructVersionedResource(resource: Resource): Resource {
 		const versionedResourceId = generateVersion(resource.id);
-		const versionedStore = new Store();
-		resource.data.forEach(
-			(quadObj) => {
-				versionedStore.add(
-					quad(
-						quadObj.subject.equals(resource.id)
-							? versionedResourceId
-							: quadObj.subject,
-						quadObj.predicate.equals(resource.id)
-							? versionedResourceId
-							: quadObj.predicate,
-						quadObj.object.equals(resource.id)
-							? versionedResourceId
-							: quadObj.object
-					)
-				);
-			},
-			null,
-			null,
-			null,
-			null
-		);
+		const versionedResource = new Resource(versionedResourceId);
+
+		versionedResource.dataMap = new Map(resource.dataMap);
 
 		const dateLiteral = nowLiteral();
 
 		// add resources about this version
-		versionedStore.add(
-			quad(versionedResourceId, purl("isVersionOf"), resource.id)
+		versionedResource.addProperty(purl("isVersionOf").value, resource.id);
+
+		versionedResource.addProperty(
+			prov("generatedAtTime").value,
+			dateLiteral
 		);
 
-		versionedStore.add(
-			quad(versionedResourceId, prov("generatedAtTime"), dateLiteral)
-		);
-
-		versionedStore.add(
-			quad(this.stream, tree("member"), versionedResourceId)
-		);
-
-		return new Resource(versionedResourceId, versionedStore);
+		return new Resource(versionedResourceId);
 	}
 
 	async closeDataset(node: Node, pageNr: number): Promise<Node> {

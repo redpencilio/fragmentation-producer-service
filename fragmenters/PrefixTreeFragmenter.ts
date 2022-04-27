@@ -140,10 +140,6 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 			}
 		}
 
-		// node.delete_members(memberGroups[mostOccuringToken]);
-
-		// newNode.add_members(memberGroups[mostOccuringToken]);
-
 		await this.cache.addNode(this.fileForNode(newNode.id), newNode);
 		this.prefixCache.addPrefix(
 			currentValue + mostOccuringToken,

@@ -26,19 +26,7 @@ export default class DefaultTransformer implements DatasetTransformer {
 				let id = dataFactory.namedNode(
 					encodeURI(config.resourceIdPrefix + input)
 				);
-				let store = new Store([
-					quad(
-						id,
-						rdf("type"),
-						dataFactory.namedNode(config.resourceType)
-					),
-					quad(
-						id,
-						dataFactory.namedNode(config.propertyType),
-						dataFactory.literal(input)
-					),
-				]);
-				let resource = new Resource(id, store);
+				let resource = new Resource(id);
 				resource.addProperty(
 					rdf("type").value,
 					dataFactory.namedNode(config.resourceType)

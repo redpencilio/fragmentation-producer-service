@@ -1,5 +1,13 @@
 import fs from "fs";
-import { Quad, Store, DataFactory, NamedNode, Term, StreamParser } from "n3";
+import {
+	Quad,
+	Store,
+	DataFactory,
+	NamedNode,
+	Term,
+	StreamParser,
+	Quad_Object,
+} from "n3";
 const { quad, namedNode } = DataFactory;
 import rdfSerializer from "rdf-serialize";
 import jsstream from "stream";
@@ -138,7 +146,7 @@ export async function readNode(filePath: string): Promise<Node> {
 			.map((quad) => quad.object);
 		memberIds.forEach((memberId) => {
 			let content = new Store(store.getQuads(memberId, null, null, null));
-			let resource = new Resource(memberId as RDF.NamedNode, content);
+			let resource = new Resource(memberId as RDF.NamedNode);
 			content.forEach(
 				(quad) => {
 					resource.addProperty(quad.predicate.value, quad.object);
@@ -186,7 +194,15 @@ export async function writeNode(node: Node, path: string) {
 	// Add the different members and their data to the store
 	node.members.forEach((member) => {
 		store.add(quad(node.stream, tree("member"), member.id));
-		store.addQuads(member.data.getQuads(null, null, null, null));
+		member.dataMap.forEach((object, predicateValue) => {
+			store.addQuad(
+				quad(
+					member.id,
+					namedNode(predicateValue.toString()),
+					object as Quad_Object
+				)
+			);
+		});
 	});
 
 	await writeTriplesStream(store, path);

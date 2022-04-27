@@ -24,19 +24,7 @@ export class IPFSIndexTransformer implements DatasetTransformer {
 				const id = dataFactory.namedNode(
 					encodeURI(config.resourceIdPrefix + list[0])
 				);
-				let store = new Store([
-					quad(
-						id,
-						rdf("type"),
-						dataFactory.namedNode(config.resourceType)
-					),
-					quad(
-						id,
-						dataFactory.namedNode(config.propertyType),
-						dataFactory.literal(list[1])
-					),
-				]);
-				let resource = new Resource(id, store);
+				let resource = new Resource(id);
 				resource.addProperty(
 					rdf("type").value,
 					dataFactory.namedNode(config.resourceType)

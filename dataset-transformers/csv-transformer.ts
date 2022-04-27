@@ -24,24 +24,8 @@ export default class CSVTransformer implements DatasetTransformer {
 						config.resourceIdPrefix + data[config.resourceIdField]
 					)
 				);
-				let store = new Store([
-					dataFactory.quad(
-						id,
-						rdf("type"),
-						dataFactory.namedNode(config.resourceType)
-					),
-				]);
 
-				Object.entries(config.propertyMappings).forEach(
-					([propertyName, predicateUri]) => {
-						store.addQuad(
-							id,
-							dataFactory.namedNode(predicateUri),
-							dataFactory.literal(data[propertyName])
-						);
-					}
-				);
-				let resource = new Resource(id, store);
+				let resource = new Resource(id);
 				resource.addProperty(
 					rdf("type").value,
 					dataFactory.namedNode(config.resourceType)

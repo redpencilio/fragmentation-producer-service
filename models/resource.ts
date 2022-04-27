@@ -4,16 +4,10 @@ import * as RDF from "rdf-js";
 
 export default class Resource {
 	id: RDF.NamedNode;
-	data: Store;
 	dataMap: Map<String, Term> = new Map();
 
-	constructor(
-		id: RDF.NamedNode,
-		data: Store,
-		dataMap: Map<String, Term> = new Map()
-	) {
+	constructor(id: RDF.NamedNode, dataMap: Map<String, Term> = new Map()) {
 		this.id = id;
-		this.data = data;
 		this.dataMap = dataMap;
 	}
 
