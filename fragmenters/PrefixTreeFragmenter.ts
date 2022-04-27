@@ -57,54 +57,63 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 		resourceValue: string,
 		depth: number = 0
 	): Promise<Node> {
-		// Check if we have to add the resource to a child of the current node, to the current node itself or if we have to split the current node.
-		const childMatch = node.relationsMap.get(
+		let childMatch = node.relationsMap.get(
 			prefixValue + resourceValue[depth]
 		);
-		if (childMatch) {
+		let curDepth = depth;
+		let curPrefixValue = prefixValue;
+		let curNode = node;
+		while (childMatch && curDepth <= resourceValue.length) {
+			// Check if we have to add the resource to a child of the current node, to the current node itself or if we have to split the current node.
 			const childNode = await this.cache.getNode(
 				this.fileForNode(childMatch.targetId)
 			);
-			return await this._addResource(
-				resource,
-				childNode,
-				childMatch.value.value,
-				resourceValue,
-				depth + 1
+			curNode = childNode;
+			curDepth += 1;
+			curPrefixValue = childMatch.value.value;
+			childMatch = curNode.relationsMap.get(
+				curPrefixValue + resourceValue[curDepth]
 			);
 		}
+
 		// Add the resource to the current node, if it is full: split.
 		if (this.shouldCreateNewPage(node)) {
-			node.add_member(resource);
+			curNode.add_member(resource);
 			// the current node has to be splitted
-			await this.splitNode(node, prefixValue, depth);
+			await this.splitNode(curNode, prefixValue, depth);
 		} else {
 			// we can simply add the new resource to the current node as a member
-			node.add_member(resource);
+			curNode.add_member(resource);
 		}
 
-		return node;
+		return curNode;
 	}
 
 	async splitNode(node: Node, currentValue: string, depth: number) {
+		if (depth >= currentValue.length) {
+			return;
+		}
 		// Determine the token at the given depth which occurs the most and split off members matching that specific token
-		let memberGroups: { [key: string]: number } = {};
-		let memberList = [...node.members];
-		for (let i = 0; i < memberList.length; i++) {
-			const member = memberList[i];
+		let memberGroups: { [key: string]: Set<Resource> } = {};
+		if (node.count() > 801) {
+			console.log(node.count());
+			console.log(depth);
+			console.log("------------");
+		}
+		node.members.forEach((member) => {
 			let pathValue = member.dataMap.get(this.path.value);
 			// let pathValue = getFirstMatch(member.data, null, this.path)?.object;
 			if (pathValue) {
-				let character = pathValue.value.substring(depth, depth + 1);
+				let character = pathValue.value.charAt(depth);
 				if (memberGroups[character]) {
-					memberGroups[character] += 1;
+					memberGroups[character].add(member);
 				} else {
-					memberGroups[character] = 1;
+					memberGroups[character] = new Set([member]);
 				}
 			}
-		}
+		});
 		let mostOccuringToken = Object.keys(memberGroups).reduce((k1, k2) =>
-			memberGroups[k1] > memberGroups[k2] ? k1 : k2
+			memberGroups[k1].size > memberGroups[k2].size ? k1 : k2
 		);
 		let newRelationType: RDF.Term;
 		if (mostOccuringToken === "") {
@@ -128,16 +137,18 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 			)
 		);
 
-		for (let i = 0; i < memberList.length; i++) {
-			const member = memberList[i];
-			let pathValue = member.dataMap.get(this.path.value);
-			if (pathValue) {
-				let character = pathValue.value.substring(depth, depth + 1);
-				if (character === mostOccuringToken) {
-					node.members.delete(member);
-					newNode.members.add(member);
-				}
-			}
+		node.delete_members(memberGroups[mostOccuringToken]);
+		newNode.add_members(memberGroups[mostOccuringToken]);
+
+		if (
+			this.shouldCreateNewPage(newNode) &&
+			newRelationType == tree("PrefixRelation")
+		) {
+			await this.splitNode(
+				newNode,
+				currentValue + mostOccuringToken,
+				depth + 1
+			);
 		}
 
 		await this.cache.addNode(this.fileForNode(newNode.id), newNode);

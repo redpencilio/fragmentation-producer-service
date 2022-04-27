@@ -100,7 +100,7 @@ export default function fragmentDataset(
 	const fragmenter = new fragmenterClass(
 		outputFolder,
 		namedNode(datasetConfiguration.stream),
-		100,
+		800,
 		example("name"),
 		20,
 		5
@@ -118,11 +118,9 @@ export default function fragmentDataset(
 			.on("data", async (resource) => {
 				transformedStream.pause();
 				i += 1;
-				console.log(`\r${i}`);
-
-				// if (i % 10000 === 0) {
-				// 	await UPDATE_QUEUE.push(() => fragmenter.cache.flush());
-				// }
+				if (i % 10000 === 0) {
+					console.log(`\r${i}`);
+				}
 
 				await UPDATE_QUEUE.push(() => fragmenter.addResource(resource));
 				transformedStream.resume();
