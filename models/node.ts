@@ -7,6 +7,7 @@ import * as RDF from "rdf-js";
 export default class Node {
 	id: number;
 	members: Set<Resource> = new Set();
+	relationsMap: Map<string, Relation> = new Map();
 	relations: Relation[] = [];
 	view: RDF.NamedNode;
 	stream: RDF.NamedNode;
@@ -28,6 +29,10 @@ export default class Node {
 
 	add_relation(relation: Relation) {
 		this.relations.push(relation);
+	}
+
+	add_prefix_relation(relationValue: string, relation: Relation) {
+		this.relationsMap.set(relationValue, relation);
 	}
 
 	add_members(resources: Resource[]) {

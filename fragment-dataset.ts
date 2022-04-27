@@ -32,7 +32,7 @@ function getTransformer(extension: string): DatasetTransformer {
 	return extensionMap.get(extension) || new DefaultTransformer();
 }
 
-const UPDATE_QUEUE = new PromiseQueue<Node | void>();
+const UPDATE_QUEUE = new PromiseQueue<Node | null | void>();
 
 const program = new Command();
 
@@ -120,9 +120,9 @@ export default function fragmentDataset(
 				i += 1;
 				console.log(`\r${i}`);
 
-				if (i % 10000 === 0) {
-					await UPDATE_QUEUE.push(() => fragmenter.cache.flush());
-				}
+				// if (i % 10000 === 0) {
+				// 	await UPDATE_QUEUE.push(() => fragmenter.cache.flush());
+				// }
 
 				await UPDATE_QUEUE.push(() => fragmenter.addResource(resource));
 				transformedStream.resume();

@@ -24,6 +24,8 @@ export default class Cache {
 
 	lastPages: Map<string, number> = new Map();
 
+	cacheLimit: number = 200;
+
 	async getNode(path: string) {
 		if (this.nodes.has(path)) {
 			return this.nodes.get(path)!.node;
@@ -38,8 +40,18 @@ export default class Cache {
 		}
 	}
 
-	addNode(path: string, node: Node) {
+	async addNode(path: string, node: Node) {
 		let cacheEntry: CacheEntry = { node, modified: true };
+		// if (this.nodes.size > this.cacheLimit) {
+		// 	// If cache has reached its node limit, select a random node, remove it and write it back
+		// 	let keys = Array.from(this.nodes.keys());
+		// 	let selectedKey = keys[Math.floor(Math.random() * keys.length)];
+		// 	let cacheEntry = this.nodes.get(selectedKey);
+		// 	if (cacheEntry?.modified) {
+		// 		await writeNode(cacheEntry.node, selectedKey);
+		// 	}
+		// 	this.nodes.delete(selectedKey);
+		// }
 		this.nodes.set(path, wrapInProxy(cacheEntry));
 	}
 

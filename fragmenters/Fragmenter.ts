@@ -80,8 +80,8 @@ export default abstract class Fragmenter {
 			path.relative(sourceSubFolder, targetSubFolder),
 			targetNodeId.toString()
 		);
-		if(!relativePath.startsWith('..')){
-			relativePath = `./${relativePath}`
+		if (!relativePath.startsWith("..")) {
+			relativePath = `./${relativePath}`;
 		}
 		return namedNode(relativePath);
 	}
@@ -94,5 +94,5 @@ export default abstract class Fragmenter {
 		return node.count() >= this.maxResourcesPerPage;
 	}
 
-	abstract addResource(resource: Resource): Promise<Node>;
+	abstract addResource(resource: Resource): Promise<Node | null>;
 }
