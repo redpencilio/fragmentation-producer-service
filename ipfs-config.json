@@ -1,0 +1,6 @@
+{
+	"stream": "http://mu.semte.ch/services/ldes-prefix-fragmenter/ipfs",
+	"resourceType": "https://example.org/ipfs-entry",
+	"propertyType": "https://example.org/name",
+	"resourceIdPrefix": "https://gateway.ipfs.io/ipfs/"
+}

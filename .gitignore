@@ -1,2 +1,4 @@
 /.log*
-docker-compose.yml
+node_modules
+data
+datasets

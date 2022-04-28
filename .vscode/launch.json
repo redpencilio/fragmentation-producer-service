@@ -8,9 +8,10 @@
             "name": "Attach",
             "port": 9229,
             "request": "attach",
-            "type": "pwa-node",
-            "sourceMaps": true,
-            "remoteRoot": "/usr/src/output/app/"
+            "type": "node",
+            "localRoot": "${workspaceFolder}",
+            "remoteRoot": "/usr/src/output/app",
+            "sourceMaps": true
         },
     ]
 }

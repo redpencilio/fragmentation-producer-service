@@ -1,0 +1,6 @@
+{
+	"stream": "http://mu.semte.ch/services/ldes-prefix-fragmenter/streets",
+	"resourceType": "https://example.org/Street",
+	"propertyType": "https://example.org/name",
+	"resourceIdPrefix": "https://example.org/"
+}
