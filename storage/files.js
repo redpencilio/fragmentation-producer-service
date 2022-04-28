@@ -1,6 +1,7 @@
-import fs from 'fs';
-import { parse, graph, Store, NamedNode, serialize } from 'rdflib';
-
+import fs from "fs";
+import rdfParser from "rdf-parse";
+import rdfSerializer from "rdf-serialize";
+import jsstream, { Stream } from "stream";
 /**
  * Contains abstractions for working with files containing turtle
  * content.
@@ -15,8 +16,7 @@ const fileCache = {};
  * @return {string} Contents of the file, read as UTF-8.
  */
 export function triplesFileAsString(file) {
-  if( !fileCache[file] )
-    fileCache[file] = fs.readFileSync(file, 'utf8');
+  if (!fileCache[file]) fileCache[file] = fs.readFileSync(file, "utf8");
 
   return fileCache[file];
 }
@@ -25,16 +25,15 @@ export function triplesFileAsString(file) {
  * Reads the triples in a file, assuming text/turtle.
  *
  * @param {string} file File path where the turtle file is stored.
- * @param {NamedNode} graph The graph to which we will write.
- * @param {Store?} store OPTIONAL: The store to which the content will be written.
- * @return {Store} Instance containing all triples which were downloaded.
+ * @return {Stream} Stream containing all triples which were downloaded.
  */
-export function readTriples(file, targetGraph, store = graph()) {
-  // TODO: targetGraph is not considered to be a new graph, how?
-  parse(triplesFileAsString(file), store, targetGraph.value, "text/turtle");
-  return store;
-}
 
+export function readTriplesStream(file, targetGraph) {
+  const fileStream = jsstream.Readable.from(triplesFileAsString(file));
+  return rdfParser.parse(fileStream, {
+    contentType: "text/turtle",
+  });
+}
 /**
  * Writes the triples in text-turtle to a file.
  *
@@ -42,10 +41,20 @@ export function readTriples(file, targetGraph, store = graph()) {
  * @param {NamedNode} graph The graph which will be written to the file.
  * @param {string} file Path of the file to which we will write the content.
  */
-export function writeTriples(store, graph, file) {
-  const serialized = serialize(graph, store, 'text/turtle');
-  fs.writeFileSync(file, serialized);
-  fileCache[file] = serialized;
+export function writeTriplesStream(store, graph, file) {
+  const quadStream = jsstream.Readable.from(store);
+  const turtleStream = rdfSerializer.serialize(quadStream, {
+    contentType: "text/turtle",
+  });
+  const writeStream = fs.createWriteStream(file);
+  fileCache[file] = "";
+  turtleStream.on("data", (turtleChunk) => {
+    writeStream.write(turtleChunk);
+    fileCache[file] += turtleChunk;
+  });
+  turtleStream.on("end", () => {
+    writeStream.end();
+  });
 }
 
 const lastPageCache = {};
@@ -68,22 +77,20 @@ export function clearLastPageCache(folder) {
  * if no numbered pages were found.
  */
 export function lastPage(folder) {
-  if( !lastPageCache[folder] ) {
+  if (!lastPageCache[folder]) {
     const files = fs.readdirSync(folder);
     const fileNumbers = files
       .map((path) => {
         const match = path.match(/\d*/);
         const parsedNumber = match.length && parseInt(match[0]);
-        if (parsedNumber && parsedNumber !== NaN)
-          return parsedNumber;
-        else
-          return NaN;
+        if (parsedNumber && parsedNumber !== NaN) return parsedNumber;
+        else return NaN;
       })
       .filter((x) => x !== NaN);
 
     fileNumbers.sort((a, b) => b - a);
     if (fileNumbers.length) {
-      lastPageCache[folder]=fileNumbers[0];
+      lastPageCache[folder] = fileNumbers[0];
     } else {
       return NaN; // let's not cache this as it's a starting point
     }
@@ -91,4 +98,3 @@ export function lastPage(folder) {
 
   return lastPageCache[folder];
 }
-
