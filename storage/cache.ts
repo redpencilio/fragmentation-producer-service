@@ -1,5 +1,5 @@
 import Node from "../models/node";
-import { readNode, writeNode } from "./files";
+import { readNode, readTriplesStream, writeNode } from "./files";
 import fs from "fs";
 import path from "path";
 
@@ -22,38 +22,44 @@ function wrapInProxy(cacheEntry: CacheEntry) {
 export default class Cache {
 	nodes: Map<string, CacheEntry> = new Map();
 
+	usageCount: number = 0;
+
+	lruRank: Map<string, number> = new Map();
+
 	lastPages: Map<string, number> = new Map();
 
-	cacheLimit: number = 200;
+	cacheLimit: number = 2000;
+
+	cacheEvictionCount: number = 50;
 
 	async getNode(path: string) {
+		let result: Node;
+
 		if (this.nodes.has(path)) {
-			return this.nodes.get(path)!.node;
+			result = this.nodes.get(path)!.node;
+		} else {
+			try {
+				result = await readNode(path);
+				let cacheEntry: CacheEntry = { node: result, modified: true };
+				this.nodes.set(path, cacheEntry);
+			} catch (e) {
+				throw e;
+			}
 		}
-		try {
-			const node = await readNode(path);
-			let cacheEntry: CacheEntry = { node, modified: true };
-			this.nodes.set(path, cacheEntry);
-			return node;
-		} catch (e) {
-			throw e;
-		}
+		this.updateNodeFrequency(path);
+		await this.applyCacheEviction();
+		return result;
+	}
+
+	updateNodeFrequency(key: string) {
+		this.lruRank.set(key, this.usageCount);
+		this.usageCount += 1;
 	}
 
 	async addNode(path: string, node: Node) {
-		// let cacheEntry: CacheEntry = { node, modified: true };
-		// if (this.nodes.size > this.cacheLimit) {
-		// 	// If cache has reached its node limit, select a random node, remove it and write it back
-		// 	let keys = Array.from(this.nodes.keys());
-		// 	let selectedKey = keys[Math.floor(Math.random() * keys.length)];
-		// 	let cacheEntry = this.nodes.get(selectedKey);
-		// 	if (cacheEntry?.modified) {
-		// 		await writeNode(cacheEntry.node, selectedKey);
-		// 	}
-		// 	this.nodes.delete(selectedKey);
-		// }
-
+		this.updateNodeFrequency(path);
 		this.nodes.set(path, { node: node, modified: true });
+		await this.applyCacheEviction();
 	}
 
 	*getFilesRecurs(folder: string) {
@@ -97,14 +103,35 @@ export default class Cache {
 		this.lastPages.set(folder, value);
 	}
 
-	async flush() {
-		console.log("Start flush");
-		for (const [path, cacheEntry] of this.nodes) {
-			if (cacheEntry.modified) {
-				await writeNode(cacheEntry.node, path);
-				// cacheEntry.modified = false;
+	async applyCacheEviction() {
+		if (this.nodes.size > this.cacheLimit) {
+			// Determine least frequently used node
+			const lruEntries = Array.from(this.lruRank.entries());
+			lruEntries.sort(([k1, v1], [k2, v2]) => v1 - v2);
+			const keys = lruEntries
+				.map(([k, v]) => k)
+				.slice(0, this.cacheEvictionCount);
+			if (keys) {
+				await this.evictFromCache2(keys);
 			}
 		}
+	}
+
+	async evictFromCache2(keys: string[]) {
+		let listOfPromises: any[] = [];
+		for (const key of keys) {
+			let node = this.nodes.get(key)?.node;
+			if (node) {
+				listOfPromises.push(writeNode(node, key));
+				this.nodes.delete(key);
+				this.lruRank.delete(key);
+			}
+		}
+		await Promise.all(listOfPromises);
+	}
+
+	async flush() {
+		await this.evictFromCache2(Array.from(this.nodes.keys()));
 		console.log("Flushed");
 	}
 }

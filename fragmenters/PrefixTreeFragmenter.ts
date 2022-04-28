@@ -65,10 +65,9 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 		let curNode = node;
 		while (childMatch && curDepth <= resourceValue.length) {
 			// Check if we have to add the resource to a child of the current node, to the current node itself or if we have to split the current node.
-			const childNode = await this.cache.getNode(
+			curNode = await this.cache.getNode(
 				this.fileForNode(childMatch.targetId)
 			);
-			curNode = childNode;
 			curDepth += 1;
 			curPrefixValue = childMatch.value.value;
 			childMatch = curNode.relationsMap.get(
@@ -80,7 +79,7 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 		if (this.shouldCreateNewPage(node)) {
 			curNode.add_member(resource);
 			// the current node has to be splitted
-			await this.splitNode(curNode, prefixValue, depth);
+			await this.splitNode(curNode, prefixValue, resourceValue, depth);
 		} else {
 			// we can simply add the new resource to the current node as a member
 			curNode.add_member(resource);
@@ -89,19 +88,20 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 		return curNode;
 	}
 
-	async splitNode(node: Node, currentValue: string, depth: number) {
-		if (depth >= currentValue.length) {
+	async splitNode(
+		node: Node,
+		currentValue: string,
+		resourceValue: string,
+		depth: number
+	) {
+		if (depth >= resourceValue.length) {
 			return;
 		}
 		// Determine the token at the given depth which occurs the most and split off members matching that specific token
 		let memberGroups: { [key: string]: Set<Resource> } = {};
-		if (node.count() > 801) {
-			console.log(node.count());
-			console.log(depth);
-			console.log("------------");
-		}
+		let pathValue;
 		node.members.forEach((member) => {
-			let pathValue = member.dataMap.get(this.path.value);
+			pathValue = member.dataMap.get(this.path.value);
 			// let pathValue = getFirstMatch(member.data, null, this.path)?.object;
 			if (pathValue) {
 				let character = pathValue.value.charAt(depth);
@@ -139,17 +139,6 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 
 		node.delete_members(memberGroups[mostOccuringToken]);
 		newNode.add_members(memberGroups[mostOccuringToken]);
-
-		if (
-			this.shouldCreateNewPage(newNode) &&
-			newRelationType == tree("PrefixRelation")
-		) {
-			await this.splitNode(
-				newNode,
-				currentValue + mostOccuringToken,
-				depth + 1
-			);
-		}
 
 		await this.cache.addNode(this.fileForNode(newNode.id), newNode);
 		this.prefixCache.addPrefix(

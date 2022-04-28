@@ -53,10 +53,9 @@ export function createStore(quadStream: RDF.Stream<Quad>): Promise<Store> {
  * @param {string} file Path of the file to which we will write the content.
  */
 export async function writeTriplesStream(
-	store: Store,
+	quadStream: jsstream.Readable,
 	file: string
 ): Promise<void> {
-	const quadStream = jsstream.Readable.from(store);
 	const turtleStream = rdfSerializer.serialize(quadStream, {
 		contentType: "text/turtle",
 	});
@@ -77,7 +76,10 @@ export async function writeTriplesStream(
 		turtleStream.resume();
 	});
 	return new Promise((resolve, reject) => {
-		turtleStream.on("error", reject);
+		turtleStream.on("error", () => {
+			console.log("error");
+			reject();
+		});
 		turtleStream.on("end", () => {
 			writeStream.end(() => {
 				resolve();
@@ -168,34 +170,54 @@ export async function readNode(filePath: string): Promise<Node> {
 }
 
 export async function writeNode(node: Node, path: string) {
+	const quadStream = new jsstream.PassThrough({ objectMode: true });
 	let store = new Store();
 
-	// Add stream and its view property
-	store.addQuads([
-		quad(node.stream, rdf("type"), ldes("EventStream")),
-		quad(node.stream, rdf("type"), tree("Collection")),
-		quad(node.stream, tree("view"), node.view),
-	]);
+	quadStream.push(quad(node.stream, rdf("type"), ldes("EventStream")));
+	quadStream.push(quad(node.stream, rdf("type"), tree("Collection")));
+	quadStream.push(quad(node.stream, tree("view"), node.view));
+
+	// // Add stream and its view property
+	// store.addQuads([
+	// 	quad(node.stream, rdf("type"), ldes("EventStream")),
+	// 	quad(node.stream, rdf("type"), tree("Collection")),
+	// 	quad(node.stream, tree("view"), node.view),
+	// ]);
 
 	// Add node id
-	store.add(quad(node.idNamedNode, rdf("type"), tree("Node")));
+	// store.add(quad(node.idNamedNode, rdf("type"), tree("Node")));
+
+	quadStream.push(quad(node.idNamedNode, rdf("type"), tree("Node")));
 
 	// Add the different relations to the store
 	node.relationsMap.forEach((relation) => {
-		store.add(quad(node.idNamedNode, tree("relation"), relation.id));
-		store.addQuads([
-			quad(relation.id, rdf("type"), relation.type),
-			quad(relation.id, tree("value"), relation.value),
-			quad(relation.id, tree("node"), relation.target),
-			quad(relation.id, tree("path"), relation.path),
-		]);
+		// store.add(quad(node.idNamedNode, tree("relation"), relation.id));
+		// store.addQuads([
+		// 	quad(relation.id, rdf("type"), relation.type),
+		// 	quad(relation.id, tree("value"), relation.value),
+		// 	quad(relation.id, tree("node"), relation.target),
+		// 	quad(relation.id, tree("path"), relation.path),
+		// ]);
+		quadStream.push(quad(node.idNamedNode, tree("relation"), relation.id));
+		quadStream.push(quad(relation.id, rdf("type"), relation.type));
+		quadStream.push(quad(relation.id, tree("value"), relation.value));
+		quadStream.push(quad(relation.id, tree("node"), relation.target));
+		quadStream.push(quad(relation.id, tree("path"), relation.path));
 	});
 
 	// Add the different members and their data to the store
 	node.members.forEach((member) => {
-		store.add(quad(node.stream, tree("member"), member.id));
+		// store.add(quad(node.stream, tree("member"), member.id));
+		quadStream.push(quad(node.stream, tree("member"), member.id));
 		member.dataMap.forEach((object, predicateValue) => {
-			store.addQuad(
+			// store.addQuad(
+			// 	quad(
+			// 		member.id,
+			// 		namedNode(predicateValue.toString()),
+			// 		object as Quad_Object
+			// 	)
+			// );
+			quadStream.push(
 				quad(
 					member.id,
 					namedNode(predicateValue.toString()),
@@ -205,5 +227,7 @@ export async function writeNode(node: Node, path: string) {
 		});
 	});
 
-	await writeTriplesStream(store, path);
+	quadStream.push(null);
+
+	await writeTriplesStream(quadStream, path);
 }
