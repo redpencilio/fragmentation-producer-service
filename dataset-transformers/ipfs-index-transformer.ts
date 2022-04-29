@@ -3,10 +3,8 @@ import { DatasetConfiguration } from "../utils/utils";
 import DatasetTransformer from "./dataset-transformer";
 import readline from "readline";
 import { example, rdf } from "../utils/namespaces";
-import { DataFactory, Store } from "n3";
 import Resource from "../models/resource";
 import { DefaultDatasetConfiguration } from "./default-transformer";
-const { quad, literal, namedNode } = DataFactory;
 import dataFactory from "@rdfjs/data-model";
 
 export class IPFSIndexTransformer implements DatasetTransformer {

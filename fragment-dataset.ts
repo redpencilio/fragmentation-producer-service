@@ -1,5 +1,5 @@
 import { Command, Option } from "commander";
-import { Store, DataFactory } from "n3";
+import { DataFactory } from "n3";
 const { quad, literal, namedNode } = DataFactory;
 import PrefixTreeFragmenter from "./fragmenters/PrefixTreeFragmenter";
 import Node from "./models/node";

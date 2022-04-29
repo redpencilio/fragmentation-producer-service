@@ -1,5 +1,11 @@
 import Node from "../models/node";
-import { readNode, readTriplesStream, writeNode } from "./files";
+import {
+	readNode,
+	readNodeGraphy,
+	readNodeStream,
+	readTriplesStream,
+	writeNode,
+} from "./files";
 import fs from "fs";
 import path from "path";
 
@@ -28,9 +34,9 @@ export default class Cache {
 
 	lastPages: Map<string, number> = new Map();
 
-	cacheLimit: number = 2000;
+	cacheLimit: number = 10000;
 
-	cacheEvictionCount: number = 50;
+	cacheEvictionCount: number = 5000;
 
 	async getNode(path: string) {
 		let result: Node;
@@ -39,7 +45,7 @@ export default class Cache {
 			result = this.nodes.get(path)!.node;
 		} else {
 			try {
-				result = await readNode(path);
+				result = await readNodeStream(path);
 				let cacheEntry: CacheEntry = { node: result, modified: true };
 				this.nodes.set(path, cacheEntry);
 			} catch (e) {
@@ -112,12 +118,12 @@ export default class Cache {
 				.map(([k, v]) => k)
 				.slice(0, this.cacheEvictionCount);
 			if (keys) {
-				await this.evictFromCache2(keys);
+				await this.evictFromCache(keys);
 			}
 		}
 	}
 
-	async evictFromCache2(keys: string[]) {
+	async evictFromCache(keys: string[]) {
 		let listOfPromises: any[] = [];
 		for (const key of keys) {
 			let node = this.nodes.get(key)?.node;
@@ -131,7 +137,7 @@ export default class Cache {
 	}
 
 	async flush() {
-		await this.evictFromCache2(Array.from(this.nodes.keys()));
+		await this.evictFromCache(Array.from(this.nodes.keys()));
 		console.log("Flushed");
 	}
 }

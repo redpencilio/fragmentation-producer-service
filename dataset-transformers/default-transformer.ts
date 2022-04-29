@@ -3,10 +3,8 @@ import { Readable, Stream, PassThrough } from "stream";
 
 import readline from "readline";
 import { example, rdf } from "../utils/namespaces";
-import { DataFactory, Store } from "n3";
 import Resource from "../models/resource";
 import { DatasetConfiguration } from "../utils/utils";
-const { quad, literal, namedNode } = DataFactory;
 import dataFactory from "@rdfjs/data-model";
 
 export interface DefaultDatasetConfiguration extends DatasetConfiguration {

@@ -1,5 +1,4 @@
 import namespace from "@rdfjs/namespace";
-import { DataFactory } from "n3";
 
 export const example = namespace("https://example.org/");
 

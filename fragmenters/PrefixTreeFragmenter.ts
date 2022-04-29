@@ -4,7 +4,7 @@ import Node from "../models/node";
 import Relation from "../models/relation";
 import Resource from "../models/resource";
 import { ldes, rdf, tree } from "../utils/namespaces";
-import { generateTreeRelation, getFirstMatch } from "../utils/utils";
+import { generateTreeRelation } from "../utils/utils";
 import * as RDF from "rdf-js";
 
 import Fragmenter from "./Fragmenter";

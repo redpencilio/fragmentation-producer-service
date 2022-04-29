@@ -9,7 +9,8 @@
       "noEmitOnError": false,
       "noImplicitAny": false,
       "downlevelIteration": true,
-      "strict": true,
+      "strict": false,
+      "noImplicitUseStrict": true,
       "esModuleInterop": true,
       "forceConsistentCasingInFileNames": true,
       // Ensure that .d.ts files are created by tsc, but not .js files

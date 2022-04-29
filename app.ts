@@ -3,7 +3,7 @@ import bodyParser from "body-parser";
 import rdfParser from "rdf-parse";
 import rdfSerializer from "rdf-serialize";
 import jsstream from "stream";
-import { Store, DataFactory, NamedNode } from "n3";
+import { DataFactory } from "n3";
 import cors from "cors";
 import path from "path";
 const { namedNode } = DataFactory;
@@ -16,7 +16,7 @@ app.use(
 	})
 );
 
-import { readTriplesStream, createStore, readNode } from "./storage/files";
+import { readTriplesStream, createStore } from "./storage/files";
 import PromiseQueue from "./promise-queue";
 import TimeFragmenter from "./fragmenters/TimeFragmenter";
 import { BASE_FOLDER, error, Newable } from "./utils/utils";
@@ -27,7 +27,7 @@ import PrefixTreeFragmenter from "./fragmenters/PrefixTreeFragmenter";
 import Cache from "./storage/cache";
 import Fragmenter from "./fragmenters/Fragmenter";
 
-const UPDATE_QUEUE = new PromiseQueue<Node | void>();
+const UPDATE_QUEUE = new PromiseQueue<Node | null | void>();
 
 const stream = ldesTime("example-stream");
 

@@ -2,7 +2,7 @@ import { Readable, Stream, PassThrough } from "stream";
 import { DatasetConfiguration } from "../utils/utils";
 import DatasetTransformer from "./dataset-transformer";
 import csv from "csv-parser";
-import { DataFactory, Store } from "n3";
+import { DataFactory } from "n3";
 import { rdf } from "../utils/namespaces";
 import Resource from "../models/resource";
 const { quad, literal, namedNode } = DataFactory;
