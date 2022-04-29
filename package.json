@@ -5,8 +5,8 @@
 	"main": "app.js",
 	"scripts": {
 		"start": "ts-node app.ts",
-		"fragment-dataset": "ts-node fragment-dataset.ts",
-		"fragment-dataset-debug": "node -r ts-node/register --inspect fragment-dataset.ts"
+		"fragment-dataset": "node --max_old_space_size=8192 -r ts-node/register --max-old-space-size=4096 fragment-dataset.ts",
+		"fragment-dataset-debug": "node --max_old_space_size=8192 -r ts-node/register --inspect fragment-dataset.ts"
 	},
 	"author": "",
 	"license": "MIT",

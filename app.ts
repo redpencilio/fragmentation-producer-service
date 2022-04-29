@@ -84,8 +84,18 @@ app.post("/:folder", async function (req: any, res: any, next: any) {
 		const quadStream = rdfParser.parse(jsstream.Readable.from(req.body), {
 			contentType: req.headers["content-type"],
 		});
+		const resource = new Resource(namedNode(req.query.resource));
 		const store = await createStore(quadStream);
-		const resource = new Resource(namedNode(req.query.resource), store);
+
+		store.forEach(
+			(quad) => {
+				resource.addProperty(quad.predicate.value, quad.object);
+			},
+			null,
+			null,
+			null,
+			null
+		);
 
 		const currentDataset = await UPDATE_QUEUE.push(() =>
 			fragmenter.addResource(resource)
