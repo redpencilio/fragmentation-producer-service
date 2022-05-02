@@ -1,7 +1,6 @@
 import Node from "../models/node";
 import {
 	readNode,
-	readNodeGraphy,
 	readNodeStream,
 	readTriplesStream,
 	writeNode,
@@ -9,24 +8,8 @@ import {
 import fs from "fs";
 import path from "path";
 
-interface CacheEntry {
-	node: Node;
-	modified: boolean;
-}
-
-function wrapInProxy(cacheEntry: CacheEntry) {
-	let nodeChangeHandler = {
-		set: function (target, property, value, receiver) {
-			target[property] = value;
-			cacheEntry.modified = true;
-			// you have to return true to accept the changes
-			return true;
-		},
-	};
-	return new Proxy(cacheEntry, nodeChangeHandler);
-}
 export default class Cache {
-	nodes: Map<string, CacheEntry> = new Map();
+	nodes: Map<string, Node> = new Map();
 
 	usageCount: number = 0;
 
@@ -36,23 +19,29 @@ export default class Cache {
 
 	cacheLimit: number = 10000;
 
-	cacheEvictionCount: number = 5000;
+	cacheEvictionPercentage: number = 0.3;
+
+	evicting: boolean = false;
+
+	constructor(cacheLimit: number = 10000) {
+		this.cacheLimit = cacheLimit;
+	}
 
 	async getNode(path: string) {
 		let result: Node;
 
 		if (this.nodes.has(path)) {
-			result = this.nodes.get(path)!.node;
+			result = this.nodes.get(path)!;
+			this.updateNodeFrequency(path);
 		} else {
 			try {
 				result = await readNodeStream(path);
-				let cacheEntry: CacheEntry = { node: result, modified: true };
-				this.nodes.set(path, cacheEntry);
+				this.nodes.set(path, result);
+				this.lruRank.set(path, 0);
 			} catch (e) {
 				throw e;
 			}
 		}
-		this.updateNodeFrequency(path);
 		await this.applyCacheEviction();
 		return result;
 	}
@@ -63,8 +52,9 @@ export default class Cache {
 	}
 
 	async addNode(path: string, node: Node) {
-		this.updateNodeFrequency(path);
-		this.nodes.set(path, { node: node, modified: true });
+		// this.updateNodeFrequency(path);
+		this.lruRank.set(path, 0);
+		this.nodes.set(path, node);
 		await this.applyCacheEviction();
 	}
 
@@ -110,32 +100,43 @@ export default class Cache {
 	}
 
 	async applyCacheEviction() {
-		if (this.nodes.size > this.cacheLimit) {
+		if (this.nodes.size > this.cacheLimit && !this.evicting) {
 			// Determine least frequently used node
 			const lruEntries = Array.from(this.lruRank.entries());
 			lruEntries.sort(([k1, v1], [k2, v2]) => v1 - v2);
+			console.log(
+				"Number of nodes with zero hits in cache: ",
+				lruEntries.filter(([k1, v1]) => v1 === 0).length
+			);
 			const keys = lruEntries
 				.map(([k, v]) => k)
-				.slice(0, this.cacheEvictionCount);
+				.slice(
+					0,
+					Math.floor(this.cacheEvictionPercentage * this.cacheLimit)
+				);
 			if (keys) {
-				await this.evictFromCache(keys);
+				this.evictFromCache(keys);
 			}
 		}
 	}
 
 	async evictFromCache(keys: string[]) {
+		this.evicting = true;
 		console.log("Eviction start");
 		let listOfPromises: any[] = [];
 		for (const key of keys) {
-			let node = this.nodes.get(key)?.node;
+			let node = this.nodes.get(key);
 			if (node) {
 				listOfPromises.push(writeNode(node, key));
-				this.nodes.delete(key);
-				this.lruRank.delete(key);
 			}
 		}
 		await Promise.all(listOfPromises);
+		for (const key of keys) {
+			this.nodes.delete(key);
+			this.lruRank.delete(key);
+		}
 		console.log("Eviction end");
+		this.evicting = false;
 	}
 
 	async flush() {

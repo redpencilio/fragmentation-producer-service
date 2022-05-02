@@ -8,10 +8,10 @@ import { generateTreeRelation } from "../utils/utils";
 import * as RDF from "rdf-js";
 
 import Fragmenter from "./Fragmenter";
-import PrefixCache from "../storage/prefixCache";
+import RelationCache from "../storage/prefixCache";
 
 export default class PrefixTreeFragmenter extends Fragmenter {
-	prefixCache: PrefixCache = new PrefixCache();
+	relationCache: RelationCache = new RelationCache();
 	async addResource(resource: Resource): Promise<Node | null> {
 		const viewFile = this.getViewFile();
 		let viewNode: Node;
@@ -23,7 +23,7 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 			console.log("No viewnode");
 			viewNode = this.constructNewNode();
 			await this.cache.addNode(this.getViewFile(), viewNode);
-			this.prefixCache.addPrefix("", this.getViewFile());
+			this.relationCache.addRelation("", this.getViewFile());
 		}
 		let node = viewNode;
 		let currentValue = "";
@@ -34,7 +34,8 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 		// let resourceValue = getFirstMatch(resource.data, null, this.path)
 		// 	?.object.value;
 		if (resourceValue) {
-			const match = this.prefixCache.getLongestMatch(resourceValue);
+			const match = this.relationCache.getLongestMatch(resourceValue);
+
 			if (match) {
 				node = await this.cache.getNode(match.nodeFile);
 				currentValue = match.prefix;
@@ -67,6 +68,7 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 		let curNode = node;
 		while (childMatch && curDepth <= resourceValue.length) {
 			// Check if we have to add the resource to a child of the current node, to the current node itself or if we have to split the current node.
+			console.log(childMatch);
 			curNode = await this.cache.getNode(
 				this.fileForNode(childMatch.targetId)
 			);
@@ -100,7 +102,7 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 			return;
 		}
 		// Determine the token at the given depth which occurs the most and split off members matching that specific token
-		let memberGroups: { [key: string]: Set<Resource> } = {};
+		let memberGroups: { [key: string]: Resource[] } = {};
 		let pathValue: RDF.Term;
 		node.members.forEach((member) => {
 			pathValue = member.dataMap.get(this.path.value);
@@ -108,14 +110,14 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 			if (pathValue) {
 				let character = pathValue.value.charAt(depth).toLowerCase();
 				if (memberGroups[character]) {
-					memberGroups[character].add(member);
+					memberGroups[character].push(member);
 				} else {
-					memberGroups[character] = new Set([member]);
+					memberGroups[character] = [member];
 				}
 			}
 		});
 		let mostOccuringToken = Object.keys(memberGroups).reduce((k1, k2) =>
-			memberGroups[k1].size > memberGroups[k2].size ? k1 : k2
+			memberGroups[k1].length > memberGroups[k2].length ? k1 : k2
 		);
 		let newRelationType: RDF.Term;
 		if (mostOccuringToken === "") {
@@ -143,7 +145,7 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 		newNode.add_members(memberGroups[mostOccuringToken]);
 
 		await this.cache.addNode(this.fileForNode(newNode.id), newNode);
-		this.prefixCache.addPrefix(
+		this.relationCache.addRelation(
 			currentValue + mostOccuringToken,
 			this.fileForNode(newNode.id)
 		);

@@ -31,13 +31,13 @@ const UPDATE_QUEUE = new PromiseQueue<Node | null | void>();
 
 const stream = ldesTime("example-stream");
 
+const cache = new Cache();
+
 const FRAGMENTERS = new Map<string, Newable<Fragmenter>>();
 
 FRAGMENTERS.set("time-fragmenter", TimeFragmenter);
 
 FRAGMENTERS.set("prefix-tree-fragmenter", PrefixTreeFragmenter);
-
-const cache = new Cache();
 
 /**
  * Yields the file path on which the specified page number is described.
@@ -73,7 +73,8 @@ app.post("/:folder", async function (req: any, res: any, next: any) {
 			namedNode(req.query.stream),
 			100,
 			namedNode(req.query["relation-path"]),
-			100
+			100,
+			cache
 		);
 		console.log(fragmenter);
 		const contentTypes = await rdfParser.getContentTypes();

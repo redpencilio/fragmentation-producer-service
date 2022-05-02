@@ -1,27 +1,27 @@
-export default class PrefixCache {
+export default class RelationCache {
 	// maps prefixes to node files
-	prefixes: Map<string, string> = new Map();
+	relationValueMap: Map<string, string> = new Map();
 
-	addPrefix(prefix: string, nodeFile: string) {
-		this.prefixes.set(prefix, nodeFile);
+	addRelation(prefix: string, nodeFile: string) {
+		this.relationValueMap.set(prefix, nodeFile);
 	}
 
-	getNodeFile(prefix: string) {
-		return this.prefixes.get(prefix);
+	getNodeFile(value: string) {
+		return this.relationValueMap.get(value);
 	}
 
 	getLongestMatch(value: string) {
 		let longestPrefix: string | null = null;
 		for (let i = 0; i < value.length; i++) {
 			let prefix = value.substring(0, i + 1);
-			if (this.prefixes.has(prefix)) {
+			if (this.relationValueMap.has(prefix)) {
 				longestPrefix = prefix;
 			}
 		}
 		if (longestPrefix) {
 			return {
 				prefix: longestPrefix,
-				nodeFile: this.prefixes.get(longestPrefix)!,
+				nodeFile: this.relationValueMap.get(longestPrefix)!,
 			};
 		}
 		return null;

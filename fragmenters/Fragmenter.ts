@@ -20,7 +20,8 @@ export default abstract class Fragmenter {
 		maxResourcesPerPage: number,
 		path: RDF.NamedNode,
 		maxNodeCountPerFolder: number,
-		folderDepth: number = 2
+		folderDepth: number = 2,
+		cache: Cache
 	) {
 		this.folder = folder;
 		this.stream = stream;
@@ -28,7 +29,7 @@ export default abstract class Fragmenter {
 		this.path = path;
 		this.maxNodeCountPerFolder = maxNodeCountPerFolder;
 		this.folderDepth = folderDepth;
-		this.cache = new Cache();
+		this.cache = cache;
 	}
 	constructNewNode(): Node {
 		const nodeId = (this.cache.getLastPage(this.folder) || 0) + 1;

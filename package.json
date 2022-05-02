@@ -5,7 +5,7 @@
 	"main": "app.js",
 	"scripts": {
 		"start": "ts-node app.ts",
-		"fragment-dataset": "node --max_old_space_size=8192 -r ts-node/register --max-old-space-size=4096 fragment-dataset.ts",
+		"fragment-dataset": "node --max_old_space_size=8192 -r ts-node/register fragment-dataset.ts",
 		"fragment-dataset-debug": "node --max_old_space_size=8192 -r ts-node/register --inspect fragment-dataset.ts"
 	},
 	"author": "",
@@ -13,7 +13,6 @@
 	"dependencies": {
 		"@graphy/content.ttl.read": "^4.3.4",
 		"@graphy/content.ttl.write": "^4.3.4",
-		"@graphy/memory.dataset.fast": "^4.3.4",
 		"@rdfjs/data-model": "^1.3.4",
 		"@rdfjs/namespace": "^1.1.0",
 		"@rdfjs/types": "^1.1.0",

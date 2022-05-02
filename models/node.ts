@@ -6,7 +6,7 @@ import * as RDF from "rdf-js";
 
 export default class Node {
 	id: number;
-	members: Set<Resource> = new Set();
+	members: Array<Resource> = [];
 	relationsMap: Map<string, Relation> = new Map();
 	view: RDF.NamedNode;
 	stream: RDF.NamedNode;
@@ -22,22 +22,25 @@ export default class Node {
 	}
 
 	add_member(resource: Resource) {
-		this.members.add(resource);
+		this.members.push(resource);
 	}
 
 	add_relation(relationValue: string, relation: Relation) {
 		this.relationsMap.set(relationValue, relation);
 	}
 
-	add_members(resources: Set<Resource>) {
-		resources.forEach((resource) => this.members.add(resource));
+	add_members(resources: Resource[]) {
+		resources.forEach((resource) => this.members.push(resource));
 	}
 
-	delete_members(resources: Set<Resource>) {
-		resources.forEach((resource) => this.members.delete(resource));
+	delete_members(resources: Resource[]) {
+		resources.forEach((resource) => {
+			let index = this.members.indexOf(resource);
+			this.members.splice(index, 1);
+		});
 	}
 
 	count() {
-		return this.members.size;
+		return this.members.length;
 	}
 }

@@ -14,6 +14,7 @@ import DatasetTransformer from "./dataset-transformers/dataset-transformer";
 import CSVTransformer from "./dataset-transformers/csv-transformer";
 import path from "path";
 import { IPFSIndexTransformer } from "./dataset-transformers/ipfs-index-transformer";
+import Cache from "./storage/cache";
 
 const fragmenterMap = new Map<String, Newable<Fragmenter>>();
 
@@ -54,12 +55,21 @@ program
 	)
 	.addOption(
 		new Option(
+			"--cache-size <cache_size>",
+			"The maximum size of the node cache"
+		)
+			.default("1000")
+			.argParser(parseInt)
+	)
+	.addOption(
+		new Option(
 			"-f, --fragmenter <fragmenter>",
 			"The fragmenter which is to be used"
 		)
 			.choices([...fragmenterMap.keys()] as string[])
 			.default("time-fragmenter")
 	)
+
 	.addOption(
 		new Option(
 			"-t, --transformer <dataset_transformer>",
@@ -83,6 +93,7 @@ program
 				datasetFile,
 				datasetConfig,
 				fragmenterClass,
+				options.cacheSize,
 				options.output
 			);
 		}
@@ -95,15 +106,18 @@ export default function fragmentDataset(
 	datasetFile: string,
 	datasetConfiguration: DatasetConfiguration,
 	fragmenterClass: Newable<Fragmenter>,
+	cacheSizeLimit: number,
 	outputFolder: string
 ): Promise<void> {
+	const cache: Cache = new Cache(cacheSizeLimit);
 	const fragmenter = new fragmenterClass(
 		outputFolder,
 		namedNode(datasetConfiguration.stream),
 		800,
 		example("name"),
 		20,
-		5
+		5,
+		cache
 	);
 	const fileStream = fs.createReadStream(datasetFile);
 
