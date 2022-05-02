@@ -124,6 +124,7 @@ export default class Cache {
 	}
 
 	async evictFromCache(keys: string[]) {
+		console.log("Eviction start");
 		let listOfPromises: any[] = [];
 		for (const key of keys) {
 			let node = this.nodes.get(key)?.node;
@@ -134,6 +135,7 @@ export default class Cache {
 			}
 		}
 		await Promise.all(listOfPromises);
+		console.log("Eviction end");
 	}
 
 	async flush() {

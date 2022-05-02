@@ -48,6 +48,17 @@ export function createStore(quadStream: RDF.Stream<Quad>): Promise<Store> {
 			.once("end", () => resolve(store))
 	);
 }
+
+async function createParentFolderIfNecessary(file) {
+	if (!fs.existsSync(path.dirname(file))) {
+		await new Promise<void>((resolve, reject) => {
+			fs.mkdir(path.dirname(file), { recursive: true }, (err) => {
+				if (err) reject(err);
+				resolve();
+			});
+		});
+	}
+}
 /**
  * Writes the triples in text-turtle to a file.
  *
@@ -59,28 +70,14 @@ export async function writeTriplesStream(
 	quadStream: jsstream.Readable,
 	file: string
 ): Promise<void> {
-	// const turtleStream = rdfSerializer.serialize(quadStream, {
-	// 	contentType: "text/turtle",
-	// });
-	if (!fs.existsSync(path.dirname(file))) {
-		await new Promise<void>((resolve, reject) => {
-			fs.mkdir(path.dirname(file), { recursive: true }, (err) => {
-				if (err) reject(err);
-				resolve();
-			});
-		});
-	}
+	await createParentFolderIfNecessary(file);
 	const turtleStream = quadStream.pipe(ttl_write());
-	// const turtleStream = rdfSerializer.serialize(quadStream, {
-	// 	contentType: "text/turtle",
-	// });
-
 	const writeStream = fs.createWriteStream(file);
 
 	turtleStream.on("data", (turtleChunk) => {
-		turtleStream.pause();
+		// turtleStream.pause();
 		writeStream.write(turtleChunk);
-		turtleStream.resume();
+		// turtleStream.resume();
 	});
 	return new Promise((resolve, reject) => {
 		turtleStream.on("error", () => {
@@ -392,6 +389,16 @@ export async function readNode(filePath: string): Promise<Node> {
 export async function writeNode(node: Node, path: string) {
 	const quadStream = new jsstream.PassThrough({ objectMode: true });
 
+	await createParentFolderIfNecessary(path);
+	const turtleStream = quadStream.pipe(ttl_write());
+	const writeStream = fs.createWriteStream(path);
+
+	turtleStream.on("data", (turtleChunk) => {
+		// turtleStream.pause();
+		writeStream.write(turtleChunk);
+		// turtleStream.resume();
+	});
+
 	quadStream.push(quad(node.stream, rdf("type"), ldes("EventStream")));
 	quadStream.push(quad(node.stream, rdf("type"), tree("Collection")));
 	quadStream.push(quad(node.stream, tree("view"), node.view));
@@ -423,5 +430,17 @@ export async function writeNode(node: Node, path: string) {
 
 	quadStream.push(null);
 
-	await writeTriplesStream(quadStream, path);
+	// await writeTriplesStream(quadStream, path);
+
+	return new Promise<void>((resolve, reject) => {
+		turtleStream.on("error", () => {
+			console.log("error");
+			reject();
+		});
+		turtleStream.on("end", () => {
+			writeStream.end(() => {
+				resolve();
+			});
+		});
+	});
 }

@@ -28,7 +28,9 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 		let node = viewNode;
 		let currentValue = "";
 		// Find longest prefix which is stored in prefixCache
-		let resourceValue = resource.dataMap.get(this.path.value)?.value;
+		let resourceValue = resource.dataMap
+			.get(this.path.value)
+			?.value.toLowerCase();
 		// let resourceValue = getFirstMatch(resource.data, null, this.path)
 		// 	?.object.value;
 		if (resourceValue) {
@@ -99,12 +101,12 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 		}
 		// Determine the token at the given depth which occurs the most and split off members matching that specific token
 		let memberGroups: { [key: string]: Set<Resource> } = {};
-		let pathValue;
+		let pathValue: RDF.Term;
 		node.members.forEach((member) => {
 			pathValue = member.dataMap.get(this.path.value);
 			// let pathValue = getFirstMatch(member.data, null, this.path)?.object;
 			if (pathValue) {
-				let character = pathValue.value.charAt(depth);
+				let character = pathValue.value.charAt(depth).toLowerCase();
 				if (memberGroups[character]) {
 					memberGroups[character].add(member);
 				} else {
