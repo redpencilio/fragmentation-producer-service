@@ -30,7 +30,7 @@ export default class TimeFragmenter extends Fragmenter {
 			dateLiteral
 		);
 
-		return new Resource(versionedResourceId);
+		return versionedResource;
 	}
 
 	async closeDataset(node: Node, pageNr: number): Promise<Node> {

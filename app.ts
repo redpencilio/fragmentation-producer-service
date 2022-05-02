@@ -31,7 +31,7 @@ const UPDATE_QUEUE = new PromiseQueue<Node | null | void>();
 
 const stream = ldesTime("example-stream");
 
-const cache = new Cache();
+const cache: Cache = new Cache();
 
 const FRAGMENTERS = new Map<string, Newable<Fragmenter>>();
 
@@ -74,6 +74,7 @@ app.post("/:folder", async function (req: any, res: any, next: any) {
 			100,
 			namedNode(req.query["relation-path"]),
 			100,
+			5,
 			cache
 		);
 		console.log(fragmenter);
@@ -90,6 +91,7 @@ app.post("/:folder", async function (req: any, res: any, next: any) {
 
 		store.forEach(
 			(quad) => {
+				console.log(quad);
 				resource.addProperty(quad.predicate.value, quad.object);
 			},
 			null,
@@ -98,11 +100,13 @@ app.post("/:folder", async function (req: any, res: any, next: any) {
 			null
 		);
 
+		console.log(resource);
+
 		const currentDataset = await UPDATE_QUEUE.push(() =>
 			fragmenter.addResource(resource)
 		);
 
-		await UPDATE_QUEUE.push(() => fragmenter.cache.flush());
+		await UPDATE_QUEUE.push(() => cache.flush());
 
 		if (currentDataset) {
 			console.log(currentDataset.id);
