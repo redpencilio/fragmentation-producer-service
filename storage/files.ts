@@ -113,6 +113,25 @@ export async function readNodeStream(filePath: string): Promise<Node> {
 					} else if (quad.object.equals(tree("Node"))) {
 						// The quad represents the node id
 						id = quad.subject;
+					} else {
+						// Put other content of the node in a map with as key the subject and value a map mapping the predicates to objects
+						let subject_value = quad.subject.value;
+						if (!content.has(subject_value)) {
+							const newMap: Map<string, RDF.Term[]> = new Map();
+							content.set(subject_value, newMap);
+						}
+						if (
+							content.get(subject_value).has(quad.predicate.value)
+						) {
+							content
+								.get(subject_value)
+								.get(quad.predicate.value)
+								.push(quad.object);
+						} else {
+							content
+								.get(subject_value)
+								.set(quad.predicate.value, [quad.object]);
+						}
 					}
 				} else if (quad.predicate.equals(tree("view"))) {
 					// The quad represents a reference to the view (the root node in the tree)
