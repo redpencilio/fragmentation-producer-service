@@ -12,6 +12,7 @@ import { ldes, prov, purl, rdf, tree } from "../utils/namespaces";
 import Resource from "../models/resource";
 import Node from "../models/node";
 import Relation from "../models/relation";
+import { Literal } from "@rdfjs/types";
 
 export default class TimeFragmenter extends Fragmenter {
 	constructVersionedResource(resource: Resource): Resource {
@@ -25,28 +26,24 @@ export default class TimeFragmenter extends Fragmenter {
 		// add resources about this version
 		versionedResource.addProperty(purl("isVersionOf").value, resource.id);
 
-		versionedResource.addProperty(
-			prov("generatedAtTime").value,
-			dateLiteral
-		);
+		versionedResource.addProperty(this.path.value, dateLiteral);
 
 		return versionedResource;
 	}
 
-	async closeDataset(node: Node, pageNr: number): Promise<Node> {
+	async closeDataset(node: Node, timestamp: Literal): Promise<Node> {
 		try {
 			// create a store with the new graph for the new file
 			const currentNode = this.constructNewNode();
-			const time = nowLiteral();
 			node.add_relation(
-				time.value,
+				timestamp.value,
 				new Relation(
 					generateTreeRelation(),
 					tree("GreaterThanOrEqualRelation"),
-					time,
+					timestamp,
 					this.getRelationReference(node.id, currentNode.id),
 					currentNode.id,
-					prov("generatedAtTime")
+					this.path
 				)
 			);
 			this.cache.addNode(this.fileForNode(currentNode.id), currentNode);
@@ -75,9 +72,14 @@ export default class TimeFragmenter extends Fragmenter {
 
 			if (this.shouldCreateNewPage(currentNode)) {
 				const closingNode = currentNode;
-
+				let timestampLastResource = versionedResource.dataMap.get(
+					this.path.value
+				)!;
 				// create a store with the new graph for the new file
-				currentNode = await this.closeDataset(closingNode, lastPageNr);
+				currentNode = await this.closeDataset(
+					closingNode,
+					timestampLastResource as Literal
+				);
 
 				currentNode.add_member(versionedResource);
 
