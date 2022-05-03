@@ -74,7 +74,7 @@ export default class TimeFragmenter extends Fragmenter {
 				const closingNode = currentNode;
 				let timestampLastResource = versionedResource.dataMap.get(
 					this.path.value
-				)!;
+				)[0]!;
 				// create a store with the new graph for the new file
 				currentNode = await this.closeDataset(
 					closingNode,

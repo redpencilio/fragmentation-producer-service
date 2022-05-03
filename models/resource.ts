@@ -4,14 +4,18 @@ import * as RDF from "rdf-js";
 
 export default class Resource {
 	id: RDF.NamedNode;
-	dataMap: Map<String, Term> = new Map();
+	dataMap: Map<String, Term[]> = new Map();
 
-	constructor(id: RDF.NamedNode, dataMap: Map<String, Term> = new Map()) {
+	constructor(id: RDF.NamedNode, dataMap: Map<String, Term[]> = new Map()) {
 		this.id = id;
 		this.dataMap = dataMap;
 	}
 
 	addProperty(property: string, value: Term) {
-		this.dataMap.set(property, value);
+		if (this.dataMap.has(property)) {
+			this.dataMap.get(property).push(value);
+		} else {
+			this.dataMap.set(property, [value]);
+		}
 	}
 }

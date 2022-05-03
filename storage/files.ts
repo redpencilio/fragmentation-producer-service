@@ -98,7 +98,7 @@ export async function readNodeStream(filePath: string): Promise<Node> {
 	let id, stream, view;
 	const relationIds = [];
 	const memberIds = [];
-	const content: Map<string, Map<string, RDF.Term>> = new Map();
+	const content: Map<string, Map<string, RDF.Term[]>> = new Map();
 	await new Promise((resolve, reject) => {
 		triplesStream
 			.on("data", (quad: RDF.Quad) => {
@@ -127,12 +127,19 @@ export async function readNodeStream(filePath: string): Promise<Node> {
 					// Put other content of the node in a map with as key the subject and value a map mapping the predicates to objects
 					let subject_value = quad.subject.value;
 					if (!content.has(subject_value)) {
-						const newMap: Map<string, RDF.Term> = new Map();
+						const newMap: Map<string, RDF.Term[]> = new Map();
 						content.set(subject_value, newMap);
 					}
-					content
-						.get(subject_value)
-						.set(quad.predicate.value, quad.object);
+					if (content.get(subject_value).has(quad.predicate.value)) {
+						content
+							.get(subject_value)
+							.get(quad.predicate.value)
+							.push(quad.object);
+					} else {
+						content
+							.get(subject_value)
+							.set(quad.predicate.value, [quad.object]);
+					}
 				}
 			})
 			.on("error", reject)
@@ -149,17 +156,26 @@ export async function readNodeStream(filePath: string): Promise<Node> {
 				let value = relationContent.get(tree("value").value);
 				let target = relationContent.get(tree("node").value);
 				let relationPath = relationContent.get(tree("path").value);
-				if (type && value && target && relationPath) {
+				if (
+					type &&
+					type.length &&
+					value &&
+					value.length &&
+					target &&
+					target.length &&
+					relationPath &&
+					relationPath.length
+				) {
 					const relation = new Relation(
 						relationId,
-						type as NamedNode,
-						value as Literal,
-						target as NamedNode,
-						parseInt(path.parse(target.value).base),
-						relationPath as NamedNode
+						type[0] as NamedNode,
+						value[0] as Literal,
+						target[0] as NamedNode,
+						parseInt(path.parse(target[0].value).base),
+						relationPath[0] as NamedNode
 					);
 
-					node.add_relation(value.value, relation);
+					node.add_relation(value[0].value, relation);
 				}
 			}
 		});
@@ -293,14 +309,16 @@ export async function writeNode(node: Node, path: string) {
 	// Add the different members and their data to the store
 	node.members.forEach((member) => {
 		quadStream.push(quad(node.stream, tree("member"), member.id));
-		member.dataMap.forEach((object, predicateValue) => {
-			quadStream.push(
-				quad(
-					member.id,
-					namedNode(predicateValue.toString()),
-					object as Quad_Object
-				)
-			);
+		member.dataMap.forEach((objects, predicateValue) => {
+			objects.forEach((object) => {
+				quadStream.push(
+					quad(
+						member.id,
+						namedNode(predicateValue.toString()),
+						object as Quad_Object
+					)
+				);
+			});
 		});
 	});
 
