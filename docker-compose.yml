@@ -1,6 +1,7 @@
 services:
     ldes-time-fragmenter:
-        image: semtech/mu-javascript-template:1.6.0
+        build: .
+        # image: semtech/mu-javascript-template:1.6.0
         ports:
             - 8888:3000
             - 9229:9229
@@ -9,6 +10,8 @@ services:
             DATA_FOLDER: "/data"
         volumes:
             - .:/app/
+            - /app/data
+            - /app/datasets
             - ./data/:/data/
         networks:
             - ldes-network

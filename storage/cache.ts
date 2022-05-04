@@ -35,7 +35,7 @@ export default class Cache {
 			this.updateNodeFrequency(path);
 		} else {
 			try {
-				result = await readNodeStream(path);
+				result = await readNode(path);
 				this.nodes.set(path, result);
 				this.lruRank.set(path, 0);
 			} catch (e) {
