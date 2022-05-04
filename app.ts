@@ -117,7 +117,6 @@ app.get("/:folder*/:nodeId", async function (req: any, res: any, next: any) {
 
 		const pagesFolder = path.join(BASE_FOLDER, req.params.folder);
 
-		console.log(cache.getLastPage(pagesFolder));
 		if (page > cache.getLastPage(pagesFolder)) {
 			return next(error(404, "Page not found"));
 		}
@@ -129,9 +128,6 @@ app.get("/:folder*/:nodeId", async function (req: any, res: any, next: any) {
 		if (!contentType) {
 			return next(error(406));
 		}
-
-		if (page < cache.getLastPage(pagesFolder))
-			res.header("Cache-Control", "public, immutable");
 
 		const rdfStream = readTriplesStream(
 			fileForPage(path.join(pagesFolder, req.params[0] || ""), page)
