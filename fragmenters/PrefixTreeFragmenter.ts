@@ -8,7 +8,7 @@ import { generateTreeRelation } from "../utils/utils";
 import * as RDF from "rdf-js";
 
 import Fragmenter from "./Fragmenter";
-import RelationCache from "../storage/prefixCache";
+import RelationCache from "../storage/relationCache";
 
 export default class PrefixTreeFragmenter extends Fragmenter {
 	relationCache: RelationCache = new RelationCache();
