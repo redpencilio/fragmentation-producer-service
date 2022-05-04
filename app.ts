@@ -16,20 +16,18 @@ app.use(
 	})
 );
 
-import { readTriplesStream, createStore } from "./storage/files";
+import { readTriplesStream } from "./storage/files";
 import PromiseQueue from "./promise-queue";
 import TimeFragmenter from "./fragmenters/TimeFragmenter";
 import { BASE_FOLDER, error, Newable } from "./utils/utils";
-import { ldesTime } from "./utils/namespaces";
 import Resource from "./models/resource";
 import Node from "./models/node";
 import PrefixTreeFragmenter from "./fragmenters/PrefixTreeFragmenter";
 import Cache from "./storage/cache";
 import Fragmenter from "./fragmenters/Fragmenter";
+import { Quad } from "@rdfjs/types";
 
 const UPDATE_QUEUE = new PromiseQueue<Node | null | void>();
-
-const stream = ldesTime("example-stream");
 
 const cache: Cache = new Cache();
 
@@ -87,18 +85,9 @@ app.post("/:folder", async function (req: any, res: any, next: any) {
 			contentType: req.headers["content-type"],
 		});
 		const resource = new Resource(namedNode(req.query.resource));
-		const store = await createStore(quadStream);
-
-		store.forEach(
-			(quad) => {
-				console.log(quad);
-				resource.addProperty(quad.predicate.value, quad.object);
-			},
-			null,
-			null,
-			null,
-			null
-		);
+		for await (const quadObj of quadStream) {
+			resource.addProperty(quadObj.predicate.value, quadObj.object);
+		}
 
 		console.log(resource);
 
@@ -116,7 +105,7 @@ app.post("/:folder", async function (req: any, res: any, next: any) {
 		}
 	} catch (e) {
 		console.error(e);
-		return next(error(500));
+		return next(error(500, e));
 	}
 });
 
@@ -166,7 +155,7 @@ app.get("/:folder*/:nodeId", async function (req: any, res: any, next: any) {
 		}
 	} catch (e) {
 		console.error(e);
-		return next(error(500));
+		return next(error(500, e));
 	}
 });
 
