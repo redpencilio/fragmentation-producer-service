@@ -57,7 +57,7 @@ The web service in this repository can be run locally or using the supplied dock
 
 -   In order to run the service locally, run the `npm start` script. The service will be exposed on port 3000.
 
--   Using the supplied docker-compose configuration, you can run the service in a docker container. By default, the service will be exposed on port 8888, you can configure how the data is mounted in the compose file.
+-   Using the supplied docker-compose and docker-compose.dev configurations, you can run the service in a docker container. By default, the service will be exposed on port 8888, you can configure how the data is mounted in the compose files.
 
 Using the `DATA_FOLDER` environment variable, you can configure in which base data folder the service will look for the fragmented datasets.
 
