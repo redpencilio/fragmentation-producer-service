@@ -21,9 +21,10 @@ The CLI tool expects the following options:
 
 As a parameter, the CLI tool expects a file containing the dataset which should be fragmented.
 
-Currently, the CLI tool supports two different types of input datasets:
+Currently, the CLI tool supports three different types of input datasets:
 
 -   A `.csv` dataset. When using a csv file as input dataset, the provided json configuration file should contain how the different csv fields should be mapped to RDF predicates.
+-   An index dump of the IPFS Search engine (https://ipfs-search.com/) which can retrieved from https://github.com/ipfs-search/ipfs-search-extractor. When using this type of dataset you can sepcify the predicates which should be used in the json config file.
 -   A standard text-file. When using a standard text file as input dataset, the CLI tool will parse each line as a seperate resource and use the contents of the line as object values for a specified predicate in the json configuration file.
 
 The json configuration file should always contain the following key/value pairs:
@@ -40,6 +41,10 @@ When using a csv dataset as input, the configuration file should additionally co
 
 -   `resourceIdField: <resource_id_field>`: this option allows you to specify the csv field which should be used as the resource id.
 -   `propertyMappings: <property_mappings>`: this is a json object describing how the different csv fields should be mapped to RDF predicates of the resource.
+
+When using an IPFS export as input, the configuration file should also contain the following key/value pair:
+
+-   `propertyType: <predicate_uri>`: this describes the uri which will be prepended to the hashes contained in the IPFS dump.
 
 #### Example 1: fragmenting an ordinary text file
 
