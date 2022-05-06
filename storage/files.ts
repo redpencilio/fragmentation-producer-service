@@ -317,13 +317,13 @@ export async function writeNode(node: Node, path: string) {
 	quadStream.push(quad(node.idNamedNode, rdf("type"), tree("Node")));
 
 	// Add the different relations to the store
-	for (const [_, relation] of Object.entries(node.relationsMap)) {
+	node.relationsMap.forEach((relation, _) => {
 		quadStream.push(quad(node.idNamedNode, tree("relation"), relation.id));
 		quadStream.push(quad(relation.id, rdf("type"), relation.type));
 		quadStream.push(quad(relation.id, tree("value"), relation.value));
 		quadStream.push(quad(relation.id, tree("node"), relation.target));
 		quadStream.push(quad(relation.id, tree("path"), relation.path));
-	}
+	});
 
 	// Add the different members and their data to the store
 	node.members.forEach((member) => {
