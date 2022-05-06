@@ -16,7 +16,7 @@ app.use(
 	})
 );
 
-import { convertToJsonLD, readTriplesStream } from "./storage/files";
+import { convert, convertToJsonLD, readTriplesStream } from "./storage/files";
 import PromiseQueue from "./promise-queue";
 import TimeFragmenter from "./fragmenters/TimeFragmenter";
 import { BASE_FOLDER, error, Newable } from "./utils/utils";
@@ -25,7 +25,6 @@ import Node from "./models/node";
 import PrefixTreeFragmenter from "./fragmenters/PrefixTreeFragmenter";
 import Cache from "./storage/cache";
 import Fragmenter from "./fragmenters/Fragmenter";
-import { Quad } from "@rdfjs/types";
 
 const UPDATE_QUEUE = new PromiseQueue<Node | null | void>();
 
@@ -75,7 +74,6 @@ app.post("/:folder", async function (req: any, res: any, next: any) {
 			5,
 			cache
 		);
-		console.log(fragmenter);
 		const contentTypes = await rdfParser.getContentTypes();
 		if (!contentTypes.includes(req.headers["content-type"])) {
 			return next(error(400, "Content-Type not recognized"));
@@ -111,10 +109,7 @@ app.post("/:folder", async function (req: any, res: any, next: any) {
 
 app.get("/:folder*/:nodeId", async function (req: any, res: any, next: any) {
 	try {
-		console.log(req.params["0"]);
 		const page = parseInt(req.params.nodeId);
-		console.log(page);
-
 		const pagesFolder = path.join(BASE_FOLDER, req.params.folder);
 
 		if (page > cache.getLastPage(pagesFolder)) {
@@ -124,7 +119,6 @@ app.get("/:folder*/:nodeId", async function (req: any, res: any, next: any) {
 		const contentTypes = await rdfSerializer.getContentTypes();
 
 		const contentType = req.accepts(contentTypes);
-		console.log(contentType);
 		if (!contentType) {
 			return next(error(406));
 		}
@@ -134,34 +128,21 @@ app.get("/:folder*/:nodeId", async function (req: any, res: any, next: any) {
 			const contents = await convertToJsonLD(filePath);
 			res.json(contents);
 		} else {
-			const rdfStream = readTriplesStream(
-				filePath
-			);
-	
-			
-			if (rdfStream) {
-				rdfSerializer
-					.serialize(rdfStream, {
-						contentType: contentType,
-						
-					})
-					.on("data", (d) => res.write(d))
-					.on("error", (error) => {
-						next(error(500, "Serializing error"));
-					})
-					.on("end", () => {
-						res.end();
-					});
-			} else {
-				next(error(500));
-			}
+			const serializedStream = convert(filePath, contentType);
+			serializedStream
+			.on("data", (d) => res.write(d))
+			.on("error", (error) => {
+				next(error(500, error));
+			})
+			.on("end", () => {
+				res.end();
+			});
 		}
-
-		
-	} catch (e) {
+	} catch(e){
 		console.error(e);
 		return next(error(500, e));
 	}
+		
 });
 
 app.use(errorHandler);

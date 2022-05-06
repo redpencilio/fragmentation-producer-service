@@ -4,13 +4,10 @@ import {
 	Store,
 	DataFactory,
 	NamedNode,
-	Term,
-	StreamParser,
 	Quad_Object,
 	Literal,
 } from "n3";
 const { quad, namedNode } = DataFactory;
-import rdfSerializer from "rdf-serialize";
 import jsstream from "stream";
 import * as RDF from "rdf-js";
 import Node from "../models/node";
@@ -24,6 +21,8 @@ import ttl_write from "@graphy/content.ttl.write";
 
 import jsonld from 'jsonld';
 import { FRAME } from "../utils/context-jsonld";
+import rdfSerializer from "rdf-serialize";
+
 /**
  * Reads the triples in a file, assuming text/turtle.
  *
@@ -34,9 +33,6 @@ import { FRAME } from "../utils/context-jsonld";
 
 export async function convertToJsonLD(file: string): Promise<Object> {
 	let quadStream = readTriplesStream(file);
-	if (!quadStream) {
-		throw Error(`File does not exist: ${file}`);
-	}
 	const quads = [];
 	await new Promise<void>((resolve, reject) => {
 		quadStream.on("data", quad => {
@@ -45,15 +41,22 @@ export async function convertToJsonLD(file: string): Promise<Object> {
 		quadStream.on("error", reject); 
 		quadStream.on("end", resolve);
 	})
-	// let quads = await createStore(quadStream);
 	const jsonDoc = await jsonld.fromRDF(quads);
 	const compactedJsonDoc = await jsonld.frame(jsonDoc, FRAME);
 	return compactedJsonDoc;
 }
 
+export function convert(file: string, contentType) : NodeJS.ReadableStream {
+	const triplesStream = readTriplesStream(file);
+	return rdfSerializer
+	.serialize(triplesStream, {
+		contentType: contentType,
+	})
+}
+
 export function readTriplesStream(file: string): jsstream.Readable | null {
 	if (!fs.existsSync(file)) {
-		return null;
+		throw Error(`File does not exist: ${file}`);
 	}
 	const fileStream = fs.createReadStream(file);
 
@@ -115,9 +118,6 @@ export async function writeTriplesStream(
 
 export async function readNodeStream(filePath: string): Promise<Node> {
 	const triplesStream = readTriplesStream(filePath);
-	if (!triplesStream) {
-		throw Error(`File does not exist: ${filePath}`);
-	}
 	let id, stream, view;
 	const relationIds = [];
 	const memberIds = [];
@@ -241,9 +241,6 @@ export async function readNodeStream(filePath: string): Promise<Node> {
 
 export async function readNode(filePath: string): Promise<Node> {
 	const triplesStream = readTriplesStream(filePath);
-	if (!triplesStream) {
-		throw Error("File does not exist");
-	}
 	let store = await createStore(triplesStream);
 
 	let id = getFirstMatch(store, null, rdf("type"), tree("Node"))?.subject;
@@ -328,9 +325,7 @@ export async function writeNode(node: Node, path: string) {
 	const writeStream = fs.createWriteStream(path);
 
 	turtleStream.on("data", (turtleChunk) => {
-		// turtleStream.pause();
 		writeStream.write(turtleChunk);
-		// turtleStream.resume();
 	});
 
 	quadStream.push(quad(node.stream, rdf("type"), ldes("EventStream")));
