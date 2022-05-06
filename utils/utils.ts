@@ -41,8 +41,8 @@ export function error(status: number, msg?: string) {
 	var err: Error = new Error(msg || "An error occurred");
 	err.status = status;
 	return err;
-}
-
+} 
+ 
 export function getFirstMatch(
 	store: Store,
 	subject?: OTerm,
