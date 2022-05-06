@@ -15,6 +15,7 @@ import CSVTransformer from "./dataset-transformers/csv-transformer";
 import path from "path";
 import { IPFSIndexTransformer } from "./dataset-transformers/ipfs-index-transformer";
 import Cache from "./storage/cache";
+import RDFTransformer from "./dataset-transformers/rdf-transformer";
 
 const fragmenterMap = new Map<String, Newable<Fragmenter>>();
 
@@ -25,6 +26,7 @@ const transformerMap = new Map<String, DatasetTransformer>();
 transformerMap.set("csv-transformer", new CSVTransformer());
 transformerMap.set("default-transformer", new DefaultTransformer());
 transformerMap.set("ipfs-transformer", new IPFSIndexTransformer());
+transformerMap.set("rdf-transformer", new RDFTransformer());
 
 const extensionMap = new Map<String, DatasetTransformer>();
 extensionMap.set(".csv", new CSVTransformer());
@@ -113,7 +115,7 @@ export default function fragmentDataset(
 	const fragmenter = new fragmenterClass(
 		outputFolder,
 		namedNode(datasetConfiguration.stream),
-		800,
+		50,
 		example("name"),
 		20,
 		5,
@@ -121,8 +123,8 @@ export default function fragmentDataset(
 	);
 	const fileStream = fs.createReadStream(datasetFile);
 
-	return new Promise<void>((resolve) => {
-		const transformedStream = transformer.transform(
+	return new Promise<void>(async (resolve) => {
+		const transformedStream = await transformer.transform(
 			fileStream,
 			datasetConfiguration
 		);

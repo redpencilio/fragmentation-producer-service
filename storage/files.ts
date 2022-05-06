@@ -1,12 +1,5 @@
 import fs from "fs";
-import {
-	Quad,
-	Store,
-	DataFactory,
-	NamedNode,
-	Quad_Object,
-	Literal,
-} from "n3";
+import { Quad, Store, DataFactory, NamedNode, Quad_Object, Literal } from "n3";
 const { quad, namedNode } = DataFactory;
 import jsstream from "stream";
 import * as RDF from "rdf-js";
@@ -19,7 +12,7 @@ import path from "path";
 import ttl_read from "@graphy/content.ttl.read";
 import ttl_write from "@graphy/content.ttl.write";
 
-import jsonld from 'jsonld';
+import jsonld from "jsonld";
 import { FRAME } from "../utils/context-jsonld";
 import rdfSerializer from "rdf-serialize";
 
@@ -30,28 +23,26 @@ import rdfSerializer from "rdf-serialize";
  * @return {Stream} Stream containing all triples which were downloaded.
  */
 
-
 export async function convertToJsonLD(file: string): Promise<Object> {
 	let quadStream = readTriplesStream(file);
 	const quads = [];
 	await new Promise<void>((resolve, reject) => {
-		quadStream.on("data", quad => {
+		quadStream.on("data", (quad) => {
 			quads.push(quad);
-		})
-		quadStream.on("error", reject); 
+		});
+		quadStream.on("error", reject);
 		quadStream.on("end", resolve);
-	})
+	});
 	const jsonDoc = await jsonld.fromRDF(quads);
 	const compactedJsonDoc = await jsonld.frame(jsonDoc, FRAME);
 	return compactedJsonDoc;
 }
 
-export function convert(file: string, contentType) : NodeJS.ReadableStream {
+export function convert(file: string, contentType): NodeJS.ReadableStream {
 	const triplesStream = readTriplesStream(file);
-	return rdfSerializer
-	.serialize(triplesStream, {
+	return rdfSerializer.serialize(triplesStream, {
 		contentType: contentType,
-	})
+	});
 }
 
 export function readTriplesStream(file: string): jsstream.Readable | null {
@@ -335,13 +326,14 @@ export async function writeNode(node: Node, path: string) {
 	quadStream.push(quad(node.idNamedNode, rdf("type"), tree("Node")));
 
 	// Add the different relations to the store
-	for (const [_, relation] of Object.entries(node.relationsMap)) {
+	console.log(node.relationsMap);
+	node.relationsMap.forEach((relation, _) => {
 		quadStream.push(quad(node.idNamedNode, tree("relation"), relation.id));
 		quadStream.push(quad(relation.id, rdf("type"), relation.type));
 		quadStream.push(quad(relation.id, tree("value"), relation.value));
 		quadStream.push(quad(relation.id, tree("node"), relation.target));
 		quadStream.push(quad(relation.id, tree("path"), relation.path));
-	}
+	});
 
 	// Add the different members and their data to the store
 	node.members.forEach((member) => {
@@ -360,8 +352,6 @@ export async function writeNode(node: Node, path: string) {
 	});
 
 	quadStream.push(null);
-
-	// await writeTriplesStream(quadStream, path);
 
 	return new Promise<void>((resolve, reject) => {
 		turtleStream.on("error", () => {
