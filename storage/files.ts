@@ -21,12 +21,35 @@ import Relation from "../models/relation";
 import path from "path";
 import ttl_read from "@graphy/content.ttl.read";
 import ttl_write from "@graphy/content.ttl.write";
+
+import jsonld from 'jsonld';
+import { FRAME } from "../utils/context-jsonld";
 /**
  * Reads the triples in a file, assuming text/turtle.
  *
  * @param {string} file File path where the turtle file is stored.
  * @return {Stream} Stream containing all triples which were downloaded.
  */
+
+
+export async function convertToJsonLD(file: string): Promise<Object> {
+	let quadStream = readTriplesStream(file);
+	if (!quadStream) {
+		throw Error(`File does not exist: ${file}`);
+	}
+	const quads = [];
+	await new Promise<void>((resolve, reject) => {
+		quadStream.on("data", quad => {
+			quads.push(quad);
+		})
+		quadStream.on("error", reject); 
+		quadStream.on("end", resolve);
+	})
+	// let quads = await createStore(quadStream);
+	const jsonDoc = await jsonld.fromRDF(quads);
+	const compactedJsonDoc = await jsonld.frame(jsonDoc, FRAME);
+	return compactedJsonDoc;
+}
 
 export function readTriplesStream(file: string): jsstream.Readable | null {
 	if (!fs.existsSync(file)) {

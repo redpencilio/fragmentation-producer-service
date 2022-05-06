@@ -20,6 +20,7 @@
 		"commander": "^9.2.0",
 		"cors": "^2.8.5",
 		"csv-parser": "^3.0.0",
+		"jsonld": "^5.2.0",
 		"mu-javascript-library": "github:jlpoelma/mu-javascript-library",
 		"n3": "^1.15.0",
 		"on-change": "^3.0.2",

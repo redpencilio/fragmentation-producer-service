@@ -6,3 +6,4 @@ datasets
 profiling*.txt
 .vscode
 build
+start-dev.sh

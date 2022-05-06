@@ -16,7 +16,7 @@ app.use(
 	})
 );
 
-import { readTriplesStream } from "./storage/files";
+import { convertToJsonLD, readTriplesStream } from "./storage/files";
 import PromiseQueue from "./promise-queue";
 import TimeFragmenter from "./fragmenters/TimeFragmenter";
 import { BASE_FOLDER, error, Newable } from "./utils/utils";
@@ -128,27 +128,36 @@ app.get("/:folder*/:nodeId", async function (req: any, res: any, next: any) {
 		if (!contentType) {
 			return next(error(406));
 		}
-
-		const rdfStream = readTriplesStream(
-			fileForPage(path.join(pagesFolder, req.params[0] || ""), page)
-		);
-
+		const filePath = fileForPage(path.join(pagesFolder, req.params[0] || ""), page);
 		res.header("Content-Type", contentType);
-		if (rdfStream) {
-			rdfSerializer
-				.serialize(rdfStream, {
-					contentType: contentType,
-				})
-				.on("data", (d) => res.write(d))
-				.on("error", (error) => {
-					next(error(500, "Serializing error"));
-				})
-				.on("end", () => {
-					res.end();
-				});
+		if(contentType === "application/json" || contentType === "application/ld+json"){
+			const contents = await convertToJsonLD(filePath);
+			res.json(contents);
 		} else {
-			next(error(500));
+			const rdfStream = readTriplesStream(
+				filePath
+			);
+	
+			
+			if (rdfStream) {
+				rdfSerializer
+					.serialize(rdfStream, {
+						contentType: contentType,
+						
+					})
+					.on("data", (d) => res.write(d))
+					.on("error", (error) => {
+						next(error(500, "Serializing error"));
+					})
+					.on("end", () => {
+						res.end();
+					});
+			} else {
+				next(error(500));
+			}
 		}
+
+		
 	} catch (e) {
 		console.error(e);
 		return next(error(500, e));
