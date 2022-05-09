@@ -1,10 +1,11 @@
-import DatasetTransformer from "./dataset-transformer";
+import DatasetTransformer, {
+	DatasetConfiguration,
+} from "./dataset-transformer";
 import { Readable, Stream, PassThrough } from "stream";
 
 import readline from "readline";
 import { example, rdf } from "../utils/namespaces";
 import Resource from "../models/resource";
-import { DatasetConfiguration } from "../utils/utils";
 import dataFactory from "@rdfjs/data-model";
 
 export interface DefaultDatasetConfiguration extends DatasetConfiguration {

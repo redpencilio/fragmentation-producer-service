@@ -12,12 +12,6 @@ interface Error {
 	status?: number;
 }
 
-export interface DatasetConfiguration {
-	stream: string;
-	resourceType: string;
-	resourceIdPrefix: string;
-}
-
 export type QuadElement =
 	| RDF.Quad_Subject
 	| RDF.Quad_Predicate
@@ -41,8 +35,8 @@ export function error(status: number, msg?: string) {
 	var err: Error = new Error(msg || "An error occurred");
 	err.status = status;
 	return err;
-} 
- 
+}
+
 export function getFirstMatch(
 	store: Store,
 	subject?: OTerm,

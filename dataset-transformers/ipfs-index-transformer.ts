@@ -1,5 +1,4 @@
 import { Readable, PassThrough } from "stream";
-import { DatasetConfiguration } from "../utils/utils";
 import DatasetTransformer from "./dataset-transformer";
 import readline from "readline";
 import { example, rdf } from "../utils/namespaces";

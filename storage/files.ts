@@ -326,7 +326,6 @@ export async function writeNode(node: Node, path: string) {
 	quadStream.push(quad(node.idNamedNode, rdf("type"), tree("Node")));
 
 	// Add the different relations to the store
-	console.log(node.relationsMap);
 	node.relationsMap.forEach((relation, _) => {
 		quadStream.push(quad(node.idNamedNode, tree("relation"), relation.id));
 		quadStream.push(quad(relation.id, rdf("type"), relation.type));

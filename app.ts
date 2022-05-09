@@ -116,6 +116,9 @@ app.get("/:folder*/:nodeId", async function (req: any, res: any, next: any) {
 			return next(error(404, "Page not found"));
 		}
 
+		if (page < cache.getLastPage(pagesFolder))
+			res.header("Cache-Control", "public, immutable");
+
 		const contentTypes = await rdfSerializer.getContentTypes();
 
 		const contentType = req.accepts(contentTypes);

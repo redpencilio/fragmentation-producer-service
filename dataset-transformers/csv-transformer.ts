@@ -1,6 +1,7 @@
 import { Readable, Stream, PassThrough } from "stream";
-import { DatasetConfiguration } from "../utils/utils";
-import DatasetTransformer from "./dataset-transformer";
+import DatasetTransformer, {
+	DatasetConfiguration,
+} from "./dataset-transformer";
 import csv from "csv-parser";
 import { DataFactory } from "n3";
 import { rdf } from "../utils/namespaces";

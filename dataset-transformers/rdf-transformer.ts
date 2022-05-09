@@ -1,8 +1,9 @@
-import DatasetTransformer from "./dataset-transformer";
+import DatasetTransformer, {
+	DatasetConfiguration,
+} from "./dataset-transformer";
 import { Readable } from "stream";
 import rdfParser from "rdf-parse";
 
-import { DatasetConfiguration } from "../utils/utils";
 import { createStore } from "../storage/files";
 import { rdf } from "../utils/namespaces";
 import { DataFactory, NamedNode, Store } from "n3";

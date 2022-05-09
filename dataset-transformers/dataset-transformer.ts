@@ -1,6 +1,10 @@
 import { Readable } from "stream";
 
-import { DatasetConfiguration } from "../utils/utils";
+export interface DatasetConfiguration {
+	stream: string;
+	resourceType: string;
+	resourceIdPrefix: string;
+}
 
 export default interface DatasetTransformer {
 	transform(
