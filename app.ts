@@ -125,14 +125,13 @@ app.get("/:folder*/:nodeId", async function (req: any, res: any, next: any) {
 		if (!contentType) {
 			return next(error(406));
 		}
-		const filePath = fileForPage(path.join(pagesFolder, req.params[0] || ""), page);
+		const filePath = fileForPage(
+			path.join(pagesFolder, req.params[0] || ""),
+			page
+		);
 		res.header("Content-Type", contentType);
-		if(contentType === "application/json" || contentType === "application/ld+json"){
-			const contents = await convertToJsonLD(filePath);
-			res.json(contents);
-		} else {
-			const serializedStream = convert(filePath, contentType);
-			serializedStream
+		const serializedStream = convert(filePath, contentType);
+		serializedStream
 			.on("data", (d) => res.write(d))
 			.on("error", (error) => {
 				next(error(500, error));
@@ -140,12 +139,10 @@ app.get("/:folder*/:nodeId", async function (req: any, res: any, next: any) {
 			.on("end", () => {
 				res.end();
 			});
-		}
-	} catch(e){
+	} catch (e) {
 		console.error(e);
 		return next(error(500, e));
 	}
-		
 });
 
 app.use(errorHandler);
