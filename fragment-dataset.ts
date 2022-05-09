@@ -4,7 +4,7 @@ const { quad, literal, namedNode } = DataFactory;
 import PrefixTreeFragmenter from "./fragmenters/PrefixTreeFragmenter";
 import Node from "./models/node";
 import PromiseQueue from "./promise-queue";
-import { example, ldesTime, rdf } from "./utils/namespaces";
+import { example, ldesTime, prov, rdf } from "./utils/namespaces";
 import fs from "fs";
 import Fragmenter from "./fragmenters/Fragmenter";
 import TimeFragmenter from "./fragmenters/TimeFragmenter";
@@ -113,8 +113,8 @@ export default function fragmentDataset(
 	const fragmenter = new fragmenterClass(
 		outputFolder,
 		namedNode(datasetConfiguration.stream),
-		800,
-		example("name"),
+		50,
+		prov("generatedAtTime"),
 		20,
 		5,
 		cache
