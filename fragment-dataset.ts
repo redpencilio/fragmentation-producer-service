@@ -9,12 +9,15 @@ import fs from "fs";
 import Fragmenter from "./fragmenters/Fragmenter";
 import TimeFragmenter from "./fragmenters/TimeFragmenter";
 import DefaultTransformer from "./dataset-transformers/default-transformer";
-import { DatasetConfiguration, Newable } from "./utils/utils";
-import DatasetTransformer from "./dataset-transformers/dataset-transformer";
+import { Newable } from "./utils/utils";
+import DatasetTransformer, {
+	DatasetConfiguration,
+} from "./dataset-transformers/dataset-transformer";
 import CSVTransformer from "./dataset-transformers/csv-transformer";
 import path from "path";
 import { IPFSIndexTransformer } from "./dataset-transformers/ipfs-index-transformer";
 import Cache from "./storage/cache";
+import { NamedNode } from "@rdfjs/types";
 
 const fragmenterMap = new Map<String, Newable<Fragmenter>>();
 
@@ -28,6 +31,10 @@ transformerMap.set("ipfs-transformer", new IPFSIndexTransformer());
 
 const extensionMap = new Map<String, DatasetTransformer>();
 extensionMap.set(".csv", new CSVTransformer());
+
+const relationPathMap = new Map<String, NamedNode>();
+relationPathMap.set("time-fragmenter", prov("generatedAtTime"));
+relationPathMap.set("prefix-tree-fragmenter", example("name"));
 
 function getTransformer(extension: string): DatasetTransformer {
 	return extensionMap.get(extension) || new DefaultTransformer();
@@ -69,6 +76,12 @@ program
 			.choices([...fragmenterMap.keys()] as string[])
 			.default("time-fragmenter")
 	)
+	.addOption(
+		new Option(
+			"-p, --relation-path <relation_path>",
+			"The predicate on which the relations should be defined"
+		)
+	)
 
 	.addOption(
 		new Option(
@@ -87,12 +100,19 @@ program
 		} else {
 			transformer = getTransformer(path.extname(datasetFile));
 		}
+		let relationPath: NamedNode;
+		if (options.relationPath) {
+			relationPath = namedNode(options.relationPath);
+		} else {
+			relationPath = relationPathMap.get(options.fragmenter);
+		}
 		if (fragmenterClass) {
 			await fragmentDataset(
 				transformer,
 				datasetFile,
 				datasetConfig,
 				fragmenterClass,
+				relationPath,
 				options.cacheSize,
 				options.output
 			);
@@ -106,6 +126,7 @@ export default function fragmentDataset(
 	datasetFile: string,
 	datasetConfiguration: DatasetConfiguration,
 	fragmenterClass: Newable<Fragmenter>,
+	relationPath: NamedNode,
 	cacheSizeLimit: number,
 	outputFolder: string
 ): Promise<void> {
@@ -114,7 +135,7 @@ export default function fragmentDataset(
 		outputFolder,
 		namedNode(datasetConfiguration.stream),
 		50,
-		prov("generatedAtTime"),
+		relationPath,
 		20,
 		5,
 		cache
