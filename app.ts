@@ -17,7 +17,7 @@ app.use(
 );
 
 import { convert } from "./storage/files";
-import PromiseQueue from "./promise-queue";
+import PromiseQueue from "./utils/promise-queue";
 import TimeFragmenter from "./fragmenters/TimeFragmenter";
 import { BASE_FOLDER, error, Newable } from "./utils/utils";
 import Resource from "./models/resource";
@@ -25,6 +25,7 @@ import Node from "./models/node";
 import PrefixTreeFragmenter from "./fragmenters/PrefixTreeFragmenter";
 import Cache from "./storage/cache";
 import Fragmenter from "./fragmenters/Fragmenter";
+import { FOLDER_DEPTH, FOLDER_NODE_COUNT, PAGE_RESOURCES_COUNT } from "./utils/constants";
 
 const UPDATE_QUEUE = new PromiseQueue<Node | null | void>();
 
@@ -48,15 +49,9 @@ function fileForPage(folder: string, page: number): string {
 
 app.post("/:folder", async function (req: any, res: any, next: any) {
 	try {
-		if (
-			!(
-				req.query.resource &&
-				req.query.stream &&
-				req.query["relation-path"]
-			)
-		) {
+		if (!req.query.resource) {
 			throw new Error(
-				"Resource, stream or relationPath parameters where not supplied"
+				"Resource uri parameter was not supplied"
 			);
 		}
 		if (req.query.fragmenter && !FRAGMENTERS.has(req.query.fragmenter)) {
@@ -65,15 +60,17 @@ app.post("/:folder", async function (req: any, res: any, next: any) {
 
 		const fragmenterClass =
 			FRAGMENTERS.get(req.query.fragmenter) || TimeFragmenter;
+
 		const fragmenter = new fragmenterClass(
-			path.join(BASE_FOLDER, req.params.folder),
-			namedNode(req.query.stream),
-			100,
-			namedNode(req.query["relation-path"]),
-			20,
-			5,
-			cache
-		);
+			{
+				folder: path.join(BASE_FOLDER, req.params.folder),
+				relationPath: namedNode(req.query["relation-path"]),
+				maxResourcesPerPage: PAGE_RESOURCES_COUNT,
+				maxNodeCountPerFolder: FOLDER_NODE_COUNT,
+				folderDepth: FOLDER_DEPTH,
+				cache
+			}
+		)
 		const contentTypes = await rdfParser.getContentTypes();
 		if (!contentTypes.includes(req.headers["content-type"])) {
 			return next(error(400, "Content-Type not recognized"));
@@ -100,7 +97,7 @@ app.post("/:folder", async function (req: any, res: any, next: any) {
 		}
 	} catch (e) {
 		console.error(e);
-		return next(error(500, e));
+		return next(e);
 	}
 });
 
@@ -138,7 +135,7 @@ app.get("/:folder*/:nodeId", async function (req: any, res: any, next: any) {
 			});
 	} catch (e) {
 		console.error(e);
-		return next(error(500, e));
+		return next(e);
 	}
 });
 

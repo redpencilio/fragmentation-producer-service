@@ -4,29 +4,36 @@ import Resource from "../models/resource";
 import * as RDF from "rdf-js";
 import path from "path";
 import Cache from "../storage/cache";
+import { STREAM_PREFIX } from "../utils/constants";
 const { namedNode } = DataFactory;
+
+export interface FragmenterArgs {
+	folder: string;
+	relationPath: RDF.NamedNode;
+	maxResourcesPerPage: number;
+	maxNodeCountPerFolder: number;
+	folderDepth: number;
+	cache: Cache;
+}
 export default abstract class Fragmenter {
 	folder: string;
 	maxResourcesPerPage: number;
-	stream: RDF.NamedNode;
-	path: RDF.NamedNode;
+	relationPath: RDF.NamedNode;
 	cache: Cache;
 	maxNodeCountPerFolder: number;
 	folderDepth: number;
 
-	constructor(
-		folder: string,
-		stream: RDF.NamedNode,
-		maxResourcesPerPage: number,
-		path: RDF.NamedNode,
-		maxNodeCountPerFolder: number,
-		folderDepth: number = 2,
-		cache: Cache
-	) {
+	constructor({
+		folder,
+		maxResourcesPerPage,
+		relationPath,
+		maxNodeCountPerFolder,
+		folderDepth,
+		cache,
+	}: FragmenterArgs) {
 		this.folder = folder;
-		this.stream = stream;
 		this.maxResourcesPerPage = maxResourcesPerPage;
-		this.path = path;
+		this.relationPath = relationPath;
 		this.maxNodeCountPerFolder = maxNodeCountPerFolder;
 		this.folderDepth = folderDepth;
 		this.cache = cache;
@@ -36,7 +43,7 @@ export default abstract class Fragmenter {
 		this.cache.updateLastPage(this.folder, nodeId);
 		const node = new Node(
 			nodeId,
-			this.stream,
+			STREAM_PREFIX(this.folder),
 			this.getRelationReference(nodeId, 1)
 		);
 		return node;

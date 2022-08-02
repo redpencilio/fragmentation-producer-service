@@ -28,7 +28,7 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 		let currentValue = "";
 		// Find longest prefix which is stored in prefixCache
 		let resourceValue = resource.dataMap
-			.get(this.path.value)![0]
+			.get(this.relationPath.value)![0]
 			?.value.toLowerCase();
 		// let resourceValue = getFirstMatch(resource.data, null, this.path)
 		// 	?.object.value;
@@ -103,7 +103,7 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 		let memberGroups: { [key: string]: Resource[] } = {};
 		let pathValue: RDF.Term;
 		node.members.forEach((member) => {
-			pathValue = member.dataMap.get(this.path.value)![0];
+			pathValue = member.dataMap.get(this.relationPath.value)![0];
 			// let pathValue = getFirstMatch(member.data, null, this.path)?.object;
 			if (pathValue) {
 				let character = pathValue.value.charAt(depth).toLowerCase();
@@ -135,7 +135,7 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 				literal(currentValue + mostOccuringToken),
 				this.getRelationReference(node.id, newNode.id),
 				newNode.id,
-				this.path
+				this.relationPath
 			)
 		);
 

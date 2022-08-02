@@ -26,7 +26,7 @@ export default class TimeFragmenter extends Fragmenter {
 		// add resources about this version
 		versionedResource.addProperty(PURL("isVersionOf").value, resource.id);
 
-		versionedResource.addProperty(this.path.value, dateLiteral);
+		versionedResource.addProperty(this.relationPath.value, dateLiteral);
 
 		return versionedResource;
 	}
@@ -43,7 +43,7 @@ export default class TimeFragmenter extends Fragmenter {
 					timestamp,
 					this.getRelationReference(node.id, currentNode.id),
 					currentNode.id,
-					this.path
+					this.relationPath
 				)
 			);
 			this.cache.addNode(this.fileForNode(currentNode.id), currentNode);
@@ -72,7 +72,7 @@ export default class TimeFragmenter extends Fragmenter {
 			if (this.shouldCreateNewPage(currentNode)) {
 				const closingNode = currentNode;
 				let timestampLastResource = versionedResource.dataMap.get(
-					this.path.value
+					this.relationPath.value
 				)![0];
 				// create a store with the new graph for the new file
 				currentNode = await this.closeDataset(
