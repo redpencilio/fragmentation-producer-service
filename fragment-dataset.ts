@@ -3,7 +3,7 @@ import { DataFactory } from "n3";
 const { quad, literal, namedNode } = DataFactory;
 import PrefixTreeFragmenter from "./fragmenters/PrefixTreeFragmenter";
 import Node from "./models/node";
-import PromiseQueue from "./promise-queue";
+import PromiseQueue from "./utils/promise-queue";
 import { EXAMPLE, LDES_TIME, PROV, RDF } from "./utils/namespaces";
 import fs from "fs";
 import Fragmenter from "./fragmenters/Fragmenter";
