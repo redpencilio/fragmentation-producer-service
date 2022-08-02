@@ -1,44 +1,41 @@
 import DatasetTransformer, {
-	DatasetConfiguration,
-} from "./dataset-transformer";
-import { Readable, Stream, PassThrough } from "stream";
+  DatasetConfiguration,
+} from './dataset-transformer';
+import { Readable, Stream, PassThrough } from 'stream';
 
-import readline from "readline";
-import { EXAMPLE, RDF } from "../utils/namespaces";
-import Resource from "../models/resource";
-import dataFactory from "@rdfjs/data-model";
+import readline from 'readline';
+import { EXAMPLE, RDF } from '../../lib/utils/namespaces';
+import Resource from '../../lib/models/resource';
+import dataFactory from '@rdfjs/data-model';
 
 export interface DefaultDatasetConfiguration extends DatasetConfiguration {
-	propertyType: string;
+  propertyType: string;
 }
 
 export default class DefaultTransformer implements DatasetTransformer {
-	transform(input: Readable, config: DefaultDatasetConfiguration): Readable {
-		const readLineInterface = readline.createInterface({
-			input: input,
-		});
+  transform(input: Readable, config: DefaultDatasetConfiguration): Readable {
+    const readLineInterface = readline.createInterface({
+      input: input,
+    });
 
-		const resultStream = new PassThrough({ objectMode: true });
+    const resultStream = new PassThrough({ objectMode: true });
 
-		readLineInterface
-			.on("line", async (input) => {
-				let id = dataFactory.namedNode(
-					encodeURI(config.resourceIdPrefix + input)
-				);
-				let resource = new Resource(id);
-				resource.addProperty(
-					RDF("type").value,
-					dataFactory.namedNode(config.resourceType)
-				);
-				resource.addProperty(
-					config.propertyType,
-					dataFactory.literal(input)
-				);
-				resultStream.push(resource);
-			})
-			.on("close", () => {
-				resultStream.end();
-			});
-		return resultStream;
-	}
+    readLineInterface
+      .on('line', async (input) => {
+        let id = dataFactory.namedNode(
+          encodeURI(config.resourceIdPrefix + input)
+        );
+        let resource = new Resource(id);
+        resource.addProperty(
+          RDF('type').value,
+          dataFactory.namedNode(config.resourceType)
+        );
+        resource.addProperty(config.propertyType, dataFactory.literal(input));
+        resultStream.push(resource);
+      })
+      .on('close', () => {
+        resultStream.end();
+      });
+    return resultStream;
+  }
 }
