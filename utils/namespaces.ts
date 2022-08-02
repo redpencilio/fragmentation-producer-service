@@ -1,19 +1,19 @@
 import namespace from "@rdfjs/namespace";
 
-export const example = namespace("https://example.org/");
+export const EXAMPLE = namespace("https://example.org/");
 
-export const tree = namespace("https://w3id.org/tree#");
+export const TREE = namespace("https://w3id.org/tree#");
 
-export const xml = namespace("http://www.w3.org/2001/XMLSchema#");
+export const XML = namespace("http://www.w3.org/2001/XMLSchema#");
 
-export const ldes = namespace("http://w3id.org/ldes#");
+export const LDES = namespace("http://w3id.org/ldes#");
 
-export const ldesTime = namespace(
+export const LDES_TIME = namespace(
 	"http://mu.semte.ch/services/ldes-time-fragmenter/"
 );
 
-export const prov = namespace("http://www.w3.org/ns/prov#");
+export const PROV = namespace("http://www.w3.org/ns/prov#");
 
-export const rdf = namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+export const RDF = namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
 
-export const purl = namespace("http://purl.org/dc/terms/");
+export const PURL = namespace("http://purl.org/dc/terms/");

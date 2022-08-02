@@ -5,7 +5,7 @@ import jsstream from "stream";
 import * as RDF from "rdf-js";
 import Node from "../models/node";
 import { getFirstMatch } from "../utils/utils";
-import { ldes, rdf, tree } from "../utils/namespaces";
+import { LDES, RDF as RDF_NAMESPACE, TREE } from "../utils/namespaces";
 import Resource from "../models/resource";
 import Relation from "../models/relation";
 import path from "path";
@@ -23,21 +23,6 @@ import rdfSerializer from "rdf-serialize";
  * @return {Stream} Stream containing all triples which were downloaded.
  */
 
-export async function convertToJsonLD(file: string): Promise<Object> {
-	let quadStream = readTriplesStream(file);
-	const quads = [];
-	await new Promise<void>((resolve, reject) => {
-		quadStream.on("data", (quad) => {
-			quads.push(quad);
-		});
-		quadStream.on("error", reject);
-		quadStream.on("end", resolve);
-	});
-	const jsonDoc = await jsonld.fromRDF(quads);
-	const compactedJsonDoc = await jsonld.frame(jsonDoc, FRAME);
-	return compactedJsonDoc;
-}
-
 export function convert(file: string, contentType): NodeJS.ReadableStream {
 	const triplesStream = readTriplesStream(file);
 	return rdfSerializer.serialize(triplesStream, {
@@ -45,7 +30,7 @@ export function convert(file: string, contentType): NodeJS.ReadableStream {
 	});
 }
 
-export function readTriplesStream(file: string): jsstream.Readable | null {
+export function readTriplesStream(file: string): jsstream.Readable {
 	if (!fs.existsSync(file)) {
 		throw Error(`File does not exist: ${file}`);
 	}
@@ -96,7 +81,6 @@ export async function writeTriplesStream(
 	});
 	return new Promise((resolve, reject) => {
 		turtleStream.on("error", () => {
-			console.log("error");
 			reject();
 		});
 		turtleStream.on("end", () => {
@@ -107,141 +91,141 @@ export async function writeTriplesStream(
 	});
 }
 
-export async function readNodeStream(filePath: string): Promise<Node> {
-	const triplesStream = readTriplesStream(filePath);
-	let id, stream, view;
-	const relationIds = [];
-	const memberIds = [];
-	const content: Map<string, Map<string, RDF.Term[]>> = new Map();
-	await new Promise((resolve, reject) => {
-		triplesStream
-			.on("data", (quad: RDF.Quad) => {
-				// Detect if quad is metadata or content and store it in the right variables
-				if (quad.predicate.equals(rdf("type"))) {
-					if (
-						quad.object.equals(ldes("EventStream")) ||
-						quad.object.equals(tree("Collection"))
-					) {
-						// The quad represents the stream
-						stream = quad.subject;
-					} else if (quad.object.equals(tree("Node"))) {
-						// The quad represents the node id
-						id = quad.subject;
-					} else {
-						// Put other content of the node in a map with as key the subject and value a map mapping the predicates to objects
-						let subject_value = quad.subject.value;
-						if (!content.has(subject_value)) {
-							const newMap: Map<string, RDF.Term[]> = new Map();
-							content.set(subject_value, newMap);
-						}
-						if (
-							content.get(subject_value).has(quad.predicate.value)
-						) {
-							content
-								.get(subject_value)
-								.get(quad.predicate.value)
-								.push(quad.object);
-						} else {
-							content
-								.get(subject_value)
-								.set(quad.predicate.value, [quad.object]);
-						}
-					}
-				} else if (quad.predicate.equals(tree("view"))) {
-					// The quad represents a reference to the view (the root node in the tree)
-					view = quad.object;
-				} else if (quad.predicate.equals(tree("relation"))) {
-					// The quad represents a relation to another node
-					relationIds.push(quad.object);
-				} else if (quad.predicate.equals(tree("member"))) {
-					// The quad represents the id of a member of the node
-					memberIds.push(quad.object);
-				} else {
-					// Put other content of the node in a map with as key the subject and value a map mapping the predicates to objects
-					let subject_value = quad.subject.value;
-					if (!content.has(subject_value)) {
-						const newMap: Map<string, RDF.Term[]> = new Map();
-						content.set(subject_value, newMap);
-					}
-					if (content.get(subject_value).has(quad.predicate.value)) {
-						content
-							.get(subject_value)
-							.get(quad.predicate.value)
-							.push(quad.object);
-					} else {
-						content
-							.get(subject_value)
-							.set(quad.predicate.value, [quad.object]);
-					}
-				}
-			})
-			.on("error", reject)
-			.on("end", resolve);
-	});
+// export async function readNodeStream(filePath: string): Promise<Node> {
+// 	const triplesStream = readTriplesStream(filePath);
+// 	let id, stream, view;
+// 	const relationIds: RDF.NamedNode[] = [];
+// 	const memberIds: RDF.NamedNode[] = [];
+// 	const content: Map<string, Map<string, RDF.Term[]>> = new Map();
+// 	await new Promise((resolve, reject) => {
+// 		triplesStream
+// 			.on("data", (quad: RDF.Quad) => {
+// 				// Detect if quad is metadata or content and store it in the right variables
+// 				if (quad.predicate.equals(RDF_NAMESPACE("type"))) {
+// 					if (
+// 						quad.object.equals(LDES("EventStream")) ||
+// 						quad.object.equals(TREE("Collection"))
+// 					) {
+// 						// The quad represents the stream
+// 						stream = quad.subject;
+// 					} else if (quad.object.equals(TREE("Node"))) {
+// 						// The quad represents the node id
+// 						id = quad.subject;
+// 					} else {
+// 						// Put other content of the node in a map with as key the subject and value a map mapping the predicates to objects
+// 						let subject_value = quad.subject.value;
+// 						if (!content.has(subject_value)) {
+// 							const newMap: Map<string, RDF.Term[]> = new Map();
+// 							content.set(subject_value, newMap);
+// 						}
+// 						if (
+// 							content.get(subject_value)!.has(quad.predicate.value)
+// 						) {
+// 							content
+// 								.get(subject_value)!
+// 								.get(quad.predicate.value)!
+// 								.push(quad.object);
+// 						} else {
+// 							content
+// 								.get(subject_value)!
+// 								.set(quad.predicate.value, [quad.object]);
+// 						}
+// 					}
+// 				} else if (quad.predicate.equals(TREE("view"))) {
+// 					// The quad represents a reference to the view (the root node in the tree)
+// 					view = quad.object;
+// 				} else if (quad.predicate.equals(TREE("relation"))) {
+// 					// The quad represents a relation to another node
+// 					relationIds.push(quad.object as NamedNode);
+// 				} else if (quad.predicate.equals(TREE("member"))) {
+// 					// The quad represents the id of a member of the node
+// 					memberIds.push(quad.object as NamedNode);
+// 				} else {
+// 					// Put other content of the node in a map with as key the subject and value a map mapping the predicates to objects
+// 					let subject_value = quad.subject.value;
+// 					if (!content.has(subject_value)) {
+// 						const newMap: Map<string, RDF.Term[]> = new Map();
+// 						content.set(subject_value, newMap);
+// 					}
+// 					if (content.get(subject_value)!.has(quad.predicate.value)) {
+// 						content
+// 							.get(subject_value)!
+// 							.get(quad.predicate.value)!
+// 							.push(quad.object);
+// 					} else {
+// 						content
+// 							.get(subject_value)!
+// 							.set(quad.predicate.value, [quad.object]);
+// 					}
+// 				}
+// 			})
+// 			.on("error", reject)
+// 			.on("end", resolve);
+// 	});
 
-	if (id && stream && view) {
-		let node = new Node(parseInt(path.parse(id.value).base), stream, view);
-		// Add members and relations
-		relationIds.forEach((relationId: RDF.NamedNode) => {
-			if (content.has(relationId.value)) {
-				const relationContent = content.get(relationId.value);
-				let type = relationContent.get(rdf("type").value);
-				let value = relationContent.get(tree("value").value);
-				let target = relationContent.get(tree("node").value);
-				let relationPath = relationContent.get(tree("path").value);
-				if (
-					type &&
-					type.length &&
-					value &&
-					value.length &&
-					target &&
-					target.length &&
-					relationPath &&
-					relationPath.length
-				) {
-					const relation = new Relation(
-						relationId,
-						type[0] as NamedNode,
-						value[0] as Literal,
-						target[0] as NamedNode,
-						parseInt(path.parse(target[0].value).base),
-						relationPath[0] as NamedNode
-					);
+// 	if (id && stream && view) {
+// 		let node = new Node(parseInt(path.parse(id.value).base), stream, view);
+// 		// Add members and relations
+// 		relationIds.forEach((relationId: RDF.NamedNode) => {
+// 			if (content.has(relationId.value)) {
+// 				const relationContent = content.get(relationId.value);
+// 				let type = relationContent.get(RDF_NAMESPACE("type").value);
+// 				let value = relationContent.get(TREE("value").value);
+// 				let target = relationContent.get(TREE("node").value);
+// 				let relationPath = relationContent.get(TREE("path").value);
+// 				if (
+// 					type &&
+// 					type.length &&
+// 					value &&
+// 					value.length &&
+// 					target &&
+// 					target.length &&
+// 					relationPath &&
+// 					relationPath.length
+// 				) {
+// 					const relation = new Relation(
+// 						relationId,
+// 						type[0] as NamedNode,
+// 						value[0] as Literal,
+// 						target[0] as NamedNode,
+// 						parseInt(path.parse(target[0].value).base),
+// 						relationPath[0] as NamedNode
+// 					);
 
-					node.add_relation(value[0].value, relation);
-				}
-			}
-		});
+// 					node.add_relation(value[0].value, relation);
+// 				}
+// 			}
+// 		});
 
-		memberIds.forEach((memberId: RDF.NamedNode) => {
-			let resource: Resource;
-			if (content.has(memberId.value)) {
-				resource = new Resource(memberId, content.get(memberId.value));
-			} else {
-				resource = new Resource(memberId);
-			}
-			node.add_member(resource);
-		});
-		return node;
-	} else {
-		throw Error(
-			"Reference to id, stream or view not found in the requested file"
-		);
-	}
-}
+// 		memberIds.forEach((memberId: RDF.NamedNode) => {
+// 			let resource: Resource;
+// 			if (content.has(memberId.value)) {
+// 				resource = new Resource(memberId, content.get(memberId.value));
+// 			} else {
+// 				resource = new Resource(memberId);
+// 			}
+// 			node.add_member(resource);
+// 		});
+// 		return node;
+// 	} else {
+// 		throw Error(
+// 			"Reference to id, stream or view not found in the requested file"
+// 		);
+// 	}
+// }
 
 export async function readNode(filePath: string): Promise<Node> {
 	const triplesStream = readTriplesStream(filePath);
 	let store = await createStore(triplesStream);
 
-	let id = getFirstMatch(store, null, rdf("type"), tree("Node"))?.subject;
+	let id = getFirstMatch(store, null, RDF_NAMESPACE("type"), TREE("Node"))?.subject;
 	const stream = getFirstMatch(
 		store,
 		null,
-		rdf("type"),
-		ldes("EventStream")
+		RDF_NAMESPACE("type"),
+		LDES("EventStream")
 	)?.subject;
-	let view = getFirstMatch(store, null, tree("view"))?.object;
+	let view = getFirstMatch(store, null, TREE("view"))?.object;
 	if (id && stream && view) {
 		let node: Node = new Node(
 			parseInt(path.parse(id.value).base),
@@ -251,20 +235,20 @@ export async function readNode(filePath: string): Promise<Node> {
 
 		// Read relations from store and add them to the node
 		const relationIds = store
-			.getQuads(id, tree("relation"), null, null)
+			.getQuads(id, TREE("relation"), null, null)
 			.map((quad) => quad.object);
 
 		relationIds.forEach((relationId) => {
-			let type = getFirstMatch(store, relationId, rdf("type"))?.object;
+			let type = getFirstMatch(store, relationId, RDF_NAMESPACE("type"))?.object;
 
-			let value = getFirstMatch(store, relationId, tree("value"))?.object;
+			let value = getFirstMatch(store, relationId, TREE("value"))?.object;
 
-			let target = getFirstMatch(store, relationId, tree("node"))?.object;
+			let target = getFirstMatch(store, relationId, TREE("node"))?.object;
 
 			let relationPath = getFirstMatch(
 				store,
 				relationId,
-				tree("path")
+				TREE("path")
 			)?.object;
 
 			if (type && value && target && relationPath) {
@@ -283,7 +267,7 @@ export async function readNode(filePath: string): Promise<Node> {
 		});
 		// Read members from store and add them to the node
 		const memberIds = store
-			.getQuads(null, tree("member"), null, null)
+			.getQuads(null, TREE("member"), null, null)
 			.map((quad) => quad.object);
 		memberIds.forEach((memberId) => {
 			let content = new Store(store.getQuads(memberId, null, null, null));
@@ -319,24 +303,24 @@ export async function writeNode(node: Node, path: string) {
 		writeStream.write(turtleChunk);
 	});
 
-	quadStream.push(quad(node.stream, rdf("type"), ldes("EventStream")));
-	quadStream.push(quad(node.stream, rdf("type"), tree("Collection")));
-	quadStream.push(quad(node.stream, tree("view"), node.view));
+	quadStream.push(quad(node.stream, RDF_NAMESPACE("type"), LDES("EventStream")));
+	quadStream.push(quad(node.stream, RDF_NAMESPACE("type"), TREE("Collection")));
+	quadStream.push(quad(node.stream, TREE("view"), node.view));
 
-	quadStream.push(quad(node.idNamedNode, rdf("type"), tree("Node")));
+	quadStream.push(quad(node.idNamedNode, RDF_NAMESPACE("type"), TREE("Node")));
 
 	// Add the different relations to the store
 	node.relationsMap.forEach((relation, _) => {
-		quadStream.push(quad(node.idNamedNode, tree("relation"), relation.id));
-		quadStream.push(quad(relation.id, rdf("type"), relation.type));
-		quadStream.push(quad(relation.id, tree("value"), relation.value));
-		quadStream.push(quad(relation.id, tree("node"), relation.target));
-		quadStream.push(quad(relation.id, tree("path"), relation.path));
+		quadStream.push(quad(node.idNamedNode, TREE("relation"), relation.id));
+		quadStream.push(quad(relation.id, RDF_NAMESPACE("type"), relation.type));
+		quadStream.push(quad(relation.id, TREE("value"), relation.value));
+		quadStream.push(quad(relation.id, TREE("node"), relation.target));
+		quadStream.push(quad(relation.id, TREE("path"), relation.path));
 	});
 
 	// Add the different members and their data to the store
 	node.members.forEach((member) => {
-		quadStream.push(quad(node.stream, tree("member"), member.id));
+		quadStream.push(quad(node.stream, TREE("member"), member.id));
 		member.dataMap.forEach((objects, predicateValue) => {
 			objects.forEach((object) => {
 				quadStream.push(
@@ -354,7 +338,6 @@ export async function writeNode(node: Node, path: string) {
 
 	return new Promise<void>((resolve, reject) => {
 		turtleStream.on("error", () => {
-			console.log("error");
 			reject();
 		});
 		turtleStream.on("end", () => {

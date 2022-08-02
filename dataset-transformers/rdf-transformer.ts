@@ -5,7 +5,7 @@ import { Readable } from "stream";
 import rdfParser from "rdf-parse";
 
 import { createStore } from "../storage/files";
-import { rdf } from "../utils/namespaces";
+import { RDF } from "../utils/namespaces";
 import { DataFactory, NamedNode, Store } from "n3";
 import Resource from "../models/resource";
 const { namedNode } = DataFactory;
@@ -14,9 +14,8 @@ export interface RDFDatasetConfiguration extends DatasetConfiguration {
 }
 
 async function* getResources(store: Store, resourceType: string) {
-	console.log(namedNode(resourceType));
 	const matches = store.getSubjects(
-		rdf("type"),
+		RDF("type"),
 		namedNode(resourceType),
 		null
 	);

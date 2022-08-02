@@ -47,7 +47,6 @@ export default class Cache {
 	}
 
 	async addNode(path: string, node: Node) {
-		// this.updateNodeFrequency(path);
 		this.lruRank.set(path, 0);
 		this.nodes.set(path, node);
 		await this.applyCacheEviction();
@@ -99,10 +98,6 @@ export default class Cache {
 			// Determine least frequently used node
 			const lruEntries = Array.from(this.lruRank.entries());
 			lruEntries.sort(([k1, v1], [k2, v2]) => v1 - v2);
-			console.log(
-				"Number of nodes with zero hits in cache: ",
-				lruEntries.filter(([k1, v1]) => v1 === 0).length
-			);
 			const keys = lruEntries
 				.map(([k, v]) => k)
 				.slice(
@@ -117,7 +112,6 @@ export default class Cache {
 
 	async evictFromCache(keys: string[]) {
 		this.evicting = true;
-		console.log("Eviction start");
 		let listOfPromises: any[] = [];
 		for (const key of keys) {
 			let node = this.nodes.get(key);
@@ -130,12 +124,10 @@ export default class Cache {
 			this.nodes.delete(key);
 			this.lruRank.delete(key);
 		}
-		console.log("Eviction end");
 		this.evicting = false;
 	}
 
 	async flush() {
 		await this.evictFromCache(Array.from(this.nodes.keys()));
-		console.log("Flushed");
 	}
 }

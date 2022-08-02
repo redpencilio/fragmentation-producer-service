@@ -1,6 +1,6 @@
 import { Store, DataFactory, Quad, OTerm } from "n3";
 import { v4 as uuid } from "uuid";
-import { ldesTime, tree, xml } from "./namespaces";
+import { LDES_TIME, TREE, XML } from "./namespaces";
 import * as RDF from "rdf-js";
 const { namedNode, quad, literal } = DataFactory;
 
@@ -18,17 +18,17 @@ export type QuadElement =
 	| RDF.Quad_Object;
 
 export function generateTreeRelation() {
-	return ldesTime(`relations/${uuid()}`);
+	return LDES_TIME(`relations/${uuid()}`);
 }
 
 export function nowLiteral() {
-	const xsdDateTime = xml("dateTime");
+	const xsdDateTime = XML("dateTime");
 	const now = new Date().toISOString();
 	return literal(now, xsdDateTime);
 }
 
 export function generateVersion(_namedNode: any) {
-	return ldesTime(`versioned/${uuid()}`);
+	return LDES_TIME(`versioned/${uuid()}`);
 }
 
 export function error(status: number, msg?: string) {

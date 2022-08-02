@@ -3,7 +3,7 @@ const { literal } = DataFactory;
 import Node from "../models/node";
 import Relation from "../models/relation";
 import Resource from "../models/resource";
-import { ldes, rdf, tree } from "../utils/namespaces";
+import {  TREE } from "../utils/namespaces";
 import { generateTreeRelation } from "../utils/utils";
 import * as RDF from "rdf-js";
 
@@ -20,7 +20,6 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 		try {
 			viewNode = await this.cache.getNode(viewFile);
 		} catch (e) {
-			console.log("No viewnode");
 			viewNode = this.constructNewNode();
 			await this.cache.addNode(this.getViewFile(), viewNode);
 			this.relationCache.addRelation("", this.getViewFile());
@@ -29,7 +28,7 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 		let currentValue = "";
 		// Find longest prefix which is stored in prefixCache
 		let resourceValue = resource.dataMap
-			.get(this.path.value)[0]
+			.get(this.path.value)![0]
 			?.value.toLowerCase();
 		// let resourceValue = getFirstMatch(resource.data, null, this.path)
 		// 	?.object.value;
@@ -68,7 +67,6 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 		let curNode = node;
 		while (childMatch && curDepth <= resourceValue.length) {
 			// Check if we have to add the resource to a child of the current node, to the current node itself or if we have to split the current node.
-			console.log(childMatch);
 			curNode = await this.cache.getNode(
 				this.fileForNode(childMatch.targetId)
 			);
@@ -105,7 +103,7 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 		let memberGroups: { [key: string]: Resource[] } = {};
 		let pathValue: RDF.Term;
 		node.members.forEach((member) => {
-			pathValue = member.dataMap.get(this.path.value)[0];
+			pathValue = member.dataMap.get(this.path.value)![0];
 			// let pathValue = getFirstMatch(member.data, null, this.path)?.object;
 			if (pathValue) {
 				let character = pathValue.value.charAt(depth).toLowerCase();
@@ -121,10 +119,10 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 		);
 		let newRelationType: RDF.Term;
 		if (mostOccuringToken === "") {
-			newRelationType = tree("EqualsRelation");
+			newRelationType = TREE("EqualsRelation");
 			// if the mostOccuringToken is an empty string => a lot of members have the same value for path => add equalrelation
 		} else {
-			newRelationType = tree("PrefixRelation");
+			newRelationType = TREE("PrefixRelation");
 			// else create a new relation and node with prefix value containing mostOccuringToken
 		}
 		let newNode: Node = this.constructNewNode();

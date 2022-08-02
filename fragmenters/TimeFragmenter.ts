@@ -8,7 +8,7 @@ import Fragmenter from "./Fragmenter";
 
 const { quad } = DataFactory;
 
-import { ldes, prov, purl, rdf, tree } from "../utils/namespaces";
+import { LDES, PROV, PURL, RDF, TREE } from "../utils/namespaces";
 import Resource from "../models/resource";
 import Node from "../models/node";
 import Relation from "../models/relation";
@@ -24,7 +24,7 @@ export default class TimeFragmenter extends Fragmenter {
 		const dateLiteral = nowLiteral();
 
 		// add resources about this version
-		versionedResource.addProperty(purl("isVersionOf").value, resource.id);
+		versionedResource.addProperty(PURL("isVersionOf").value, resource.id);
 
 		versionedResource.addProperty(this.path.value, dateLiteral);
 
@@ -39,7 +39,7 @@ export default class TimeFragmenter extends Fragmenter {
 				timestamp.value,
 				new Relation(
 					generateTreeRelation(),
-					tree("GreaterThanOrEqualRelation"),
+					TREE("GreaterThanOrEqualRelation"),
 					timestamp,
 					this.getRelationReference(node.id, currentNode.id),
 					currentNode.id,
@@ -62,7 +62,6 @@ export default class TimeFragmenter extends Fragmenter {
 				pageFile = this.fileForNode(lastPageNr);
 				currentNode = await this.cache.getNode(pageFile);
 			} else {
-				console.log("No viewnode");
 				currentNode = this.constructNewNode();
 				pageFile = this.fileForNode(currentNode.id);
 				this.cache.addNode(pageFile, currentNode);
@@ -74,7 +73,7 @@ export default class TimeFragmenter extends Fragmenter {
 				const closingNode = currentNode;
 				let timestampLastResource = versionedResource.dataMap.get(
 					this.path.value
-				)[0]!;
+				)![0];
 				// create a store with the new graph for the new file
 				currentNode = await this.closeDataset(
 					closingNode,

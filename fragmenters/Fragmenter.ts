@@ -33,9 +33,6 @@ export default abstract class Fragmenter {
 	}
 	constructNewNode(): Node {
 		const nodeId = (this.cache.getLastPage(this.folder) || 0) + 1;
-		if (nodeId === 1) {
-			console.log("view");
-		}
 		this.cache.updateLastPage(this.folder, nodeId);
 		const node = new Node(
 			nodeId,

@@ -4,7 +4,7 @@ const { quad, literal, namedNode } = DataFactory;
 import PrefixTreeFragmenter from "./fragmenters/PrefixTreeFragmenter";
 import Node from "./models/node";
 import PromiseQueue from "./promise-queue";
-import { example, ldesTime, prov, rdf } from "./utils/namespaces";
+import { EXAMPLE, LDES_TIME, PROV, RDF } from "./utils/namespaces";
 import fs from "fs";
 import Fragmenter from "./fragmenters/Fragmenter";
 import TimeFragmenter from "./fragmenters/TimeFragmenter";
@@ -35,8 +35,8 @@ const extensionMap = new Map<String, DatasetTransformer>();
 extensionMap.set(".csv", new CSVTransformer());
 
 const relationPathMap = new Map<String, NamedNode>();
-relationPathMap.set("time-fragmenter", prov("generatedAtTime"));
-relationPathMap.set("prefix-tree-fragmenter", example("name"));
+relationPathMap.set("time-fragmenter", PROV("generatedAtTime"));
+relationPathMap.set("prefix-tree-fragmenter", EXAMPLE("name"));
 
 function getTransformer(extension: string): DatasetTransformer {
 	return extensionMap.get(extension) || new DefaultTransformer();
@@ -93,7 +93,6 @@ program
 	)
 	.action(async (datasetFile, options) => {
 		const fragmenterClass = fragmenterMap.get(options.fragmenter);
-		console.log(options.config);
 		const jsonData = fs.readFileSync(options.config, "utf8");
 		const datasetConfig: DatasetConfiguration = JSON.parse(jsonData);
 		let transformer: DatasetTransformer;
@@ -106,7 +105,7 @@ program
 		if (options.relationPath) {
 			relationPath = namedNode(options.relationPath);
 		} else {
-			relationPath = relationPathMap.get(options.fragmenter);
+			relationPath = relationPathMap.get(options.fragmenter)!;
 		}
 		if (fragmenterClass) {
 			await fragmentDataset(
@@ -150,14 +149,10 @@ export default function fragmentDataset(
 			datasetConfiguration
 		);
 		let i = 0;
-		console.log(i);
 		transformedStream
 			.on("data", async (resource) => {
 				transformedStream.pause();
 				i += 1;
-				if (i % 10000 === 0) {
-					console.log(`\r${i}`);
-				}
 
 				await UPDATE_QUEUE.push(() => fragmenter.addResource(resource));
 				transformedStream.resume();

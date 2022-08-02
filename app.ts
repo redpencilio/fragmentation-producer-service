@@ -1,4 +1,4 @@
-import { app, uuid, errorHandler } from "mu-javascript-library";
+import { app, errorHandler } from "mu-javascript-library";
 import bodyParser from "body-parser";
 import rdfParser from "rdf-parse";
 import rdfSerializer from "rdf-serialize";
@@ -16,7 +16,7 @@ app.use(
 	})
 );
 
-import { convert, convertToJsonLD, readTriplesStream } from "./storage/files";
+import { convert } from "./storage/files";
 import PromiseQueue from "./promise-queue";
 import TimeFragmenter from "./fragmenters/TimeFragmenter";
 import { BASE_FOLDER, error, Newable } from "./utils/utils";
@@ -42,7 +42,7 @@ FRAGMENTERS.set("prefix-tree-fragmenter", PrefixTreeFragmenter);
  * @param {number} page Page index for which we want te get the file path.
  * @return {string} Path to the page.
  */
-function fileForPage(folder: string, page: number) {
+function fileForPage(folder: string, page: number): string {
 	return `${folder}/${page}.ttl`;
 }
 
@@ -70,7 +70,7 @@ app.post("/:folder", async function (req: any, res: any, next: any) {
 			namedNode(req.query.stream),
 			100,
 			namedNode(req.query["relation-path"]),
-			100,
+			20,
 			5,
 			cache
 		);
@@ -87,8 +87,6 @@ app.post("/:folder", async function (req: any, res: any, next: any) {
 			resource.addProperty(quadObj.predicate.value, quadObj.object);
 		}
 
-		console.log(resource);
-
 		const currentDataset = await UPDATE_QUEUE.push(() =>
 			fragmenter.addResource(resource)
 		);
@@ -96,7 +94,6 @@ app.post("/:folder", async function (req: any, res: any, next: any) {
 		await UPDATE_QUEUE.push(() => cache.flush());
 
 		if (currentDataset) {
-			console.log(currentDataset.id);
 			res.status(201).send(
 				`{"message": "ok", "triplesInPage": ${currentDataset.count()}}`
 			);

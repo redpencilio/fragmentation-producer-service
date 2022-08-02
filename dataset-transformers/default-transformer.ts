@@ -4,7 +4,7 @@ import DatasetTransformer, {
 import { Readable, Stream, PassThrough } from "stream";
 
 import readline from "readline";
-import { example, rdf } from "../utils/namespaces";
+import { EXAMPLE, RDF } from "../utils/namespaces";
 import Resource from "../models/resource";
 import dataFactory from "@rdfjs/data-model";
 
@@ -27,7 +27,7 @@ export default class DefaultTransformer implements DatasetTransformer {
 				);
 				let resource = new Resource(id);
 				resource.addProperty(
-					rdf("type").value,
+					RDF("type").value,
 					dataFactory.namedNode(config.resourceType)
 				);
 				resource.addProperty(
