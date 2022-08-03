@@ -5,17 +5,14 @@ import Resource from './resource';
 import * as RDF from 'rdf-js';
 
 export default class Node {
-  id: number;
   members: Array<Resource> = [];
   relationsMap: Map<string, Relation> = new Map();
-  view: RDF.NamedNode;
-  stream: RDF.NamedNode;
 
-  constructor(id: number, stream: RDF.NamedNode, view: RDF.NamedNode) {
-    this.id = id;
-    this.stream = stream;
-    this.view = view;
-  }
+  constructor(
+    readonly id: number,
+    readonly stream: RDF.NamedNode,
+    readonly view: RDF.NamedNode
+  ) {}
 
   get idNamedNode() {
     return namedNode(`./${this.id}`);

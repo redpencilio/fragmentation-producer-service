@@ -35,7 +35,6 @@ export default class TimeFragmenter extends Fragmenter {
 
   async closeDataset(node: Node, timestamp: RDF.Literal): Promise<Node> {
     try {
-      // create a store with the new graph for the new file
       const currentNode = this.constructNewNode();
       node.add_relation(
         timestamp.value,

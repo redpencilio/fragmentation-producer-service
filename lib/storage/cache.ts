@@ -5,17 +5,11 @@ import path from 'path';
 
 export default class Cache {
   nodes: Map<string, Node> = new Map();
-
   usageCount: number = 0;
-
   lruRank: Map<string, number> = new Map();
-
   lastPages: Map<string, number> = new Map();
-
   cacheLimit: number = 10000;
-
   cacheEvictionPercentage: number = 0.3;
-
   evicting: boolean = false;
 
   constructor(cacheLimit: number) {
