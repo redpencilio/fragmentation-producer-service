@@ -26,6 +26,7 @@ import PrefixTreeFragmenter from './lib/fragmenters/PrefixTreeFragmenter';
 import Cache from './lib/storage/cache';
 import Fragmenter from './lib/fragmenters/Fragmenter';
 import {
+  CACHE_SIZE,
   FOLDER_DEPTH,
   PAGE_RESOURCES_COUNT,
   SUBFOLDER_NODE_COUNT,
@@ -33,7 +34,7 @@ import {
 
 const UPDATE_QUEUE = new PromiseQueue<Node | null | void>();
 
-const cache: Cache = new Cache();
+const cache: Cache = new Cache(CACHE_SIZE);
 
 const FRAGMENTERS = new Map<string, Newable<Fragmenter>>();
 
@@ -63,7 +64,7 @@ app.post('/:folder', async function (req: any, res: any, next: any) {
     const fragmenterClass =
       FRAGMENTERS.get(req.query.fragmenter) || TimeFragmenter;
 
-    const fragmenter = new fragmenterClass(4, {
+    const fragmenter = new fragmenterClass({
       folder: path.join(BASE_FOLDER, req.params.folder),
       maxResourcesPerPage: PAGE_RESOURCES_COUNT,
       maxNodeCountPerSubFolder: SUBFOLDER_NODE_COUNT,

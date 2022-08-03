@@ -13,10 +13,10 @@ import Resource from '../models/resource';
 import Node from '../models/node';
 import Relation from '../models/relation';
 import * as RDF from '@rdfjs/types';
-import { PREFIX_TREE_RELATION_PATH } from '../utils/constants';
+import { TIME_TREE_RELATION_PATH } from '../utils/constants';
 
 export default class TimeFragmenter extends Fragmenter {
-  relationPath: RDF.NamedNode<string> = namedNode(PREFIX_TREE_RELATION_PATH);
+  relationPath: RDF.NamedNode<string> = namedNode(TIME_TREE_RELATION_PATH);
   constructVersionedResource(resource: Resource): Resource {
     const versionedResourceId = generateVersion(resource.id);
     const versionedResource = new Resource(versionedResourceId);

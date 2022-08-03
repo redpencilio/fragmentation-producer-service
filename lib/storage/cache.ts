@@ -18,7 +18,7 @@ export default class Cache {
 
   evicting: boolean = false;
 
-  constructor(cacheLimit: number = 10000) {
+  constructor(cacheLimit: number) {
     this.cacheLimit = cacheLimit;
   }
 

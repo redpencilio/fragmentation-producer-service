@@ -17,3 +17,5 @@ export const TIME_TREE_RELATION_PATH =
 export const PREFIX_TREE_RELATION_PATH =
   process.env.PREFIX_TREE_RELATION_PATH ||
   'https://w3id.org/tree#PrefixRelation';
+
+export const CACHE_SIZE = parseInt(process.env.CACHE_SIZE || '10');
