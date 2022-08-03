@@ -4,7 +4,7 @@ import {
   generateVersion,
   nowLiteral,
 } from '../utils/utils';
-import Fragmenter from './Fragmenter';
+import Fragmenter, { FragmenterArgs } from './Fragmenter';
 
 const { quad } = DataFactory;
 
@@ -96,6 +96,7 @@ export default class TimeFragmenter extends Fragmenter {
     const versionedResource: Resource = await this.constructVersionedResource(
       resource
     );
+    console.log(versionedResource);
     const lastDataset = await this.writeVersionedResource(versionedResource);
     return lastDataset;
   }

@@ -3,11 +3,15 @@
     "display": "Node 14",
   
     "compilerOptions": {
-      "lib": ["es2015"],
-      "module": "commonjs",
       "target": "es2015",
+      "module": "commonjs",
+      "allowJs": true,
+      "moduleResolution": "node",
       "noEmitOnError": false,
-      "noImplicitAny": false,
+      "noEmit": false,
+      "noImplicitAny": true,
+      "noImplicitThis": true,
+      "alwaysStrict": true,
       "downlevelIteration": true,
       "strict": true,
       "esModuleInterop": true,

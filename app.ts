@@ -1,4 +1,4 @@
-import { app, errorHandler } from 'mu-javascript-library';
+const { app, errorHandler } = require('mu-javascript-library');
 import bodyParser from 'body-parser';
 import rdfParser from 'rdf-parse';
 import rdfSerializer from 'rdf-serialize';
@@ -109,7 +109,7 @@ app.get('/:folder*/:nodeId', async function (req: any, res: any, next: any) {
     if (page > cache.getLastPage(pagesFolder)) {
       return next(error(404, 'Page not found'));
     }
- 
+
     if (page < cache.getLastPage(pagesFolder))
       res.header('Cache-Control', 'public, immutable');
 

@@ -13,7 +13,7 @@ export default class PromiseQueue<T> {
       });
       this.pop();
     });
-  }0
+  }
 
   pop() {
     if (this.runningPromise || !this.promises.length) {
