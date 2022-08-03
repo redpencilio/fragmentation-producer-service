@@ -54,4 +54,14 @@ export function getFirstMatch(
   return null;
 }
 
+/**
+ * Yields the file path on which the specified page number is described.
+ *
+ * @param {number} page Page index for which we want te get the file path.
+ * @return {string} Path to the page.
+ */
+export function fileForPage(folder: string, page: number): string {
+  return `${folder}/${page}.ttl`;
+}
+
 export type Newable<T> = { new (...args: any[]): T };

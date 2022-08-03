@@ -18,6 +18,25 @@ const ttl_read = require('@graphy/content.ttl.read');
 const ttl_write = require('@graphy/content.ttl.write');
 
 import rdfSerializer from 'rdf-serialize';
+import { JsonLdSerializer } from 'jsonld-streaming-serializer';
+import { CONTEXT, FRAME } from '../utils/context-jsonld';
+import * as jsonld from 'jsonld';
+
+export async function convertToJsonLD(
+  file: string
+): Promise<jsonld.JsonLdDocument> {
+  const quadStream = readTriplesStream(file);
+  const quads: RDF.Quad[] = [];
+  await new Promise<void>((resolve, reject) => {
+    quadStream.on('data', (quad) => {
+      quads.push(quad);
+    });
+    quadStream.on('error', reject);
+    quadStream.on('end', resolve);
+  });
+  const jsonDoc = await jsonld.fromRDF(quads);
+  return jsonDoc;
+}
 
 /**
  * Reads the triples in a file, assuming text/turtle.
@@ -31,9 +50,22 @@ export function convert(
   contentType: string
 ): NodeJS.ReadableStream {
   const triplesStream = readTriplesStream(file);
-  return rdfSerializer.serialize(triplesStream, {
-    contentType: contentType,
-  });
+  switch (contentType) {
+    case 'application/ld+json':
+    case 'application/json':
+      const jsonLdSerializer = new JsonLdSerializer({
+        space: '  ',
+        compactIds: true,
+        context: CONTEXT,
+        rdfDirection: 'i18n-datatype',
+        useNativeTypes: true,
+      });
+      return triplesStream.pipe(jsonLdSerializer);
+    default:
+      return rdfSerializer.serialize(triplesStream, {
+        contentType: contentType,
+      });
+  }
 }
 
 export function readTriplesStream(file: string): jsstream.Readable {
