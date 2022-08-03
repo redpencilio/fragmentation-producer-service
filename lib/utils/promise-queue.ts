@@ -1,7 +1,11 @@
 // Based on https://medium.com/@karenmarkosyan/how-to-manage-promises-into-dynamic-queue-with-vanilla-javascript-9d0d1f8d4df5
 
 export default class PromiseQueue<T> {
-  promises: any[] = [];
+  promises: {
+    promise: () => Promise<T>;
+    resolve: (value: T) => void;
+    reject: (reason?: any) => void;
+  }[] = [];
   runningPromise = false;
 
   push(promise: () => Promise<T>): Promise<T> {
@@ -19,10 +23,10 @@ export default class PromiseQueue<T> {
     if (this.runningPromise || !this.promises.length) {
       return;
     }
-    const { promise, resolve, reject } = this.promises.shift();
+    const { promise, resolve, reject } = this.promises.shift()!;
     this.runningPromise = true;
     promise()
-      .then((res: any) => {
+      .then((res: T) => {
         this.runningPromise = false;
         resolve(res);
         this.pop();
