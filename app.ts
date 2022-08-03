@@ -19,13 +19,14 @@ app.use(
 import { convert } from './lib/storage/files';
 import PromiseQueue from './lib/utils/promise-queue';
 import TimeFragmenter from './lib/fragmenters/TimeFragmenter';
-import { BASE_FOLDER, error, Newable } from './lib/utils/utils';
+import { error, Newable } from './lib/utils/utils';
 import Resource from './lib/models/resource';
 import Node from './lib/models/node';
 import PrefixTreeFragmenter from './lib/fragmenters/PrefixTreeFragmenter';
 import Cache from './lib/storage/cache';
 import Fragmenter from './lib/fragmenters/Fragmenter';
 import {
+  BASE_FOLDER,
   CACHE_SIZE,
   FOLDER_DEPTH,
   PAGE_RESOURCES_COUNT,

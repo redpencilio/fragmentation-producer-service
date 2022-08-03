@@ -19,3 +19,5 @@ export const PREFIX_TREE_RELATION_PATH =
   'https://w3id.org/tree#PrefixRelation';
 
 export const CACHE_SIZE = parseInt(process.env.CACHE_SIZE || '10');
+
+export const BASE_FOLDER = process.env.DATA_FOLDER || './data';
