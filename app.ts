@@ -27,8 +27,8 @@ import Cache from './lib/storage/cache';
 import Fragmenter from './lib/fragmenters/Fragmenter';
 import {
   FOLDER_DEPTH,
-  FOLDER_NODE_COUNT,
   PAGE_RESOURCES_COUNT,
+  SUBFOLDER_NODE_COUNT,
 } from './lib/utils/constants';
 
 const UPDATE_QUEUE = new PromiseQueue<Node | null | void>();
@@ -63,11 +63,10 @@ app.post('/:folder', async function (req: any, res: any, next: any) {
     const fragmenterClass =
       FRAGMENTERS.get(req.query.fragmenter) || TimeFragmenter;
 
-    const fragmenter = new fragmenterClass({
+    const fragmenter = new fragmenterClass(4, {
       folder: path.join(BASE_FOLDER, req.params.folder),
-      relationPath: namedNode(req.query['relation-path']),
       maxResourcesPerPage: PAGE_RESOURCES_COUNT,
-      maxNodeCountPerFolder: FOLDER_NODE_COUNT,
+      maxNodeCountPerSubFolder: SUBFOLDER_NODE_COUNT,
       folderDepth: FOLDER_DEPTH,
       cache,
     });

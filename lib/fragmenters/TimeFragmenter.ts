@@ -4,17 +4,19 @@ import {
   generateVersion,
   nowLiteral,
 } from '../utils/utils';
-import Fragmenter, { FragmenterArgs } from './Fragmenter';
+import Fragmenter from './Fragmenter';
 
-const { quad } = DataFactory;
+const { namedNode } = DataFactory;
 
-import { LDES, PROV, PURL, RDF, TREE } from '../utils/namespaces';
+import { PURL, TREE } from '../utils/namespaces';
 import Resource from '../models/resource';
 import Node from '../models/node';
 import Relation from '../models/relation';
-import { Literal } from '@rdfjs/types';
+import * as RDF from '@rdfjs/types';
+import { PREFIX_TREE_RELATION_PATH } from '../utils/constants';
 
 export default class TimeFragmenter extends Fragmenter {
+  relationPath: RDF.NamedNode<string> = namedNode(PREFIX_TREE_RELATION_PATH);
   constructVersionedResource(resource: Resource): Resource {
     const versionedResourceId = generateVersion(resource.id);
     const versionedResource = new Resource(versionedResourceId);
@@ -31,7 +33,7 @@ export default class TimeFragmenter extends Fragmenter {
     return versionedResource;
   }
 
-  async closeDataset(node: Node, timestamp: Literal): Promise<Node> {
+  async closeDataset(node: Node, timestamp: RDF.Literal): Promise<Node> {
     try {
       // create a store with the new graph for the new file
       const currentNode = this.constructNewNode();
@@ -77,7 +79,7 @@ export default class TimeFragmenter extends Fragmenter {
         // create a store with the new graph for the new file
         currentNode = await this.closeDataset(
           closingNode,
-          timestampLastResource as Literal
+          timestampLastResource as RDF.Literal
         );
 
         currentNode.add_member(versionedResource);

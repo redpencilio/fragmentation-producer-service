@@ -5,7 +5,11 @@ import jsstream from 'stream';
 import * as RDF from 'rdf-js';
 import Node from '../models/node';
 import { getFirstMatch } from '../utils/utils';
-import { LDES, RDF as RDF_NAMESPACE, TREE } from '../utils/namespaces';
+import {
+  LDES,
+  RDF_NAMESPACE as RDF_NAMESPACE,
+  TREE,
+} from '../utils/namespaces';
 import Resource from '../models/resource';
 import Relation from '../models/relation';
 import path from 'path';

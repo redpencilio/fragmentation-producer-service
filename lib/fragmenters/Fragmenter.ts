@@ -9,32 +9,29 @@ const { namedNode } = DataFactory;
 
 export interface FragmenterArgs {
   folder: string;
-  relationPath: RDF.NamedNode;
   maxResourcesPerPage: number;
-  maxNodeCountPerFolder: number;
+  maxNodeCountPerSubFolder: number;
   folderDepth: number;
   cache: Cache;
 }
 export default abstract class Fragmenter {
   folder: string;
   maxResourcesPerPage: number;
-  relationPath: RDF.NamedNode;
+  abstract relationPath: RDF.NamedNode;
   cache: Cache;
-  maxNodeCountPerFolder: number;
+  maxNodeCountPerSubFolder: number;
   folderDepth: number;
 
   constructor({
     folder,
     maxResourcesPerPage,
-    relationPath,
-    maxNodeCountPerFolder,
+    maxNodeCountPerSubFolder,
     folderDepth,
     cache,
   }: FragmenterArgs) {
     this.folder = folder;
     this.maxResourcesPerPage = maxResourcesPerPage;
-    this.relationPath = relationPath;
-    this.maxNodeCountPerFolder = maxNodeCountPerFolder;
+    this.maxNodeCountPerSubFolder = maxNodeCountPerSubFolder;
     this.folderDepth = folderDepth;
     this.cache = cache;
   }
@@ -61,13 +58,13 @@ export default abstract class Fragmenter {
     } else {
       let folderChain: string[] = [];
       let rest = nodeId;
-      let divider = this.maxNodeCountPerFolder;
+      let divider = this.maxNodeCountPerSubFolder;
       for (let i = 1; i < this.folderDepth; i++) {
         let wholeDiv = Math.floor(rest / divider) % divider;
         let folderNumber = wholeDiv + 1;
         folderChain.unshift(folderNumber.toString());
-        rest = rest - wholeDiv * this.maxNodeCountPerFolder;
-        divider = divider * this.maxNodeCountPerFolder;
+        rest = rest - wholeDiv * this.maxNodeCountPerSubFolder;
+        divider = divider * this.maxNodeCountPerSubFolder;
       }
       folderChain.unshift('');
       return path.join(...folderChain);

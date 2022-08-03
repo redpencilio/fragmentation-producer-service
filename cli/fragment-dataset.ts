@@ -1,31 +1,36 @@
 import { Command, Option } from 'commander';
 import { DataFactory } from 'n3';
-const { quad, literal, namedNode } = DataFactory;
-import PrefixTreeFragmenter from './lib/fragmenters/PrefixTreeFragmenter';
-import Node from './lib/models/node';
-import PromiseQueue from './lib/utils/promise-queue';
-import { EXAMPLE, LDES_TIME, PROV, RDF } from './lib/utils/namespaces';
+const { namedNode } = DataFactory;
+import PrefixTreeFragmenter from '../lib/fragmenters/PrefixTreeFragmenter';
+import Node from '../lib/models/node';
+import PromiseQueue from '../lib/utils/promise-queue';
+import { EXAMPLE, PROV } from '../lib/utils/namespaces';
 import fs from 'fs';
-import Fragmenter from './lib/fragmenters/Fragmenter';
-import TimeFragmenter from './lib/fragmenters/TimeFragmenter';
-import DefaultTransformer from './cli/dataset-transformers/default-transformer';
-import { Newable } from './lib/utils/utils';
+import Fragmenter from '../lib/fragmenters/Fragmenter';
+import TimeFragmenter from '../lib/fragmenters/TimeFragmenter';
+import DefaultTransformer from './dataset-transformers/default-transformer';
+import { Newable } from '../lib/utils/utils';
 import DatasetTransformer, {
   DatasetConfiguration,
-} from './cli/dataset-transformers/dataset-transformer';
-import CSVTransformer from './cli/dataset-transformers/csv-transformer';
+} from './dataset-transformers/dataset-transformer';
+import CSVTransformer from './dataset-transformers/csv-transformer';
 import path from 'path';
-import { IPFSIndexTransformer } from './cli/dataset-transformers/ipfs-index-transformer';
-import Cache from './lib/storage/cache';
-import RDFTransformer from './cli/dataset-transformers/rdf-transformer';
+import { IPFSIndexTransformer } from './dataset-transformers/ipfs-index-transformer';
+import Cache from '../lib/storage/cache';
+import RDFTransformer from './dataset-transformers/rdf-transformer';
 import { NamedNode } from '@rdfjs/types';
+import {
+  FOLDER_DEPTH,
+  PAGE_RESOURCES_COUNT,
+  SUBFOLDER_NODE_COUNT,
+} from '../lib/utils/constants';
 
-const fragmenterMap = new Map<String, Newable<Fragmenter>>();
+const fragmenterMap = new Map<string, Newable<Fragmenter>>();
 
 fragmenterMap.set('time-fragmenter', TimeFragmenter);
 fragmenterMap.set('prefix-tree-fragmenter', PrefixTreeFragmenter);
 
-const transformerMap = new Map<String, DatasetTransformer>();
+const transformerMap = new Map<string, DatasetTransformer>();
 transformerMap.set('csv-transformer', new CSVTransformer());
 transformerMap.set('default-transformer', new DefaultTransformer());
 transformerMap.set('ipfs-transformer', new IPFSIndexTransformer());
@@ -90,7 +95,8 @@ program
     ).choices([...transformerMap.keys()] as string[])
   )
   .action(async (datasetFile, options) => {
-    const fragmenterClass = fragmenterMap.get(options.fragmenter);
+    const fragmenterClass =
+      fragmenterMap.get(options.fragmenter) || TimeFragmenter;
     const jsonData = fs.readFileSync(options.config, 'utf8');
     const datasetConfig: DatasetConfiguration = JSON.parse(jsonData);
     let transformer: DatasetTransformer;
@@ -130,15 +136,13 @@ export default function fragmentDataset(
   outputFolder: string
 ): Promise<void> {
   const cache: Cache = new Cache(cacheSizeLimit);
-  const fragmenter = new fragmenterClass(
-    outputFolder,
-    namedNode(datasetConfiguration.stream),
-    50,
-    relationPath,
-    20,
-    5,
-    cache
-  );
+  const fragmenter = new fragmenterClass({
+    folder: outputFolder,
+    maxResourcesPerPage: PAGE_RESOURCES_COUNT,
+    maxNodeCountPerSubFolder: SUBFOLDER_NODE_COUNT,
+    folderDepth: FOLDER_DEPTH,
+    cache,
+  });
   const fileStream = fs.createReadStream(datasetFile);
 
   return new Promise<void>(async (resolve) => {

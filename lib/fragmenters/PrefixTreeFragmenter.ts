@@ -9,8 +9,11 @@ import * as RDF from 'rdf-js';
 
 import Fragmenter from './Fragmenter';
 import RelationCache from '../storage/relationCache';
+import { namedNode } from '@rdfjs/data-model';
+import { TIME_TREE_RELATION_PATH } from '../utils/constants';
 
 export default class PrefixTreeFragmenter extends Fragmenter {
+  relationPath: RDF.NamedNode<string> = namedNode(TIME_TREE_RELATION_PATH);
   relationCache: RelationCache = new RelationCache();
   async addResource(resource: Resource): Promise<Node | null> {
     const viewFile = this.getViewFile();
