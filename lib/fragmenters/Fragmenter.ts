@@ -48,7 +48,7 @@ export default abstract class Fragmenter {
 
   fileForNode(nodeId: number): string {
     // Determine in which subfolder nodeId should be located
-    let subFolder: string = this.determineSubFolder(nodeId);
+    const subFolder: string = this.determineSubFolder(nodeId);
     return path.join(this.folder, subFolder, `${nodeId}.ttl`);
   }
 
@@ -56,12 +56,12 @@ export default abstract class Fragmenter {
     if (nodeId === 1) {
       return '';
     } else {
-      let folderChain: string[] = [];
+      const folderChain: string[] = [];
       let rest = nodeId;
       let divider = this.maxNodeCountPerSubFolder;
       for (let i = 1; i < this.folderDepth; i++) {
-        let wholeDiv = Math.floor(rest / divider) % divider;
-        let folderNumber = wholeDiv + 1;
+        const wholeDiv = Math.floor(rest / divider) % divider;
+        const folderNumber = wholeDiv + 1;
         folderChain.unshift(folderNumber.toString());
         rest = rest - wholeDiv * this.maxNodeCountPerSubFolder;
         divider = divider * this.maxNodeCountPerSubFolder;
@@ -72,8 +72,8 @@ export default abstract class Fragmenter {
   }
 
   getRelationReference(sourceNodeId: number, targetNodeId: number): NamedNode {
-    let sourceSubFolder: string = this.determineSubFolder(sourceNodeId);
-    let targetSubFolder: string = this.determineSubFolder(targetNodeId);
+    const sourceSubFolder: string = this.determineSubFolder(sourceNodeId);
+    const targetSubFolder: string = this.determineSubFolder(targetNodeId);
 
     let relativePath = path.join(
       path.relative(sourceSubFolder, targetSubFolder),

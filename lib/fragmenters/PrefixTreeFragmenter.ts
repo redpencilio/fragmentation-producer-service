@@ -30,7 +30,7 @@ export default class PrefixTreeFragmenter extends Fragmenter {
     let node = viewNode;
     let currentValue = '';
     // Find longest prefix which is stored in prefixCache
-    let resourceValue = resource.dataMap
+    const resourceValue = resource.dataMap
       .get(this.relationPath.value)![0]
       ?.value.toLowerCase();
     // let resourceValue = getFirstMatch(resource.data, null, this.path)
@@ -58,9 +58,9 @@ export default class PrefixTreeFragmenter extends Fragmenter {
   async _addResource(
     resource: Resource,
     node: Node,
-    prefixValue: string = '',
+    prefixValue = '',
     resourceValue: string,
-    depth: number = 0
+    depth = 0
   ): Promise<Node> {
     let childMatch = node.relationsMap.get(prefixValue + resourceValue[depth]);
     let curDepth = depth;
@@ -99,13 +99,13 @@ export default class PrefixTreeFragmenter extends Fragmenter {
       return;
     }
     // Determine the token at the given depth which occurs the most and split off members matching that specific token
-    let memberGroups: { [key: string]: Resource[] } = {};
+    const memberGroups: { [key: string]: Resource[] } = {};
     let pathValue: RDF.Term;
     node.members.forEach((member) => {
       pathValue = member.dataMap.get(this.relationPath.value)![0];
       // let pathValue = getFirstMatch(member.data, null, this.path)?.object;
       if (pathValue) {
-        let character = pathValue.value.charAt(depth).toLowerCase();
+        const character = pathValue.value.charAt(depth).toLowerCase();
         if (memberGroups[character]) {
           memberGroups[character].push(member);
         } else {
@@ -113,7 +113,7 @@ export default class PrefixTreeFragmenter extends Fragmenter {
         }
       }
     });
-    let mostOccuringToken = Object.keys(memberGroups).reduce((k1, k2) =>
+    const mostOccuringToken = Object.keys(memberGroups).reduce((k1, k2) =>
       memberGroups[k1].length > memberGroups[k2].length ? k1 : k2
     );
     let newRelationType: RDF.Term;
@@ -124,7 +124,7 @@ export default class PrefixTreeFragmenter extends Fragmenter {
       newRelationType = TREE('PrefixRelation');
       // else create a new relation and node with prefix value containing mostOccuringToken
     }
-    let newNode: Node = this.constructNewNode();
+    const newNode: Node = this.constructNewNode();
 
     node.add_relation(
       currentValue + mostOccuringToken,

@@ -1,8 +1,8 @@
 import { Store, DataFactory, Quad, OTerm } from 'n3';
 import { v4 as uuid } from 'uuid';
-import { LDES_TIME, TREE, XML } from './namespaces';
+import { LDES_TIME, XML } from './namespaces';
 import * as RDF from 'rdf-js';
-const { namedNode, quad, literal } = DataFactory;
+const { literal } = DataFactory;
 
 interface Error {
   name: string;
@@ -30,7 +30,7 @@ export function generateVersion(_namedNode: any) {
 }
 
 export function error(status: number, msg?: string) {
-  var err: Error = new Error(msg || 'An error occurred');
+  const err: Error = new Error(msg || 'An error occurred');
   err.status = status;
   return err;
 }

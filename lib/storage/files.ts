@@ -99,9 +99,9 @@ export async function writeTriplesStream(
 
 export async function readNode(filePath: string): Promise<Node> {
   const triplesStream = readTriplesStream(filePath);
-  let store = await createStore(triplesStream);
+  const store = await createStore(triplesStream);
 
-  let id = getFirstMatch(
+  const id = getFirstMatch(
     store,
     null,
     RDF_NAMESPACE('type'),
@@ -113,9 +113,9 @@ export async function readNode(filePath: string): Promise<Node> {
     RDF_NAMESPACE('type'),
     LDES('EventStream')
   )?.subject;
-  let view = getFirstMatch(store, null, TREE('view'))?.object;
+  const view = getFirstMatch(store, null, TREE('view'))?.object;
   if (id && stream && view) {
-    let node: Node = new Node(
+    const node: Node = new Node(
       parseInt(path.parse(id.value).base),
       stream as RDF.NamedNode,
       view as RDF.NamedNode
@@ -127,17 +127,21 @@ export async function readNode(filePath: string): Promise<Node> {
       .map((quad) => quad.object);
 
     relationIds.forEach((relationId) => {
-      let type = getFirstMatch(
+      const type = getFirstMatch(
         store,
         relationId,
         RDF_NAMESPACE('type')
       )?.object;
 
-      let value = getFirstMatch(store, relationId, TREE('value'))?.object;
+      const value = getFirstMatch(store, relationId, TREE('value'))?.object;
 
-      let target = getFirstMatch(store, relationId, TREE('node'))?.object;
+      const target = getFirstMatch(store, relationId, TREE('node'))?.object;
 
-      let relationPath = getFirstMatch(store, relationId, TREE('path'))?.object;
+      const relationPath = getFirstMatch(
+        store,
+        relationId,
+        TREE('path')
+      )?.object;
 
       if (type && value && target && relationPath) {
         node.add_relation(
@@ -158,8 +162,8 @@ export async function readNode(filePath: string): Promise<Node> {
       .getQuads(null, TREE('member'), null, null)
       .map((quad) => quad.object);
     memberIds.forEach((memberId) => {
-      let content = new Store(store.getQuads(memberId, null, null, null));
-      let resource = new Resource(memberId as RDF.NamedNode);
+      const content = new Store(store.getQuads(memberId, null, null, null));
+      const resource = new Resource(memberId as RDF.NamedNode);
       content.forEach(
         (quad) => {
           resource.addProperty(quad.predicate.value, quad.object);
