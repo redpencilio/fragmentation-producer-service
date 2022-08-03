@@ -1,4 +1,4 @@
-import { NamedNode, Term, DataFactory } from 'n3';
+import { DataFactory } from 'n3';
 const { namedNode } = DataFactory;
 import Relation from './relation';
 import Resource from './resource';
@@ -32,7 +32,7 @@ export default class Node {
 
   delete_members(resources: Resource[]) {
     resources.forEach((resource) => {
-      let index = this.members.indexOf(resource);
+      const index = this.members.indexOf(resource);
       this.members.splice(index, 1);
     });
   }

@@ -5,12 +5,12 @@ import path from 'path';
 
 export default class Cache {
   nodes: Map<string, Node> = new Map();
-  usageCount: number = 0;
+  usageCount = 0;
   lruRank: Map<string, number> = new Map();
   lastPages: Map<string, number> = new Map();
-  cacheLimit: number = 10000;
-  cacheEvictionPercentage: number = 0.3;
-  evicting: boolean = false;
+  cacheLimit = 100;
+  cacheEvictionPercentage = 0.3;
+  evicting = false;
 
   constructor(cacheLimit: number) {
     this.cacheLimit = cacheLimit;
@@ -23,13 +23,9 @@ export default class Cache {
       result = this.nodes.get(path)!;
       this.updateNodeFrequency(path);
     } else {
-      try {
-        result = await readNode(path);
-        this.nodes.set(path, result);
-        this.lruRank.set(path, 0);
-      } catch (e) {
-        throw e;
-      }
+      result = await readNode(path);
+      this.nodes.set(path, result);
+      this.lruRank.set(path, 0);
     }
     await this.applyCacheEviction();
     return result;
@@ -62,12 +58,12 @@ export default class Cache {
       if (!fs.existsSync(folder)) {
         return NaN;
       }
-      let fileNumbers: number[] = [];
+      const fileNumbers: number[] = [];
       for (const file of this.getFilesRecurs(folder)) {
         const match = file.match(/\d*/);
         if (match) {
           const parsedNumber = match.length && parseInt(match[0]);
-          if (parsedNumber && parsedNumber !== NaN)
+          if (parsedNumber && !isNaN(parsedNumber))
             fileNumbers.push(parsedNumber);
         }
       }
@@ -103,9 +99,9 @@ export default class Cache {
 
   async evictFromCache(keys: string[]) {
     this.evicting = true;
-    let listOfPromises: any[] = [];
+    const listOfPromises: any[] = [];
     for (const key of keys) {
-      let node = this.nodes.get(key);
+      const node = this.nodes.get(key);
       if (node) {
         listOfPromises.push(writeNode(node, key));
       }
