@@ -1,4 +1,4 @@
-# Implementation of an LDES fragmenter service
+# Implementation of an TREE fragmentation service
 
 This application provides two parts:
 
