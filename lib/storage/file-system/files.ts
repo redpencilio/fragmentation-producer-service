@@ -22,7 +22,7 @@ import { createStore } from '../../utils/utils';
 export async function convertToJsonLD(file: string): Promise<any> {
   const quadStream = readTriplesStream(
     file,
-    path.join(DOMAIN_NAME, path.relative(BASE_FOLDER, file))
+    DOMAIN_NAME + path.relative(BASE_FOLDER, file)
   );
   const quads: RDF.Quad[] = [];
   await new Promise<void>((resolve, reject) => {
