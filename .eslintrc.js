@@ -13,8 +13,8 @@ module.exports = {
   rules: {
     // indent: ['error', 2],
     'linebreak-style': ['error', 'unix'],
-    quotes: ['error', 'single'],
-    semi: ['error', 'always'],
+    quotes: ['error', 'always'],
+    semi: ['error', 'never'],
     '@typescript-eslint/no-require-imports': 'warn',
     '@typescript-eslint/no-var-requires': 'warn',
     'no-case-declarations': 'off',

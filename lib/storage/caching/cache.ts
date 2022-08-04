@@ -1,5 +1,5 @@
-import Node from '../models/node';
-import { readNode, writeNode } from './files';
+import Node from '../../models/node';
+import { readNode, writeNode } from '../file-system/files';
 import fs from 'fs';
 import path from 'path';
 

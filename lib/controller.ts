@@ -7,15 +7,15 @@ import {
   PAGE_RESOURCES_COUNT,
   SUBFOLDER_NODE_COUNT,
 } from './utils/constants';
-import Cache from './storage/cache';
+import Cache from './storage/caching/cache';
 import { error, fileForPage } from './utils/utils';
 import rdfSerializer from 'rdf-serialize';
 import rdfParser from 'rdf-parse';
-import { convert, convertToJsonLD } from './storage/files';
+import { convert, convertToJsonLD } from './storage/file-system/files';
 import PromiseQueue from './utils/promise-queue';
 import Node from './models/node';
 import convertToMember from './converters/member-converter';
-import Fragmenter from './fragmenters/fragmenter';
+import { createFragmenter } from './fragmenters/fragmenter-factory';
 
 const cache: Cache = new Cache(CACHE_SIZE);
 
@@ -69,7 +69,7 @@ export async function addResource(
       throw new Error('Resource uri parameter was not supplied');
     }
 
-    const fragmenter = Fragmenter.create(
+    const fragmenter = createFragmenter(
       (req.query.fragmenter as string) || 'time-fragmenter',
       {
         folder: path.join(BASE_FOLDER, req.params.folder),

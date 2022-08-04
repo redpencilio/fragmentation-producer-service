@@ -1,11 +1,7 @@
 import { Command, Option } from 'commander';
-import { DataFactory } from 'n3';
-const { namedNode } = DataFactory;
 import Node from '../lib/models/node';
 import PromiseQueue from '../lib/utils/promise-queue';
-import { EXAMPLE, PROV } from '../lib/utils/namespaces';
 import fs from 'fs';
-import Fragmenter, { FRAGMENTER_MAP } from '../lib/fragmenters/fragmenter';
 import DefaultTransformer from './dataset-transformers/default-transformer';
 import DatasetTransformer, {
   DatasetConfiguration,
@@ -13,14 +9,17 @@ import DatasetTransformer, {
 import CSVTransformer from './dataset-transformers/csv-transformer';
 import path from 'path';
 import { IPFSIndexTransformer } from './dataset-transformers/ipfs-index-transformer';
-import Cache from '../lib/storage/cache';
+import Cache from '../lib/storage/caching/cache';
 import RDFTransformer from './dataset-transformers/rdf-transformer';
-import { NamedNode } from '@rdfjs/types';
 import {
   FOLDER_DEPTH,
   PAGE_RESOURCES_COUNT,
   SUBFOLDER_NODE_COUNT,
 } from '../lib/utils/constants';
+import {
+  createFragmenter,
+  FRAGMENTER_MAP,
+} from '../lib/fragmenters/fragmenter-factory';
 
 const transformerMap = new Map<string, DatasetTransformer>();
 transformerMap.set('csv-transformer', new CSVTransformer());
@@ -105,7 +104,7 @@ export default function fragmentDataset(
   outputFolder: string
 ): Promise<void> {
   const cache: Cache = new Cache(cacheSizeLimit);
-  const fragmenter = Fragmenter.create(fragmenterName, {
+  const fragmenter = createFragmenter(fragmenterName, {
     folder: outputFolder,
     maxResourcesPerPage: PAGE_RESOURCES_COUNT,
     maxNodeCountPerSubFolder: SUBFOLDER_NODE_COUNT,

@@ -1,11 +1,11 @@
 import { Readable, PassThrough } from 'stream';
 import DatasetTransformer from './dataset-transformer';
 import readline from 'readline';
-import { EXAMPLE, RDF_NAMESPACE } from '../../lib/utils/namespaces';
-import Member from '../../lib/models/member';
+import { RDF_NAMESPACE } from '../../lib/utils/namespaces';
 import { DefaultDatasetConfiguration } from './default-transformer';
-import dataFactory from '@rdfjs/data-model';
-
+import MemberNew from '../../lib/models/member-new';
+import { DataFactory } from 'n3';
+const { quad, namedNode, literal } = DataFactory;
 export class IPFSIndexTransformer implements DatasetTransformer {
   transform(input: Readable, config: DefaultDatasetConfiguration): Readable {
     const readLineInterface = readline.createInterface({
@@ -18,16 +18,17 @@ export class IPFSIndexTransformer implements DatasetTransformer {
       .on('line', async (input) => {
         readLineInterface.pause();
         const list = JSON.parse(input);
-        const id = dataFactory.namedNode(
-          encodeURI(config.resourceIdPrefix + list[0])
+        const id = namedNode(encodeURI(config.resourceIdPrefix + list[0]));
+        const member = new MemberNew(id);
+        member.addQuads(
+          quad(
+            member.id,
+            RDF_NAMESPACE('type'),
+            namedNode(config.resourceType)
+          ),
+          quad(member.id, namedNode(config.propertyType), literal(list[1]))
         );
-        let resource = new Member(id);
-        resource.addProperty(
-          RDF_NAMESPACE('type').value,
-          dataFactory.namedNode(config.resourceType)
-        );
-        resource.addProperty(config.propertyType, dataFactory.literal(list[1]));
-        resultStream.push(resource);
+        resultStream.push(member);
         readLineInterface.resume();
       })
       .on('close', () => {

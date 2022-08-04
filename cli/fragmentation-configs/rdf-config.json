@@ -1,5 +1,4 @@
 {
-	"stream": "http://mu.semte.ch/streams/public-services",
-	"resourceType": "http://purl.org/vocab/cpsv#PublicService",
-	"datatype": "text/turtle"
+  "resourceType": "http://purl.org/vocab/cpsv#PublicService",
+  "datatype": "text/turtle"
 }

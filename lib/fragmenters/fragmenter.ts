@@ -1,18 +1,11 @@
 import { DataFactory, NamedNode } from 'n3';
 import Node from '../models/node';
-import Member from '../models/member';
 import * as RDF from 'rdf-js';
 import path from 'path';
-import Cache from '../storage/cache';
+import Cache from '../storage/caching/cache';
 import { STREAM_PREFIX } from '../utils/constants';
-import TimeFragmenter from './time-fragmenter';
-import PrefixTreeFragmenter from './prefix-tree-fragmenter';
-import { Newable } from '../utils/utils';
+import MemberNew from '../models/member-new';
 const { namedNode } = DataFactory;
-export const FRAGMENTER_MAP: Record<string, Newable<Fragmenter>> = {
-  'time-fragmenter': TimeFragmenter,
-  'prefix-tree-fragmenter': PrefixTreeFragmenter,
-};
 
 export interface FragmenterArgs {
   folder: string;
@@ -103,13 +96,5 @@ export default abstract class Fragmenter {
     return node.count >= this.maxResourcesPerPage;
   }
 
-  abstract addMember(resource: Member): Promise<Node | null>;
-
-  static create(name: string, args: FragmenterArgs) {
-    if (name in FRAGMENTER_MAP) {
-      return new FRAGMENTER_MAP[name](args);
-    } else {
-      throw new Error(`Fragmenter ${name} not found`);
-    }
-  }
+  abstract addMember(resource: MemberNew): Promise<Node | null>;
 }

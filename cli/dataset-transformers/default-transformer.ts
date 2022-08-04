@@ -1,13 +1,13 @@
 import DatasetTransformer, {
   DatasetConfiguration,
 } from './dataset-transformer';
-import { Readable, Stream, PassThrough } from 'stream';
+import { Readable, PassThrough } from 'stream';
 
 import readline from 'readline';
-import { EXAMPLE, RDF_NAMESPACE } from '../../lib/utils/namespaces';
-import Member from '../../lib/models/member';
-import dataFactory from '@rdfjs/data-model';
-
+import { RDF_NAMESPACE } from '../../lib/utils/namespaces';
+import { DataFactory } from 'n3';
+import MemberNew from '../../lib/models/member-new';
+const { quad, namedNode, literal } = DataFactory;
 export interface DefaultDatasetConfiguration extends DatasetConfiguration {
   propertyType: string;
 }
@@ -22,16 +22,17 @@ export default class DefaultTransformer implements DatasetTransformer {
 
     readLineInterface
       .on('line', async (input) => {
-        let id = dataFactory.namedNode(
-          encodeURI(config.resourceIdPrefix + input)
+        const id = namedNode(encodeURI(config.resourceIdPrefix + input));
+        const member = new MemberNew(id);
+        member.addQuads(
+          quad(
+            member.id,
+            RDF_NAMESPACE('type'),
+            namedNode(config.resourceType)
+          ),
+          quad(member.id, namedNode(config.propertyType), literal(input))
         );
-        let resource = new Member(id);
-        resource.addProperty(
-          RDF_NAMESPACE('type').value,
-          dataFactory.namedNode(config.resourceType)
-        );
-        resource.addProperty(config.propertyType, dataFactory.literal(input));
-        resultStream.push(resource);
+        resultStream.push(member);
       })
       .on('close', () => {
         resultStream.end();

@@ -2,23 +2,20 @@ import { DataFactory } from 'n3';
 const { literal } = DataFactory;
 import Node from '../models/node';
 import Relation from '../models/relation';
-import Member from '../models/member';
 import { TREE } from '../utils/namespaces';
-import { generateTreeRelation } from '../utils/utils';
+import { generateTreeRelation, getFirstMatch } from '../utils/utils';
 import * as RDF from 'rdf-js';
 
 import Fragmenter from './fragmenter';
-import RelationCache from '../storage/relationCache';
+import RelationCache from '../storage/caching/relationCache';
 import { namedNode } from '@rdfjs/data-model';
 import { PREFIX_TREE_RELATION_PATH } from '../utils/constants';
+import MemberNew from '../models/member-new';
 
-/**
- * @deprecated
- */
 export default class PrefixTreeFragmenter extends Fragmenter {
   relationPath: RDF.NamedNode<string> = namedNode(PREFIX_TREE_RELATION_PATH);
   relationCache: RelationCache = new RelationCache();
-  async addMember(resource: Member): Promise<Node | null> {
+  async addMember(member: MemberNew): Promise<Node | null> {
     const viewFile = this.getViewFile();
     let viewNode: Node;
     // Check if the view node exists, if not, create one
@@ -33,23 +30,24 @@ export default class PrefixTreeFragmenter extends Fragmenter {
     let node = viewNode;
     let currentValue = '';
     // Find longest prefix which is stored in prefixCache
-    const resourceValue = resource.dataMap
-      .get(this.relationPath.value)![0]
-      ?.value.toLowerCase();
-    // let resourceValue = getFirstMatch(resource.data, null, this.path)
+    const resourceValue = getFirstMatch(
+      member.data,
+      member.id,
+      this.relationPath
+    );
     // 	?.object.value;
     if (resourceValue) {
-      const match = this.relationCache.getLongestMatch(resourceValue);
+      const match = this.relationCache.getLongestMatch(resourceValue.value);
 
       if (match) {
         node = await this.cache.getNode(match.nodeFile);
         currentValue = match.prefix;
       }
       const result = await this._addResource(
-        resource,
+        member,
         node,
         currentValue,
-        resourceValue,
+        resourceValue.value,
         currentValue.length
       );
 
@@ -59,7 +57,7 @@ export default class PrefixTreeFragmenter extends Fragmenter {
   }
 
   async _addResource(
-    resource: Member,
+    member: MemberNew,
     node: Node,
     prefixValue = '',
     resourceValue: string,
@@ -81,12 +79,12 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 
     // Add the resource to the current node, if it is full: split.
     if (this.shouldCreateNewPage(node)) {
-      curNode.add_member(resource);
+      curNode.add_member(member);
       // the current node has to be splitted
       await this.splitNode(curNode, prefixValue, resourceValue, depth);
     } else {
       // we can simply add the new resource to the current node as a member
-      curNode.add_member(resource);
+      curNode.add_member(member);
     }
 
     return curNode;
@@ -102,11 +100,10 @@ export default class PrefixTreeFragmenter extends Fragmenter {
       return;
     }
     // Determine the token at the given depth which occurs the most and split off members matching that specific token
-    const memberGroups: { [key: string]: Member[] } = {};
+    const memberGroups: { [key: string]: MemberNew[] } = {};
     let pathValue: RDF.Term;
     node.members.forEach((member) => {
-      pathValue = member.dataMap.get(this.relationPath.value)![0];
-      // let pathValue = getFirstMatch(member.data, null, this.path)?.object;
+      pathValue = getFirstMatch(member.data, null, this.relationPath)?.object;
       if (pathValue) {
         const character = pathValue.value.charAt(depth).toLowerCase();
         if (memberGroups[character]) {

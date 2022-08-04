@@ -71,4 +71,24 @@ export function pushToReadable<T>(readable: Readable, ...chunks: T[]) {
   });
 }
 
+export async function createStore(
+  quadStream: RDF.Stream<Quad>
+): Promise<Store> {
+  const store = new Store();
+  await importToStore(store, quadStream);
+  return store;
+}
+
+export function importToStore(
+  store: Store,
+  quadStream: RDF.Stream<Quad>
+): Promise<void> {
+  return new Promise((resolve, reject) =>
+    store
+      .import(quadStream)
+      .on('error', reject)
+      .once('end', () => resolve())
+  );
+}
+
 export type Newable<T> = { new (...args: any[]): T };
