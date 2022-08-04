@@ -3,14 +3,17 @@
     "display": "Node 14",
   
     "compilerOptions": {
-      "lib": ["es2015"],
-      "module": "commonjs",
       "target": "es2015",
+      "module": "commonjs",
+      "allowJs": true,
+      "moduleResolution": "node",
       "noEmitOnError": false,
-      "noImplicitAny": false,
+      "noEmit": false,
+      "noImplicitAny": true,
+      "noImplicitThis": true,
+      "alwaysStrict": true,
       "downlevelIteration": true,
-      "strict": false,
-      "noImplicitUseStrict": true,
+      "strict": true,
       "esModuleInterop": true,
       "forceConsistentCasingInFileNames": true,
       // Ensure that .d.ts files are created by tsc, but not .js files
