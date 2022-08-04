@@ -1,11 +1,18 @@
 import { DataFactory, NamedNode } from 'n3';
 import Node from '../models/node';
-import Resource from '../models/resource';
+import Member from '../models/member';
 import * as RDF from 'rdf-js';
 import path from 'path';
 import Cache from '../storage/cache';
 import { STREAM_PREFIX } from '../utils/constants';
+import TimeFragmenter from './time-fragmenter';
+import PrefixTreeFragmenter from './prefix-tree-fragmenter';
+import { Newable } from '../utils/utils';
 const { namedNode } = DataFactory;
+export const FRAGMENTER_MAP: Record<string, Newable<Fragmenter>> = {
+  'time-fragmenter': TimeFragmenter,
+  'prefix-tree-fragmenter': PrefixTreeFragmenter,
+};
 
 export interface FragmenterArgs {
   folder: string;
@@ -38,11 +45,11 @@ export default abstract class Fragmenter {
   constructNewNode(): Node {
     const nodeId = (this.cache.getLastPage(this.folder) || 0) + 1;
     this.cache.updateLastPage(this.folder, nodeId);
-    const node = new Node(
-      nodeId,
-      STREAM_PREFIX(this.folder),
-      this.getRelationReference(nodeId, 1)
-    );
+    const node = new Node({
+      id: nodeId,
+      stream: STREAM_PREFIX(this.folder),
+      view: this.getRelationReference(nodeId, 1),
+    });
     return node;
   }
 
@@ -71,7 +78,10 @@ export default abstract class Fragmenter {
     }
   }
 
-  getRelationReference(sourceNodeId: number, targetNodeId: number): NamedNode {
+  protected getRelationReference(
+    sourceNodeId: number,
+    targetNodeId: number
+  ): NamedNode {
     const sourceSubFolder: string = this.determineSubFolder(sourceNodeId);
     const targetSubFolder: string = this.determineSubFolder(targetNodeId);
 
@@ -85,13 +95,21 @@ export default abstract class Fragmenter {
     return namedNode(relativePath);
   }
 
-  getViewFile() {
+  protected getViewFile() {
     return this.fileForNode(1);
   }
 
-  shouldCreateNewPage(node: Node): boolean {
-    return node.count() >= this.maxResourcesPerPage;
+  protected shouldCreateNewPage(node: Node): boolean {
+    return node.count >= this.maxResourcesPerPage;
   }
 
-  abstract addResource(resource: Resource): Promise<Node | null>;
+  abstract addMember(resource: Member): Promise<Node | null>;
+
+  static create(name: string, args: FragmenterArgs) {
+    if (name in FRAGMENTER_MAP) {
+      return new FRAGMENTER_MAP[name](args);
+    } else {
+      throw new Error(`Fragmenter ${name} not found`);
+    }
+  }
 }

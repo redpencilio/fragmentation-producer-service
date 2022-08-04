@@ -3,6 +3,7 @@ import { v4 as uuid } from 'uuid';
 import { LDES_TIME, XML } from './namespaces';
 import * as RDF from 'rdf-js';
 const { literal } = DataFactory;
+import { Readable } from 'stream';
 
 interface Error {
   name: string;
@@ -62,6 +63,12 @@ export function getFirstMatch(
  */
 export function fileForPage(folder: string, page: number): string {
   return `${folder}/${page}.ttl`;
+}
+
+export function pushToReadable<T>(readable: Readable, ...chunks: T[]) {
+  chunks.forEach((chunk) => {
+    readable.push(chunk);
+  });
 }
 
 export type Newable<T> = { new (...args: any[]): T };

@@ -2,20 +2,23 @@ import { DataFactory } from 'n3';
 const { literal } = DataFactory;
 import Node from '../models/node';
 import Relation from '../models/relation';
-import Resource from '../models/resource';
+import Member from '../models/member';
 import { TREE } from '../utils/namespaces';
 import { generateTreeRelation } from '../utils/utils';
 import * as RDF from 'rdf-js';
 
-import Fragmenter from './Fragmenter';
+import Fragmenter from './fragmenter';
 import RelationCache from '../storage/relationCache';
 import { namedNode } from '@rdfjs/data-model';
 import { PREFIX_TREE_RELATION_PATH } from '../utils/constants';
 
+/**
+ * @deprecated
+ */
 export default class PrefixTreeFragmenter extends Fragmenter {
   relationPath: RDF.NamedNode<string> = namedNode(PREFIX_TREE_RELATION_PATH);
   relationCache: RelationCache = new RelationCache();
-  async addResource(resource: Resource): Promise<Node | null> {
+  async addMember(resource: Member): Promise<Node | null> {
     const viewFile = this.getViewFile();
     let viewNode: Node;
     // Check if the view node exists, if not, create one
@@ -56,7 +59,7 @@ export default class PrefixTreeFragmenter extends Fragmenter {
   }
 
   async _addResource(
-    resource: Resource,
+    resource: Member,
     node: Node,
     prefixValue = '',
     resourceValue: string,
@@ -99,7 +102,7 @@ export default class PrefixTreeFragmenter extends Fragmenter {
       return;
     }
     // Determine the token at the given depth which occurs the most and split off members matching that specific token
-    const memberGroups: { [key: string]: Resource[] } = {};
+    const memberGroups: { [key: string]: Member[] } = {};
     let pathValue: RDF.Term;
     node.members.forEach((member) => {
       pathValue = member.dataMap.get(this.relationPath.value)![0];
@@ -127,24 +130,23 @@ export default class PrefixTreeFragmenter extends Fragmenter {
     const newNode: Node = this.constructNewNode();
 
     node.add_relation(
-      currentValue + mostOccuringToken,
       new Relation(
         generateTreeRelation(),
         newRelationType,
         literal(currentValue + mostOccuringToken),
-        this.getRelationReference(node.id, newNode.id),
-        newNode.id,
+        this.getRelationReference(node.metadata.id, newNode.metadata.id),
+        newNode.metadata.id,
         this.relationPath
       )
     );
 
     node.delete_members(memberGroups[mostOccuringToken]);
-    newNode.add_members(memberGroups[mostOccuringToken]);
+    newNode.add_members(...memberGroups[mostOccuringToken]);
 
-    await this.cache.addNode(this.fileForNode(newNode.id), newNode);
+    await this.cache.addNode(this.fileForNode(newNode.metadata.id), newNode);
     this.relationCache.addRelation(
       currentValue + mostOccuringToken,
-      this.fileForNode(newNode.id)
+      this.fileForNode(newNode.metadata.id)
     );
   }
 }

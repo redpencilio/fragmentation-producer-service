@@ -2,7 +2,7 @@ import { Readable, PassThrough } from 'stream';
 import DatasetTransformer from './dataset-transformer';
 import readline from 'readline';
 import { EXAMPLE, RDF_NAMESPACE } from '../../lib/utils/namespaces';
-import Resource from '../../lib/models/resource';
+import Member from '../../lib/models/member';
 import { DefaultDatasetConfiguration } from './default-transformer';
 import dataFactory from '@rdfjs/data-model';
 
@@ -21,7 +21,7 @@ export class IPFSIndexTransformer implements DatasetTransformer {
         const id = dataFactory.namedNode(
           encodeURI(config.resourceIdPrefix + list[0])
         );
-        let resource = new Resource(id);
+        let resource = new Member(id);
         resource.addProperty(
           RDF_NAMESPACE('type').value,
           dataFactory.namedNode(config.resourceType)

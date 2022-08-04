@@ -20,3 +20,5 @@ export const PREFIX_TREE_RELATION_PATH =
 export const CACHE_SIZE = parseInt(process.env.CACHE_SIZE || '10');
 
 export const BASE_FOLDER = process.env.DATA_FOLDER || './data';
+
+export const DOMAIN_NAME = process.env.DOMAIN_NAME || 'http://localhost:3000/';

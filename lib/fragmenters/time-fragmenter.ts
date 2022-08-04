@@ -4,12 +4,12 @@ import {
   generateVersion,
   nowLiteral,
 } from '../utils/utils';
-import Fragmenter from './Fragmenter';
+import Fragmenter from './fragmenter';
 
 const { namedNode } = DataFactory;
 
 import { PURL, TREE } from '../utils/namespaces';
-import Resource from '../models/resource';
+import Member from '../models/member';
 import Node from '../models/node';
 import Relation from '../models/relation';
 import * as RDF from '@rdfjs/types';
@@ -17,9 +17,10 @@ import { TIME_TREE_RELATION_PATH } from '../utils/constants';
 
 export default class TimeFragmenter extends Fragmenter {
   relationPath: RDF.NamedNode<string> = namedNode(TIME_TREE_RELATION_PATH);
-  constructVersionedResource(resource: Resource): Resource {
+
+  constructVersionedResource(resource: Member): Member {
     const versionedResourceId = generateVersion(resource.id);
-    const versionedResource = new Resource(versionedResourceId);
+    const versionedResource = new Member(versionedResourceId);
 
     versionedResource.dataMap = new Map(resource.dataMap);
 
@@ -33,24 +34,23 @@ export default class TimeFragmenter extends Fragmenter {
     return versionedResource;
   }
 
-  async closeDataset(node: Node, timestamp: RDF.Literal): Promise<Node> {
+  async closeNode(node: Node, timestamp: RDF.Literal): Promise<Node> {
     const currentNode = this.constructNewNode();
     node.add_relation(
-      timestamp.value,
       new Relation(
         generateTreeRelation(),
         TREE('GreaterThanOrEqualRelation'),
         timestamp,
-        this.getRelationReference(node.id, currentNode.id),
-        currentNode.id,
+        this.getRelationReference(node.metadata.id, currentNode.metadata.id),
+        currentNode.metadata.id,
         this.relationPath
       )
     );
-    this.cache.addNode(this.fileForNode(currentNode.id), currentNode);
+    this.cache.addNode(this.fileForNode(currentNode.metadata.id), currentNode);
     return currentNode;
   }
 
-  async writeVersionedResource(versionedResource: Resource): Promise<Node> {
+  async writeVersionedMember(versionedResource: Member): Promise<Node> {
     const lastPageNr = this.cache.getLastPage(this.folder);
     let currentNode: Node;
     let pageFile;
@@ -59,7 +59,7 @@ export default class TimeFragmenter extends Fragmenter {
       currentNode = await this.cache.getNode(pageFile);
     } else {
       currentNode = this.constructNewNode();
-      pageFile = this.fileForNode(currentNode.id);
+      pageFile = this.fileForNode(currentNode.metadata.id);
       this.cache.addNode(pageFile, currentNode);
     }
 
@@ -71,7 +71,7 @@ export default class TimeFragmenter extends Fragmenter {
         this.relationPath.value
       )![0];
       // create a store with the new graph for the new file
-      currentNode = await this.closeDataset(
+      currentNode = await this.closeNode(
         closingNode,
         timestampLastResource as RDF.Literal
       );
@@ -85,12 +85,9 @@ export default class TimeFragmenter extends Fragmenter {
     return currentNode;
   }
 
-  async addResource(resource: Resource): Promise<Node> {
-    const versionedResource: Resource = await this.constructVersionedResource(
-      resource
-    );
-    console.log(versionedResource);
-    const lastDataset = await this.writeVersionedResource(versionedResource);
+  async addMember(resource: Member): Promise<Node> {
+    const versionedResource: Member = this.constructVersionedResource(resource);
+    const lastDataset = await this.writeVersionedMember(versionedResource);
     return lastDataset;
   }
 }

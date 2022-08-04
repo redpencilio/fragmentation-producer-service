@@ -8,28 +8,16 @@ import {
   SUBFOLDER_NODE_COUNT,
 } from './utils/constants';
 import Cache from './storage/cache';
-import { error, fileForPage, Newable } from './utils/utils';
+import { error, fileForPage } from './utils/utils';
 import rdfSerializer from 'rdf-serialize';
 import rdfParser from 'rdf-parse';
 import { convert, convertToJsonLD } from './storage/files';
-import Fragmenter from './fragmenters/Fragmenter';
-import TimeFragmenter from './fragmenters/TimeFragmenter';
-import PrefixTreeFragmenter from './fragmenters/PrefixTreeFragmenter';
-import nodeStream from 'stream';
-import Resource from './models/resource';
 import PromiseQueue from './utils/promise-queue';
 import Node from './models/node';
-
-import { DataFactory } from 'n3';
-const { namedNode } = DataFactory;
+import convertToMember from './converters/member-converter';
+import Fragmenter from './fragmenters/fragmenter';
 
 const cache: Cache = new Cache(CACHE_SIZE);
-
-const FRAGMENTERS = new Map<string, Newable<Fragmenter>>();
-
-FRAGMENTERS.set('time-fragmenter', TimeFragmenter);
-
-FRAGMENTERS.set('prefix-tree-fragmenter', PrefixTreeFragmenter);
 
 const UPDATE_QUEUE = new PromiseQueue<Node | null | void>();
 
@@ -80,38 +68,30 @@ export async function addResource(
     if (!req.query.resource) {
       throw new Error('Resource uri parameter was not supplied');
     }
-    if (
-      req.query.fragmenter &&
-      !FRAGMENTERS.has(req.query.fragmenter as string)
-    ) {
-      throw new Error('Supplied fragmenter type does not exist');
-    }
 
-    const fragmenterClass =
-      FRAGMENTERS.get(req.query.fragmenter as string) || TimeFragmenter;
+    const fragmenter = Fragmenter.create(
+      (req.query.fragmenter as string) || 'time-fragmenter',
+      {
+        folder: path.join(BASE_FOLDER, req.params.folder),
+        maxResourcesPerPage: PAGE_RESOURCES_COUNT,
+        maxNodeCountPerSubFolder: SUBFOLDER_NODE_COUNT,
+        folderDepth: FOLDER_DEPTH,
+        cache,
+      }
+    );
 
-    const fragmenter = new fragmenterClass({
-      folder: path.join(BASE_FOLDER, req.params.folder),
-      maxResourcesPerPage: PAGE_RESOURCES_COUNT,
-      maxNodeCountPerSubFolder: SUBFOLDER_NODE_COUNT,
-      folderDepth: FOLDER_DEPTH,
-      cache,
-    });
     const contentTypes = await rdfParser.getContentTypes();
     if (!contentTypes.includes(req.headers['content-type'] as string)) {
       return next(error(400, 'Content-Type not recognized'));
     }
 
-    const quadStream = rdfParser.parse(nodeStream.Readable.from(req.body), {
-      contentType: req.headers['content-type'] as string,
-    });
-    const resource = new Resource(namedNode(req.query.resource as string));
-    for await (const quadObj of quadStream) {
-      resource.addProperty(quadObj.predicate.value, quadObj.object);
-    }
-
+    const member = await convertToMember(
+      req.query.resource as string,
+      req.body,
+      req.headers['content-type'] as string
+    );
     const currentDataset = await UPDATE_QUEUE.push(() =>
-      fragmenter.addResource(resource)
+      fragmenter.addMember(member)
     );
 
     await UPDATE_QUEUE.push(() => cache.flush());
@@ -119,7 +99,7 @@ export async function addResource(
     if (currentDataset) {
       res
         .status(201)
-        .send(`{"message": "ok", "triplesInPage": ${currentDataset.count()}}`);
+        .send(`{"message": "ok", "triplesInPage": ${currentDataset.count}}`);
     }
   } catch (e) {
     console.error(e);

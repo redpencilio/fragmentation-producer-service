@@ -1,5 +1,9 @@
 export const CONTEXT = {
-  member: { '@id': 'https://w3id.org/tree#member', '@type': '@id' },
+  member: {
+    '@id': 'https://w3id.org/tree#member',
+    '@type': '@id',
+    // '@container': '@set',
+  },
   relation: { '@id': 'https://w3id.org/tree#relation', '@type': '@id' },
   view: { '@id': 'https://w3id.org/tree#view', '@type': '@id' },
   generatedAtTime: {

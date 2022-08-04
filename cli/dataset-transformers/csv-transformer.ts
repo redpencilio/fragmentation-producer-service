@@ -5,7 +5,7 @@ import DatasetTransformer, {
 import csv from 'csv-parser';
 import { DataFactory } from 'n3';
 import { RDF_NAMESPACE } from '../../lib/utils/namespaces';
-import Resource from '../../lib/models/resource';
+import Member from '../../lib/models/member';
 const { quad, literal, namedNode } = DataFactory;
 import dataFactory from '@rdfjs/data-model';
 interface CSVDatasetConfiguration extends DatasetConfiguration {
@@ -24,7 +24,7 @@ export default class CSVTransformer implements DatasetTransformer {
           encodeURI(config.resourceIdPrefix + data[config.resourceIdField])
         );
 
-        let resource = new Resource(id);
+        let resource = new Member(id);
         resource.addProperty(
           RDF_NAMESPACE('type').value,
           dataFactory.namedNode(config.resourceType)

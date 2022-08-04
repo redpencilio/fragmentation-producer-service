@@ -1,8 +1,9 @@
 import { Term } from '@rdfjs/types';
 import * as RDF from 'rdf-js';
 
-export default class Resource {
+export default class Member {
   id: RDF.NamedNode;
+  data: RDF.Store;
   dataMap: Map<string, Term[]> = new Map();
 
   constructor(id: RDF.NamedNode, dataMap: Map<string, Term[]> = new Map()) {

@@ -7,7 +7,7 @@ import rdfParser from 'rdf-parse';
 import { createStore } from '../../lib/storage/files';
 import { RDF_NAMESPACE } from '../../lib/utils/namespaces';
 import { DataFactory, NamedNode, Store } from 'n3';
-import Resource from '../../lib/models/resource';
+import Member from '../../lib/models/member';
 const { namedNode } = DataFactory;
 export interface RDFDatasetConfiguration extends DatasetConfiguration {
   datatype: string;
@@ -21,7 +21,7 @@ async function* getResources(store: Store, resourceType: string) {
   );
   for (const resourceId of matches) {
     const resourceStore = store.match(resourceId, null, null);
-    const resource = new Resource(resourceId as NamedNode);
+    const resource = new Member(resourceId as NamedNode);
     for (const quad of resourceStore) {
       resource.addProperty(quad.predicate.value, quad.object);
     }

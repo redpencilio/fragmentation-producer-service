@@ -1,43 +1,49 @@
 import { DataFactory } from 'n3';
 const { namedNode } = DataFactory;
 import Relation from './relation';
-import Resource from './resource';
+import Member from './member';
 import * as RDF from 'rdf-js';
 
+export type Metadata = {
+  id: number;
+  stream: RDF.NamedNode;
+  view: RDF.NamedNode;
+};
+
 export default class Node {
-  members: Array<Resource> = [];
+  members: Array<Member> = [];
   relationsMap: Map<string, Relation> = new Map();
 
-  constructor(
-    readonly id: number,
-    readonly stream: RDF.NamedNode,
-    readonly view: RDF.NamedNode
-  ) {}
+  constructor(readonly metadata: Metadata) {}
 
   get idNamedNode() {
-    return namedNode(`./${this.id}`);
+    return namedNode(`./${this.metadata.id}`);
   }
 
-  add_member(resource: Resource) {
-    this.members.push(resource);
+  get count() {
+    return this.members.length;
   }
 
-  add_relation(relationValue: string, relation: Relation) {
-    this.relationsMap.set(relationValue, relation);
+  add_members(...members: Member[]) {
+    this.members.push(...members);
   }
 
-  add_members(resources: Resource[]) {
-    resources.forEach((resource) => this.members.push(resource));
+  add_member(member: Member) {
+    this.members.push(member);
   }
 
-  delete_members(resources: Resource[]) {
-    resources.forEach((resource) => {
-      const index = this.members.indexOf(resource);
+  add_relation(relation: Relation) {
+    this.relationsMap.set(relation.value.value, relation);
+  }
+
+  add_relations(...relations: Relation[]) {
+    relations.forEach(this.add_relation);
+  }
+
+  delete_members(members: Member[]) {
+    members.forEach((member) => {
+      const index = this.members.indexOf(member);
       this.members.splice(index, 1);
     });
-  }
-
-  count() {
-    return this.members.length;
   }
 }

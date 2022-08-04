@@ -99,7 +99,7 @@ export default class Cache {
 
   async evictFromCache(keys: string[]) {
     this.evicting = true;
-    const listOfPromises: any[] = [];
+    const listOfPromises: Promise<void>[] = [];
     for (const key of keys) {
       const node = this.nodes.get(key);
       if (node) {

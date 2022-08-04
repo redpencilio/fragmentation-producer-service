@@ -1,15 +1,12 @@
 import { Command, Option } from 'commander';
 import { DataFactory } from 'n3';
 const { namedNode } = DataFactory;
-import PrefixTreeFragmenter from '../lib/fragmenters/PrefixTreeFragmenter';
 import Node from '../lib/models/node';
 import PromiseQueue from '../lib/utils/promise-queue';
 import { EXAMPLE, PROV } from '../lib/utils/namespaces';
 import fs from 'fs';
-import Fragmenter from '../lib/fragmenters/Fragmenter';
-import TimeFragmenter from '../lib/fragmenters/TimeFragmenter';
+import Fragmenter, { FRAGMENTER_MAP } from '../lib/fragmenters/fragmenter';
 import DefaultTransformer from './dataset-transformers/default-transformer';
-import { Newable } from '../lib/utils/utils';
 import DatasetTransformer, {
   DatasetConfiguration,
 } from './dataset-transformers/dataset-transformer';
@@ -25,23 +22,14 @@ import {
   SUBFOLDER_NODE_COUNT,
 } from '../lib/utils/constants';
 
-const fragmenterMap = new Map<string, Newable<Fragmenter>>();
-
-fragmenterMap.set('time-fragmenter', TimeFragmenter);
-fragmenterMap.set('prefix-tree-fragmenter', PrefixTreeFragmenter);
-
 const transformerMap = new Map<string, DatasetTransformer>();
 transformerMap.set('csv-transformer', new CSVTransformer());
 transformerMap.set('default-transformer', new DefaultTransformer());
 transformerMap.set('ipfs-transformer', new IPFSIndexTransformer());
 transformerMap.set('rdf-transformer', new RDFTransformer());
 
-const extensionMap = new Map<String, DatasetTransformer>();
+const extensionMap = new Map<string, DatasetTransformer>();
 extensionMap.set('.csv', new CSVTransformer());
-
-const relationPathMap = new Map<String, NamedNode>();
-relationPathMap.set('time-fragmenter', PROV('generatedAtTime'));
-relationPathMap.set('prefix-tree-fragmenter', EXAMPLE('name'));
 
 function getTransformer(extension: string): DatasetTransformer {
   return extensionMap.get(extension) || new DefaultTransformer();
@@ -78,16 +66,9 @@ program
       '-f, --fragmenter <fragmenter>',
       'The fragmenter which is to be used'
     )
-      .choices([...fragmenterMap.keys()] as string[])
+      .choices(Object.keys(FRAGMENTER_MAP))
       .default('time-fragmenter')
   )
-  .addOption(
-    new Option(
-      '-p, --relation-path <relation_path>',
-      'The predicate on which the relations should be defined'
-    )
-  )
-
   .addOption(
     new Option(
       '-t, --transformer <dataset_transformer>',
@@ -95,8 +76,6 @@ program
     ).choices([...transformerMap.keys()] as string[])
   )
   .action(async (datasetFile, options) => {
-    const fragmenterClass =
-      fragmenterMap.get(options.fragmenter) || TimeFragmenter;
     const jsonData = fs.readFileSync(options.config, 'utf8');
     const datasetConfig: DatasetConfiguration = JSON.parse(jsonData);
     let transformer: DatasetTransformer;
@@ -105,23 +84,14 @@ program
     } else {
       transformer = getTransformer(path.extname(datasetFile));
     }
-    let relationPath: NamedNode;
-    if (options.relationPath) {
-      relationPath = namedNode(options.relationPath);
-    } else {
-      relationPath = relationPathMap.get(options.fragmenter)!;
-    }
-    if (fragmenterClass) {
-      await fragmentDataset(
-        transformer,
-        datasetFile,
-        datasetConfig,
-        fragmenterClass,
-        relationPath,
-        options.cacheSize,
-        options.output
-      );
-    }
+    await fragmentDataset(
+      transformer,
+      datasetFile,
+      datasetConfig,
+      options.fragmenter || 'time-fragmenter',
+      options.cacheSize,
+      options.output
+    );
   });
 
 program.parse();
@@ -130,13 +100,12 @@ export default function fragmentDataset(
   transformer: DatasetTransformer,
   datasetFile: string,
   datasetConfiguration: DatasetConfiguration,
-  fragmenterClass: Newable<Fragmenter>,
-  relationPath: NamedNode,
+  fragmenterName: string,
   cacheSizeLimit: number,
   outputFolder: string
 ): Promise<void> {
   const cache: Cache = new Cache(cacheSizeLimit);
-  const fragmenter = new fragmenterClass({
+  const fragmenter = Fragmenter.create(fragmenterName, {
     folder: outputFolder,
     maxResourcesPerPage: PAGE_RESOURCES_COUNT,
     maxNodeCountPerSubFolder: SUBFOLDER_NODE_COUNT,
@@ -156,7 +125,7 @@ export default function fragmentDataset(
         transformedStream.pause();
         i += 1;
 
-        await UPDATE_QUEUE.push(() => fragmenter.addResource(resource));
+        await UPDATE_QUEUE.push(() => fragmenter.addMember(resource));
         transformedStream.resume();
       })
       .on('close', async () => {
