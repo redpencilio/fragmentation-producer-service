@@ -3,7 +3,7 @@ import DatasetTransformer from './dataset-transformer';
 import readline from 'readline';
 import { RDF_NAMESPACE } from '../../lib/utils/namespaces';
 import { DefaultDatasetConfiguration } from './default-transformer';
-import Member from '../../lib/models/member-new';
+import Member from '../../lib/models/member';
 import { DataFactory } from 'n3';
 const { quad, namedNode, literal } = DataFactory;
 export class IPFSIndexTransformer implements DatasetTransformer {

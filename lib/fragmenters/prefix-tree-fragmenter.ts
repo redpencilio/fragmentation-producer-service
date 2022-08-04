@@ -10,7 +10,7 @@ import Fragmenter from './fragmenter';
 import RelationCache from '../storage/caching/relationCache';
 import { namedNode } from '@rdfjs/data-model';
 import { PREFIX_TREE_RELATION_PATH } from '../utils/constants';
-import Member from '../models/member-new';
+import Member from '../models/member';
 
 export default class PrefixTreeFragmenter extends Fragmenter {
   relationPath: RDF.NamedNode<string> = namedNode(PREFIX_TREE_RELATION_PATH);

@@ -4,7 +4,7 @@ import * as RDF from 'rdf-js';
 import path from 'path';
 import Cache from '../storage/caching/cache';
 import { STREAM_PREFIX } from '../utils/constants';
-import Member from '../models/member-new';
+import Member from '../models/member';
 const { namedNode } = DataFactory;
 
 export interface FragmenterArgs {

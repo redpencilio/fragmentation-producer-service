@@ -1,5 +1,6 @@
-import { Store } from 'n3';
+import { Quad, Store } from 'n3';
 import * as RDF from 'rdf-js';
+import { importToStore } from '../utils/utils';
 
 export default class Member {
   data: Store;
@@ -17,11 +18,6 @@ export default class Member {
   }
 
   async importStream(stream: RDF.Stream<RDF.Quad>): Promise<void> {
-    return new Promise((resolve, reject) =>
-      this.data
-        .import(stream)
-        .on('error', reject)
-        .once('end', () => resolve())
-    );
+    return importToStore(this.data, stream);
   }
 }

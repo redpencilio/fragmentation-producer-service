@@ -72,7 +72,7 @@ export function pushToReadable<T>(readable: Readable, ...chunks: T[]) {
 }
 
 export async function createStore(
-  quadStream: RDF.Stream<Quad>
+  quadStream: RDF.Stream<RDF.Quad>
 ): Promise<Store> {
   const store = new Store();
   await importToStore(store, quadStream);
@@ -81,7 +81,7 @@ export async function createStore(
 
 export function importToStore(
   store: Store,
-  quadStream: RDF.Stream<Quad>
+  quadStream: RDF.Stream<RDF.Quad>
 ): Promise<void> {
   return new Promise((resolve, reject) =>
     store

@@ -6,7 +6,7 @@ import { Readable, PassThrough } from 'stream';
 import readline from 'readline';
 import { RDF_NAMESPACE } from '../../lib/utils/namespaces';
 import { DataFactory } from 'n3';
-import Member from '../../lib/models/member-new';
+import Member from '../../lib/models/member';
 const { quad, namedNode, literal } = DataFactory;
 export interface DefaultDatasetConfiguration extends DatasetConfiguration {
   propertyType: string;

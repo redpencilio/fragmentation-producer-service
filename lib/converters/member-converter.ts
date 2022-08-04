@@ -1,7 +1,7 @@
 import rdfParser from 'rdf-parse';
 import nodeStream from 'stream';
 import { DataFactory } from 'n3';
-import Member from '../models/member-new';
+import Member from '../models/member';
 const { namedNode } = DataFactory;
 
 export default async function convertToMember(

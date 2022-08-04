@@ -6,7 +6,7 @@ import csv from 'csv-parser';
 import { DataFactory } from 'n3';
 import { RDF_NAMESPACE } from '../../lib/utils/namespaces';
 const { quad, literal, namedNode } = DataFactory;
-import Member from '../../lib/models/member-new';
+import Member from '../../lib/models/member';
 interface CSVDatasetConfiguration extends DatasetConfiguration {
   resourceIdField: string;
   propertyMappings: object;

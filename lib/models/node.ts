@@ -2,7 +2,7 @@ import { DataFactory } from 'n3';
 const { namedNode } = DataFactory;
 import Relation from './relation';
 import * as RDF from 'rdf-js';
-import Member from './member-new';
+import Member from './member';
 
 export type Metadata = {
   id: number;

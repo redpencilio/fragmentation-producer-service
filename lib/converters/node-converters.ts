@@ -5,7 +5,7 @@ import { getFirstMatch, pushToReadable } from '../utils/utils';
 import * as RDF from 'rdf-js';
 import path from 'path';
 import Relation from '../models/relation';
-import Member from '../models/member-new';
+import Member from '../models/member';
 import stream from 'stream';
 const { quad } = DataFactory;
 export function convertToStream(node: Node) {

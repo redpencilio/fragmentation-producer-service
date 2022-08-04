@@ -14,7 +14,7 @@ import Node from '../models/node';
 import Relation from '../models/relation';
 import * as RDF from '@rdfjs/types';
 import { TIME_TREE_RELATION_PATH } from '../utils/constants';
-import Member from '../models/member-new';
+import Member from '../models/member';
 
 export default class TimeFragmenter extends Fragmenter {
   relationPath: RDF.NamedNode<string> = namedNode(TIME_TREE_RELATION_PATH);

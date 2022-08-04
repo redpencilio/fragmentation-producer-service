@@ -6,7 +6,7 @@ import rdfParser from 'rdf-parse';
 
 import { RDF_NAMESPACE } from '../../lib/utils/namespaces';
 import { DataFactory, NamedNode, Store } from 'n3';
-import Member from '../../lib/models/member-new';
+import Member from '../../lib/models/member';
 import { createStore } from '../../lib/utils/utils';
 const { namedNode } = DataFactory;
 export interface RDFDatasetConfiguration extends DatasetConfiguration {
