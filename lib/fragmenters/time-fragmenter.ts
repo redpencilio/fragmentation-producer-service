@@ -14,12 +14,12 @@ import Node from '../models/node';
 import Relation from '../models/relation';
 import * as RDF from '@rdfjs/types';
 import { TIME_TREE_RELATION_PATH } from '../utils/constants';
-import MemberNew from '../models/member-new';
+import Member from '../models/member-new';
 
 export default class TimeFragmenter extends Fragmenter {
   relationPath: RDF.NamedNode<string> = namedNode(TIME_TREE_RELATION_PATH);
 
-  constructVersionedMember(member: MemberNew): MemberNew {
+  constructVersionedMember(member: Member): Member {
     const versionedResourceId = generateVersion(member.id);
     member.data.forEach(
       (quadObj) => {
@@ -38,7 +38,7 @@ export default class TimeFragmenter extends Fragmenter {
       null,
       null
     );
-    const versionedResource = new MemberNew(versionedResourceId);
+    const versionedResource = new Member(versionedResourceId);
 
     versionedResource.importStore(member.data);
 
@@ -69,7 +69,7 @@ export default class TimeFragmenter extends Fragmenter {
     return currentNode;
   }
 
-  async writeVersionedMember(versionedMember: MemberNew): Promise<Node> {
+  async writeVersionedMember(versionedMember: Member): Promise<Node> {
     const lastPageNr = this.cache.getLastPage(this.folder);
     let currentNode: Node;
     let pageFile;
@@ -101,9 +101,8 @@ export default class TimeFragmenter extends Fragmenter {
     return currentNode;
   }
 
-  async addMember(resource: MemberNew): Promise<Node> {
-    const versionedResource: MemberNew =
-      this.constructVersionedMember(resource);
+  async addMember(resource: Member): Promise<Node> {
+    const versionedResource: Member = this.constructVersionedMember(resource);
     const lastDataset = await this.writeVersionedMember(versionedResource);
     return lastDataset;
   }

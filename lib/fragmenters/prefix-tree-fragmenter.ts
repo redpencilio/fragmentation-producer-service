@@ -10,12 +10,12 @@ import Fragmenter from './fragmenter';
 import RelationCache from '../storage/caching/relationCache';
 import { namedNode } from '@rdfjs/data-model';
 import { PREFIX_TREE_RELATION_PATH } from '../utils/constants';
-import MemberNew from '../models/member-new';
+import Member from '../models/member-new';
 
 export default class PrefixTreeFragmenter extends Fragmenter {
   relationPath: RDF.NamedNode<string> = namedNode(PREFIX_TREE_RELATION_PATH);
   relationCache: RelationCache = new RelationCache();
-  async addMember(member: MemberNew): Promise<Node | null> {
+  async addMember(member: Member): Promise<Node | null> {
     const viewFile = this.getViewFile();
     let viewNode: Node;
     // Check if the view node exists, if not, create one
@@ -57,7 +57,7 @@ export default class PrefixTreeFragmenter extends Fragmenter {
   }
 
   async _addResource(
-    member: MemberNew,
+    member: Member,
     node: Node,
     prefixValue = '',
     resourceValue: string,
@@ -100,7 +100,7 @@ export default class PrefixTreeFragmenter extends Fragmenter {
       return;
     }
     // Determine the token at the given depth which occurs the most and split off members matching that specific token
-    const memberGroups: { [key: string]: MemberNew[] } = {};
+    const memberGroups: { [key: string]: Member[] } = {};
     let pathValue: RDF.Term;
     node.members.forEach((member) => {
       pathValue = getFirstMatch(member.data, null, this.relationPath)?.object;

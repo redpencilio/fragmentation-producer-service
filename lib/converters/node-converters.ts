@@ -5,7 +5,7 @@ import { getFirstMatch, pushToReadable } from '../utils/utils';
 import * as RDF from 'rdf-js';
 import path from 'path';
 import Relation from '../models/relation';
-import MemberNew from '../models/member-new';
+import Member from '../models/member-new';
 import stream from 'stream';
 const { quad } = DataFactory;
 export function convertToStream(node: Node) {
@@ -124,13 +124,13 @@ function extractRelations(store: Store): Relation[] {
   return relations;
 }
 
-function extractMembers(store: Store): MemberNew[] {
-  const members: MemberNew[] = [];
+function extractMembers(store: Store): Member[] {
+  const members: Member[] = [];
   store.forObjects(
     (memberId) => {
       store.match(memberId);
       const content = store.getQuads(memberId, null, null, null);
-      const member = new MemberNew(memberId as RDF.NamedNode);
+      const member = new Member(memberId as RDF.NamedNode);
       member.addQuads(...content);
       members.push(member);
     },

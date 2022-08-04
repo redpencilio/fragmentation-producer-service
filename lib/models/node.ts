@@ -2,7 +2,7 @@ import { DataFactory } from 'n3';
 const { namedNode } = DataFactory;
 import Relation from './relation';
 import * as RDF from 'rdf-js';
-import MemberNew from './member-new';
+import Member from './member-new';
 
 export type Metadata = {
   id: number;
@@ -11,7 +11,7 @@ export type Metadata = {
 };
 
 export default class Node {
-  members: MemberNew[] = [];
+  members: Member[] = [];
   relationsMap: Map<string, Relation> = new Map();
 
   constructor(readonly metadata: Metadata) {}
@@ -24,11 +24,11 @@ export default class Node {
     return this.members.length;
   }
 
-  add_members(...members: MemberNew[]) {
+  add_members(...members: Member[]) {
     this.members.push(...members);
   }
 
-  add_member(member: MemberNew) {
+  add_member(member: Member) {
     this.members.push(member);
   }
 
@@ -40,7 +40,7 @@ export default class Node {
     relations.forEach(this.add_relation);
   }
 
-  delete_members(members: MemberNew[]) {
+  delete_members(members: Member[]) {
     members.forEach((member) => {
       const index = this.members.indexOf(member);
       this.members.splice(index, 1);

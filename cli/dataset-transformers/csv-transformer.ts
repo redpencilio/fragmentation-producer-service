@@ -6,7 +6,7 @@ import csv from 'csv-parser';
 import { DataFactory } from 'n3';
 import { RDF_NAMESPACE } from '../../lib/utils/namespaces';
 const { quad, literal, namedNode } = DataFactory;
-import MemberNew from '../../lib/models/member-new';
+import Member from '../../lib/models/member-new';
 interface CSVDatasetConfiguration extends DatasetConfiguration {
   resourceIdField: string;
   propertyMappings: object;
@@ -23,7 +23,7 @@ export default class CSVTransformer implements DatasetTransformer {
           encodeURI(config.resourceIdPrefix + data[config.resourceIdField])
         );
 
-        let member = new MemberNew(id);
+        let member = new Member(id);
         member.addQuads(
           quad(member.id, RDF_NAMESPACE('type'), namedNode(config.resourceType))
         );

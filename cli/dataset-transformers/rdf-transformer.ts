@@ -6,7 +6,7 @@ import rdfParser from 'rdf-parse';
 
 import { RDF_NAMESPACE } from '../../lib/utils/namespaces';
 import { DataFactory, NamedNode, Store } from 'n3';
-import MemberNew from '../../lib/models/member-new';
+import Member from '../../lib/models/member-new';
 import { createStore } from '../../lib/utils/utils';
 const { namedNode } = DataFactory;
 export interface RDFDatasetConfiguration extends DatasetConfiguration {
@@ -23,7 +23,7 @@ async function* getResources(store: Store, resourceType: string) {
     const resourceStore = new Store(
       store.getQuads(resourceId, null, null, null)
     );
-    const resource = new MemberNew(resourceId as NamedNode, resourceStore);
+    const resource = new Member(resourceId as NamedNode, resourceStore);
     yield resource;
   }
 }

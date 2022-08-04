@@ -6,7 +6,7 @@ import { Readable, PassThrough } from 'stream';
 import readline from 'readline';
 import { RDF_NAMESPACE } from '../../lib/utils/namespaces';
 import { DataFactory } from 'n3';
-import MemberNew from '../../lib/models/member-new';
+import Member from '../../lib/models/member-new';
 const { quad, namedNode, literal } = DataFactory;
 export interface DefaultDatasetConfiguration extends DatasetConfiguration {
   propertyType: string;
@@ -23,7 +23,7 @@ export default class DefaultTransformer implements DatasetTransformer {
     readLineInterface
       .on('line', async (input) => {
         const id = namedNode(encodeURI(config.resourceIdPrefix + input));
-        const member = new MemberNew(id);
+        const member = new Member(id);
         member.addQuads(
           quad(
             member.id,

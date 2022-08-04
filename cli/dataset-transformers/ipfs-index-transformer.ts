@@ -3,7 +3,7 @@ import DatasetTransformer from './dataset-transformer';
 import readline from 'readline';
 import { RDF_NAMESPACE } from '../../lib/utils/namespaces';
 import { DefaultDatasetConfiguration } from './default-transformer';
-import MemberNew from '../../lib/models/member-new';
+import Member from '../../lib/models/member-new';
 import { DataFactory } from 'n3';
 const { quad, namedNode, literal } = DataFactory;
 export class IPFSIndexTransformer implements DatasetTransformer {
@@ -19,7 +19,7 @@ export class IPFSIndexTransformer implements DatasetTransformer {
         readLineInterface.pause();
         const list = JSON.parse(input);
         const id = namedNode(encodeURI(config.resourceIdPrefix + list[0]));
-        const member = new MemberNew(id);
+        const member = new Member(id);
         member.addQuads(
           quad(
             member.id,

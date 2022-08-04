@@ -4,7 +4,7 @@ import * as RDF from 'rdf-js';
 import path from 'path';
 import Cache from '../storage/caching/cache';
 import { STREAM_PREFIX } from '../utils/constants';
-import MemberNew from '../models/member-new';
+import Member from '../models/member-new';
 const { namedNode } = DataFactory;
 
 export interface FragmenterArgs {
@@ -96,5 +96,5 @@ export default abstract class Fragmenter {
     return node.count >= this.maxResourcesPerPage;
   }
 
-  abstract addMember(resource: MemberNew): Promise<Node | null>;
+  abstract addMember(resource: Member): Promise<Node | null>;
 }
