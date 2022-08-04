@@ -1,0 +1,61 @@
+kind: pipeline
+type: docker
+name: push-latest
+steps:
+- name: build-and-push
+  image: plugins/docker
+  settings:
+    repo: ${DRONE_REPO_NAMESPACE/redpencilio/redpencil}/${DRONE_REPO_NAME%-service}
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+trigger:
+  branch:
+  - master
+  event:
+    exclude:
+    - pull_request
+---
+kind: pipeline
+type: docker
+name: push-release
+steps:
+- name: build-and-push-tag
+  image: plugins/docker
+  settings:
+    repo: ${DRONE_REPO_NAMESPACE/redpencilio/redpencil}/${DRONE_REPO_NAME%-service}
+    tags: ${DRONE_TAG##v} # strips v from the tag
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+trigger:
+  event:
+  - tag
+---
+kind: pipeline
+type: docker
+name: dry-run
+steps:
+- name: dry-run
+  image: plugins/docker
+  settings:
+    repo: ${DRONE_REPO_NAMESPACE/redpencilio/redpencil}/${DRONE_REPO_NAME%-service}
+    dry_run: true
+trigger:
+  event:
+  - pull_request
+---
+kind: secret
+name: docker_username
+data: tXWdgG9eT8kJKjW7ARDvY97B5JW5nn8GNfgMBgAcMVfpzy8=
+---
+kind: secret
+name: docker_password
+data: RO9grRgw/g7uK+WwCzF7o8QcBmEcBStpJBCFQjhJIWJS25oYS4R6TY7rLBt/KWRN+pU55tXkv3INdwjd4O9/SA==
+---
+kind: signature
+hmac: 6c72cf10c4407258aed1f991a1a02a6686ece2089c3478796a94c38708ce76c
+
+...
