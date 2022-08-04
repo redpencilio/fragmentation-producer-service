@@ -2,11 +2,16 @@
   "name": "ldes-time-fragmenter",
   "version": "0.0.1",
   "description": "A time fragmenter for LDES",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/redpencilio/ldes-fragmenter-service.git"
+  },
   "main": "app.js",
   "scripts": {
     "start": "nodemon app.ts",
     "fragment-dataset": "node --max_old_space_size=8192 -r ts-node/register fragment-dataset.ts",
-    "fragment-dataset-debug": "node --max_old_space_size=8192 -r ts-node/register --inspect fragment-dataset.ts"
+    "fragment-dataset-debug": "node --max_old_space_size=8192 -r ts-node/register --inspect fragment-dataset.ts",
+    "release": "release-it"
   },
   "author": "",
   "license": "MIT",
@@ -47,6 +52,8 @@
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-promise": "^6.0.0",
     "nodemon": "^2.0.19",
+    "release-it": "^15.2.0",
+    "release-it-lerna-changelog": "^5.0.0",
     "ts-node": "^10.7.0",
     "typescript": "^4.6.3"
   }
