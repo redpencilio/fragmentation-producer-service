@@ -1,4 +1,4 @@
-import { Quad, Store } from 'n3';
+import { Store } from 'n3';
 import * as RDF from 'rdf-js';
 import { importToStore } from '../utils/utils';
 

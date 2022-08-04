@@ -125,18 +125,56 @@ function extractRelations(store: Store): Relation[] {
 }
 
 function extractMembers(store: Store): Member[] {
-  const members: Member[] = [];
-  store.forObjects(
-    (memberId) => {
-      store.match(memberId);
-      const content = store.getQuads(memberId, null, null, null);
-      const member = new Member(memberId as RDF.NamedNode);
-      member.addQuads(...content);
-      members.push(member);
+  const subjectsToQuadsMapping = new Map<RDF.Quad_Subject, RDF.Quad[]>();
+  store.forEach(
+    (quad) => {
+      if (subjectsToQuadsMapping.has(quad.subject)) {
+        subjectsToQuadsMapping.get(quad.subject)!.push(quad);
+      } else {
+        subjectsToQuadsMapping.set(quad.subject, [quad]);
+      }
     },
     null,
-    TREE('member'),
+    null,
+    null,
     null
   );
+  const handledSubjects: Set<string> = new Set();
+  const members: Member[] = [];
+  const memberIds = store.getObjects(null, TREE('member'), null);
+  memberIds.forEach((memberId) => {
+    const member = extractMember(
+      memberId as RDF.NamedNode,
+      store,
+      handledSubjects
+    );
+    members.push(member);
+  });
   return members;
+}
+
+function extractMember(
+  memberId: RDF.NamedNode,
+  store: Store,
+  handledSubjects: Set<string>
+) {
+  const member = new Member(memberId as RDF.NamedNode);
+  const queue: RDF.Quad_Subject[] = [memberId];
+  while (queue.length > 0) {
+    const subject = queue.pop();
+    if (subject && !handledSubjects.has(subject.value)) {
+      handledSubjects.add(subject.value);
+      store.getQuads(memberId, null, null, null).forEach((quad) => {
+        member.addQuads(quad);
+        if (
+          (quad.object.termType === 'BlankNode' ||
+            quad.object.termType === 'NamedNode') &&
+          !handledSubjects.has(quad.object.value)
+        ) {
+          queue.push(quad.object);
+        }
+      });
+    }
+  }
+  return member;
 }

@@ -90,7 +90,7 @@ export default class TimeFragmenter extends Fragmenter {
         versionedMember.data,
         versionedMember.id,
         this.relationPath
-      ).object;
+      )!.object;
       // create a store with the new graph for the new file
       currentNode = await this.closeNode(
         closingNode,

@@ -13,7 +13,7 @@
       "noImplicitThis": true,
       "alwaysStrict": true,
       "downlevelIteration": true,
-      "strict": false,
+      "strict": true,
       "esModuleInterop": true,
       "forceConsistentCasingInFileNames": true,
       // Ensure that .d.ts files are created by tsc, but not .js files

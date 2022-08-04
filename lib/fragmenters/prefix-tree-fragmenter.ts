@@ -101,7 +101,7 @@ export default class PrefixTreeFragmenter extends Fragmenter {
     }
     // Determine the token at the given depth which occurs the most and split off members matching that specific token
     const memberGroups: { [key: string]: Member[] } = {};
-    let pathValue: RDF.Term;
+    let pathValue: RDF.Term | undefined;
     node.members.forEach((member) => {
       pathValue = getFirstMatch(member.data, null, this.relationPath)?.object;
       if (pathValue) {
