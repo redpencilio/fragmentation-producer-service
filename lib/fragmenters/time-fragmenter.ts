@@ -22,20 +22,26 @@ export default class TimeFragmenter extends Fragmenter {
   constructVersionedMember(member: Member): Member {
     const versionedResourceId = generateVersion(member.id);
     const versionedMember = new Member(versionedResourceId);
-    member.data.forEach((quadObj) => {
-      if(quadObj.subject.equals(member.id)){
-        versionedMember.addQuads(
-          quad(
-            versionedResourceId,
-            quadObj.predicate,
-            quadObj.object, 
-            quadObj.graph
-          )
-        )
-      } else {
-        versionedMember.addQuads(quadObj);
-      }
-    }, null, null, null, null)
+    member.data.forEach(
+      (quadObj) => {
+        if (quadObj.subject.equals(member.id)) {
+          versionedMember.addQuads(
+            quad(
+              versionedResourceId,
+              quadObj.predicate,
+              quadObj.object,
+              quadObj.graph
+            )
+          );
+        } else {
+          versionedMember.addQuads(quadObj);
+        }
+      },
+      null,
+      null,
+      null,
+      null
+    );
 
     const dateLiteral = nowLiteral();
 
