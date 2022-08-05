@@ -21,36 +21,31 @@ export default class TimeFragmenter extends Fragmenter {
 
   constructVersionedMember(member: Member): Member {
     const versionedResourceId = generateVersion(member.id);
-    member.data.forEach(
-      (quadObj) => {
-        member.data.removeQuad(quadObj);
-        member.data.addQuad(
+    const versionedMember = new Member(versionedResourceId);
+    member.data.forEach((quadObj) => {
+      if(quadObj.subject.equals(member.id)){
+        versionedMember.addQuads(
           quad(
             versionedResourceId,
             quadObj.predicate,
-            quadObj.object,
+            quadObj.object, 
             quadObj.graph
           )
-        );
-      },
-      member.id,
-      null,
-      null,
-      null
-    );
-    const versionedResource = new Member(versionedResourceId);
-
-    versionedResource.importStore(member.data);
+        )
+      } else {
+        versionedMember.addQuads(quadObj);
+      }
+    }, null, null, null, null)
 
     const dateLiteral = nowLiteral();
 
     // add resources about this version
-    versionedResource.addQuads(
-      quad(versionedResource.id, PURL('isVersionOf'), member.id),
-      quad(versionedResource.id, this.relationPath, dateLiteral)
+    versionedMember.addQuads(
+      quad(versionedMember.id, PURL('isVersionOf'), member.id),
+      quad(versionedMember.id, this.relationPath, dateLiteral)
     );
 
-    return versionedResource;
+    return versionedMember;
   }
 
   async closeNode(node: Node, timestamp: RDF.Literal): Promise<Node> {
@@ -69,7 +64,7 @@ export default class TimeFragmenter extends Fragmenter {
     return currentNode;
   }
 
-  async writeVersionedMember(versionedMember: Member): Promise<Node> {
+  async addVersionedMember(versionedMember: Member): Promise<Node> {
     const lastPageNr = this.cache.getLastPage(this.folder);
     let currentNode: Node;
     let pageFile;
@@ -103,7 +98,7 @@ export default class TimeFragmenter extends Fragmenter {
 
   async addMember(resource: Member): Promise<Node> {
     const versionedResource: Member = this.constructVersionedMember(resource);
-    const lastDataset = await this.writeVersionedMember(versionedResource);
+    const lastDataset = await this.addVersionedMember(versionedResource);
     return lastDataset;
   }
 }
