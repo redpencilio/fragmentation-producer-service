@@ -162,12 +162,10 @@ function extractMember(
   const queue: RDF.Quad_Subject[] = [memberId];
   while (queue.length > 0) {
     const subject = queue.pop();
-    console.log('SUBJECT', subject);
     if (subject && !handledSubjects.has(subject.value)) {
       handledSubjects.add(subject.value);
       store.getQuads(subject, null, null, null).forEach((quad) => {
         member.addQuads(quad);
-        console.log(quad);
         if (
           (quad.object.termType === 'BlankNode' ||
             quad.object.termType === 'NamedNode') &&

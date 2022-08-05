@@ -53,7 +53,9 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 
       return result;
     }
-    return null;
+    throw new Error(
+      `No triple with predicate ${this.relationPath.value} found`
+    );
   }
 
   async _addResource(

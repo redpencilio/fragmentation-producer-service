@@ -29,7 +29,7 @@ export async function writeNode(node: Node, path: string) {
 
   return new Promise<void>((resolve, reject) => {
     turtleStream.on('error', () => {
-      reject();
+      reject('Something went wrong while writing node to file');
     });
     turtleStream.on('end', () => {
       writeStream.end(() => {

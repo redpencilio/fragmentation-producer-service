@@ -60,7 +60,7 @@ export async function getNode(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-export async function addResource(
+export async function addMember(
   req: Request,
   res: Response,
   next: NextFunction
@@ -100,7 +100,7 @@ export async function addResource(
     if (currentDataset) {
       res
         .status(201)
-        .send(`{"message": "ok", "triplesInPage": ${currentDataset.count}}`);
+        .send(`{"message": "ok", "membersInPage": ${currentDataset.count}}`);
     }
   } catch (e) {
     console.error(e);

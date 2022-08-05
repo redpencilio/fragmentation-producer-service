@@ -15,21 +15,27 @@ import { BASE_FOLDER, DOMAIN_NAME } from '../../utils/constants';
 import { convertToNode } from '../../converters/node-converters';
 import { createStore } from '../../utils/utils';
 
-export async function convertToJsonLD(file: string): Promise<any> {
-  const quadStream = readTriplesStream(
-    file,
-    DOMAIN_NAME + path.relative(BASE_FOLDER, file)
-  );
-  const quads: RDF.Quad[] = [];
-  await new Promise<void>((resolve, reject) => {
-    quadStream.on('data', (quad) => {
-      quads.push(quad);
+export async function convertToJsonLD(
+  file: string
+): Promise<jsonld.NodeObject> {
+  try {
+    const quadStream = readTriplesStream(
+      file,
+      DOMAIN_NAME + path.relative(BASE_FOLDER, file)
+    );
+    const quads: RDF.Quad[] = [];
+    await new Promise<void>((resolve, reject) => {
+      quadStream.on('data', (quad) => {
+        quads.push(quad);
+      });
+      quadStream.on('error', reject);
+      quadStream.on('end', resolve);
     });
-    quadStream.on('error', reject);
-    quadStream.on('end', resolve);
-  });
-  const jsonDoc = await jsonld.fromRDF(quads);
-  return jsonld.frame(jsonDoc, FRAME);
+    const jsonDoc = await jsonld.fromRDF(quads);
+    return jsonld.frame(jsonDoc, FRAME);
+  } catch (e) {
+    throw new Error(`Something went wrong while converting to JSON-LD: ${e}`);
+  }
 }
 
 /**
@@ -68,6 +74,10 @@ function readTriplesStream(file: string, baseIRI?: string): jsstream.Readable {
 }
 
 export async function readNode(filePath: string): Promise<Node> {
-  const store = await createStore(readTriplesStream(filePath));
-  return convertToNode(store);
+  try {
+    const store = await createStore(readTriplesStream(filePath));
+    return convertToNode(store);
+  } catch (e) {
+    throw new Error(`Something went wrong while converting file to node: ${e}`);
+  }
 }

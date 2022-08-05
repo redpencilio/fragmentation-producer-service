@@ -1,7 +1,7 @@
 const { app, errorHandler } = require('mu-javascript-library');
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import { addResource, getNode } from './lib/controller';
+import { addMember, getNode } from './lib/controller';
 
 app.use(cors());
 app.use(
@@ -12,7 +12,7 @@ app.use(
   })
 );
 
-app.post('/:folder', addResource);
+app.post('/:folder', addMember);
 
 app.get('/:folder*/:nodeId', getNode);
 

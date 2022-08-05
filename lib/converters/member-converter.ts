@@ -9,10 +9,16 @@ export default async function convertToMember(
   body: any,
   contentType: string
 ): Promise<Member> {
-  const quadStream = rdfParser.parse(nodeStream.Readable.from(body), {
-    contentType,
-  });
-  const member = new Member(namedNode(resource));
-  await member.importStream(quadStream);
-  return member;
+  try {
+    const quadStream = rdfParser.parse(nodeStream.Readable.from(body), {
+      contentType,
+    });
+    const member = new Member(namedNode(resource));
+    await member.importStream(quadStream);
+    return member;
+  } catch (e) {
+    throw new Error(
+      `Something went wrong while parsing the request body: ${e}`
+    );
+  }
 }
