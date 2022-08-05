@@ -4,7 +4,6 @@ import * as RDF from 'rdf-js';
 import Node from '../../models/node';
 import path from 'path';
 
-const ttl_write = require('@graphy/content.ttl.write');
 const ttl_read = require('@graphy/content.ttl.read');
 
 import rdfParser from 'rdf-parse';
@@ -13,10 +12,7 @@ import rdfSerializer from 'rdf-serialize';
 import { FRAME } from '../../utils/context-jsonld';
 import * as jsonld from 'jsonld';
 import { BASE_FOLDER, DOMAIN_NAME } from '../../utils/constants';
-import {
-  convertToNode,
-  convertToStream,
-} from '../../converters/node-converters';
+import { convertToNode } from '../../converters/node-converters';
 import { createStore } from '../../utils/utils';
 
 export async function convertToJsonLD(file: string): Promise<any> {
@@ -56,10 +52,7 @@ export function convert(
   });
 }
 
-export function readTriplesStream(
-  file: string,
-  baseIRI?: string
-): jsstream.Readable {
+function readTriplesStream(file: string, baseIRI?: string): jsstream.Readable {
   if (!fs.existsSync(file)) {
     throw Error(`File does not exist: ${file}`);
   }
@@ -74,41 +67,7 @@ export function readTriplesStream(
   }
 }
 
-async function createParentFolderIfNecessary(file: string) {
-  if (!fs.existsSync(path.dirname(file))) {
-    await new Promise<void>((resolve, reject) => {
-      fs.mkdir(path.dirname(file), { recursive: true }, (err) => {
-        if (err) reject(err);
-        resolve();
-      });
-    });
-  }
-}
-
 export async function readNode(filePath: string): Promise<Node> {
   const store = await createStore(readTriplesStream(filePath));
   return convertToNode(store);
-}
-
-export async function writeNode(node: Node, path: string) {
-  const quadStream = convertToStream(node);
-
-  await createParentFolderIfNecessary(path);
-  const turtleStream = quadStream.pipe(ttl_write());
-  const writeStream = fs.createWriteStream(path);
-
-  turtleStream.on('data', (turtleChunk: any) => {
-    writeStream.write(turtleChunk);
-  });
-
-  return new Promise<void>((resolve, reject) => {
-    turtleStream.on('error', () => {
-      reject();
-    });
-    turtleStream.on('end', () => {
-      writeStream.end(() => {
-        resolve();
-      });
-    });
-  });
 }
