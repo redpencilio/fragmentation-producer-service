@@ -11,17 +11,18 @@ import rdfParser from 'rdf-parse';
 import rdfSerializer from 'rdf-serialize';
 import { FRAME } from '../../utils/context-jsonld';
 import * as jsonld from 'jsonld';
-import { BASE_FOLDER, DOMAIN_NAME } from '../../utils/constants';
+import { BASE_FOLDER } from '../../utils/constants';
 import { convertToNode } from '../../converters/node-converters';
 import { createStore } from '../../utils/utils';
 
 export async function convertToJsonLD(
-  file: string
+  file: string,
+  domainName: string
 ): Promise<jsonld.NodeObject> {
   try {
     const quadStream = readTriplesStream(
       file,
-      DOMAIN_NAME + path.relative(BASE_FOLDER, file)
+      domainName + path.relative(BASE_FOLDER, file)
     );
     const quads: RDF.Quad[] = [];
     await new Promise<void>((resolve, reject) => {
@@ -47,11 +48,12 @@ export async function convertToJsonLD(
 
 export function convert(
   file: string,
-  contentType: string
+  contentType: string,
+  domainName: string
 ): NodeJS.ReadableStream {
   const triplesStream = readTriplesStream(
     file,
-    path.join(DOMAIN_NAME, path.relative(BASE_FOLDER, file))
+    domainName + path.relative(BASE_FOLDER, file)
   );
   return rdfSerializer.serialize(triplesStream, {
     contentType: contentType,

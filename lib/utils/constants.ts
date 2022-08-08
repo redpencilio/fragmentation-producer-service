@@ -21,8 +21,6 @@ export const CACHE_SIZE = parseInt(process.env.CACHE_SIZE || '10');
 
 export const BASE_FOLDER = process.env.DATA_FOLDER || './data';
 
-export const DOMAIN_NAME = process.env.DOMAIN_NAME || 'http://localhost:3000/';
-
 export const ENABLE_AUTH = process.env.ENABLE_AUTH === 'true' ? true : false;
 
 export const AUTH_USERNAME = process.env.AUTH_USERNAME || 'username';
