@@ -24,6 +24,7 @@ const UPDATE_QUEUE = new PromiseQueue<Node | null | void>();
 
 export async function getNode(req: Request, res: Response, next: NextFunction) {
   try {
+    console.log(req.protocol + '://' + req.header('host'));
     const page = parseInt(req.params.nodeId);
     const pagesFolder = path.join(BASE_FOLDER, req.params.folder);
 
@@ -45,14 +46,15 @@ export async function getNode(req: Request, res: Response, next: NextFunction) {
       page
     );
     res.header('Content-Type', contentType);
+    const domainName = req.protocol + '://' + req.header('host') + '/';
     if (
       contentType === 'application/json' ||
       contentType === 'application/ld+json'
     ) {
-      const contents = await convertToJsonLD(filePath);
+      const contents = await convertToJsonLD(filePath, domainName);
       res.json(contents);
     } else {
-      convert(filePath, contentType).pipe(res);
+      convert(filePath, contentType, domainName).pipe(res);
     }
   } catch (e) {
     console.error(e);
