@@ -34,10 +34,9 @@ export default class PrefixTreeFragmenter extends Fragmenter {
       member.data,
       member.id,
       this.relationPath
-    );
-    // 	?.object.value;
+    )?.object.value.toLowerCase();
     if (resourceValue) {
-      const match = this.relationCache.getLongestMatch(resourceValue.value);
+      const match = this.relationCache.getLongestMatch(resourceValue);
 
       if (match) {
         node = await this.cache.getNode(match.nodeFile);
@@ -47,7 +46,7 @@ export default class PrefixTreeFragmenter extends Fragmenter {
         member,
         node,
         currentValue,
-        resourceValue.value,
+        resourceValue,
         currentValue.length
       );
 
@@ -66,6 +65,8 @@ export default class PrefixTreeFragmenter extends Fragmenter {
     depth = 0
   ): Promise<Node> {
     let childMatch = node.relationsMap.get(prefixValue + resourceValue[depth]);
+    console.log(prefixValue + resourceValue[depth]);
+    console.log(node.relationsMap);
     let curDepth = depth;
     let curPrefixValue = prefixValue;
     let curNode = node;
@@ -127,7 +128,6 @@ export default class PrefixTreeFragmenter extends Fragmenter {
       // else create a new relation and node with prefix value containing mostOccuringToken
     }
     const newNode: Node = this.constructNewNode();
-
     node.add_relation(
       new Relation(
         generateTreeRelation(),
@@ -141,7 +141,6 @@ export default class PrefixTreeFragmenter extends Fragmenter {
 
     node.delete_members(memberGroups[mostOccuringToken]);
     newNode.add_members(...memberGroups[mostOccuringToken]);
-
     await this.cache.addNode(this.fileForNode(newNode.metadata.id), newNode);
     this.relationCache.addRelation(
       currentValue + mostOccuringToken,

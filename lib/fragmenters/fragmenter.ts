@@ -38,9 +38,10 @@ export default abstract class Fragmenter {
   constructNewNode(): Node {
     const nodeId = (this.cache.getLastPage(this.folder) || 0) + 1;
     this.cache.updateLastPage(this.folder, nodeId);
+
     const node = new Node({
       id: nodeId,
-      stream: STREAM_PREFIX(this.folder),
+      stream: STREAM_PREFIX(path.basename(this.folder)),
       view: this.getRelationReference(nodeId, 1),
     });
     return node;
