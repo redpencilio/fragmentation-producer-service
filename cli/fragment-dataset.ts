@@ -95,7 +95,7 @@ program
 
 program.parse();
 
-export default function fragmentDataset(
+export default async function fragmentDataset(
   transformer: DatasetTransformer,
   datasetFile: string,
   datasetConfiguration: DatasetConfiguration,
@@ -112,17 +112,14 @@ export default function fragmentDataset(
     cache,
   });
   const fileStream = fs.createReadStream(datasetFile);
-
-  return new Promise<void>(async (resolve) => {
-    const transformedStream = await transformer.transform(
-      fileStream,
-      datasetConfiguration
-    );
-    let i = 0;
+  const transformedStream = await transformer.transform(
+    fileStream,
+    datasetConfiguration
+  );
+  return new Promise<void>((resolve) => {
     transformedStream
       .on('data', async (resource) => {
         transformedStream.pause();
-        i += 1;
 
         await UPDATE_QUEUE.push(() => fragmenter.addMember(resource));
         transformedStream.resume();

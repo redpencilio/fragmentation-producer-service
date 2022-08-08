@@ -10,4 +10,5 @@ export default interface DatasetTransformer {
     input: Readable,
     config: DatasetConfiguration
   ): Readable | Promise<Readable>;
+  // eslint-disable-next-line semi
 }

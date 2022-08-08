@@ -19,11 +19,11 @@ export default class CSVTransformer implements DatasetTransformer {
     input
       .pipe(csv())
       .on('data', (data) => {
-        let id = namedNode(
+        const id = namedNode(
           encodeURI(config.resourceIdPrefix + data[config.resourceIdField])
         );
 
-        let member = new Member(id);
+        const member = new Member(id);
         member.addQuads(
           quad(member.id, RDF_NAMESPACE('type'), namedNode(config.resourceType))
         );
