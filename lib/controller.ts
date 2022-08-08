@@ -70,6 +70,17 @@ export async function addMember(
       throw new Error('Resource uri parameter was not supplied');
     }
 
+    const contentTypes = await rdfParser.getContentTypes();
+    if (!contentTypes.includes(req.headers['content-type'] as string)) {
+      return next(error(400, 'Content-Type not recognized'));
+    }
+
+    const member = await convertToMember(
+      req.query.resource as string,
+      req.body,
+      req.headers['content-type'] as string
+    );
+
     const fragmenter = createFragmenter(
       (req.query.fragmenter as string) || 'time-fragmenter',
       {
@@ -81,16 +92,6 @@ export async function addMember(
       }
     );
 
-    const contentTypes = await rdfParser.getContentTypes();
-    if (!contentTypes.includes(req.headers['content-type'] as string)) {
-      return next(error(400, 'Content-Type not recognized'));
-    }
-
-    const member = await convertToMember(
-      req.query.resource as string,
-      req.body,
-      req.headers['content-type'] as string
-    );
     const currentDataset = await UPDATE_QUEUE.push(() =>
       fragmenter.addMember(member)
     );
