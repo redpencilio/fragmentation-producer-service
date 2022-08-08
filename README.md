@@ -27,6 +27,9 @@ The following environment variables can be configured:
 - `FOLDER_DEPTH`: the number of levels the data folder structure should contain. (default: `1`, a flat folder structure)
 - `PAGE_RESOURCES_COUNT`: the number of resources (members) one page should contain. (default: `10`)
 - `SUBFOLDER_NODE_COUNT`: the maximum number of nodes (pages) a subfolder should contain. (default: `10`)
+- `ENABLE_AUTH`: this allows you to add Basic authentication to the POST route, the GET route (used to fetch pages) is always public (default: `false`)
+- `AUTH_USERNAME`: the username to use when enabling Basic authentication. (default: `username`)
+- `AUTH_PASSWORD`: the password to use when enabling Basic authentication. (default: `password`)
 
 ### Using the LDES web service
 
