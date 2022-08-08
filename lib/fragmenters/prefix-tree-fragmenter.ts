@@ -15,7 +15,7 @@ import Member from '../models/member';
 export default class PrefixTreeFragmenter extends Fragmenter {
   relationPath: RDF.NamedNode<string> = namedNode(PREFIX_TREE_RELATION_PATH);
   relationCache: RelationCache = new RelationCache();
-  async addMember(member: Member): Promise<Node | null> {
+  async addMember(member: Member): Promise<Node> {
     const viewFile = this.getViewFile();
     let viewNode: Node;
     // Check if the view node exists, if not, create one

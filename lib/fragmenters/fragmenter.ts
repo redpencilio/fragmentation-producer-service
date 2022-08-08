@@ -97,5 +97,5 @@ export default abstract class Fragmenter {
     return node.count >= this.maxResourcesPerPage;
   }
 
-  abstract addMember(resource: Member): Promise<Node | null>;
+  abstract addMember(resource: Member): Promise<Node>;
 }
