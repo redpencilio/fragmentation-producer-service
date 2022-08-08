@@ -27,6 +27,9 @@ The following environment variables can be configured:
 - `FOLDER_DEPTH`: the number of levels the data folder structure should contain. (default: `1`, a flat folder structure)
 - `PAGE_RESOURCES_COUNT`: the number of resources (members) one page should contain. (default: `10`)
 - `SUBFOLDER_NODE_COUNT`: the maximum number of nodes (pages) a subfolder should contain. (default: `10`)
+- `ENABLE_AUTH`: this allows you to add Basic authentication to the POST route, the GET route (used to fetch pages) is always public (default: `false`)
+- `AUTH_USERNAME`: the username to use when enabling Basic authentication. (default: `username`)
+- `AUTH_PASSWORD`: the password to use when enabling Basic authentication. (default: `password`)
 
 ### Using the LDES web service
 
@@ -64,7 +67,7 @@ The body can for example contain a turtle document:
 
 In this case, the supplied Content-Type header should be `text/turtle`.
 
-## Using the fragmentation CLI tool (out of date)
+## Using the fragmentation CLI tool
 
 In order to use the fragmentation CLI tool, this application provides the `fragment-dataset` npm script.
 
@@ -84,7 +87,6 @@ Currently, the CLI tool supports three different types of input datasets:
 
 The json configuration file should always contain the following key/value pairs:
 
-- `stream: <stream_uri>`: the URI of the stream in which the resources of the dataset should be stored.
 - `resourceType: <resource_type_uri>`: the URI describing the type which should be attributed to the resources.
 - `resourceIdPrefix: <resource_id_prefix_uri`: the URI which should be prepended to the resource ID's.
 
@@ -120,7 +122,7 @@ This repository also contains a `csv-config.json` as an example on how to write 
 - `fileForNode` returns the file location of a node given a node id
 - `determineSubFolder` determines the folder the node should be located in
 - `shouldCreateNewPage` determines whether a node has reached its limit in terms of resource count
-- `addResource` is an abstract method which is responsible to add a new resource to a dataset and is the main method which should be implemented by new fragmenters.
+- `addMember` is an abstract method which is responsible to add a new member to a dataset and is the main method which should be implemented by new fragmenters.
 
 `fragmenters/TimeFragmenter.ts` implements a versioning time-based LDES fragmenter. When adding a resource to a dataset using this fragmenter, it adds a timestamp and a version to the resource. The relations it uses are GreaterThanRelations.
 

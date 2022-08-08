@@ -1,7 +1,6 @@
 import { Readable } from 'stream';
 
 export interface DatasetConfiguration {
-  stream: string;
   resourceType: string;
   resourceIdPrefix: string;
 }
@@ -11,4 +10,5 @@ export default interface DatasetTransformer {
     input: Readable,
     config: DatasetConfiguration
   ): Readable | Promise<Readable>;
+  // eslint-disable-next-line semi
 }

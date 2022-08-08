@@ -1,5 +1,4 @@
 {
-  "stream": "http://mu.semte.ch/services/ldes-prefix-fragmenter/movies",
   "resourceType": "https://example.org/Movie",
   "resourceIdField": "movieId",
   "resourceIdPrefix": "https://example.org/movies/",

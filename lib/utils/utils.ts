@@ -3,6 +3,7 @@ import { v4 as uuid } from 'uuid';
 import { LDES_TIME, XML } from './namespaces';
 import * as RDF from 'rdf-js';
 const { literal } = DataFactory;
+import { Readable } from 'stream';
 
 interface Error {
   name: string;
@@ -52,6 +53,48 @@ export function getFirstMatch(
     return matches[0];
   }
   return null;
+}
+
+/**
+ * Yields the file path on which the specified page number is described.
+ *
+ * @param {number} page Page index for which we want te get the file path.
+ * @return {string} Path to the page.
+ */
+export function fileForPage(folder: string, page: number): string {
+  return `${folder}/${page}.ttl`;
+}
+
+export function pushToReadable<T>(readable: Readable, ...chunks: T[]) {
+  chunks.forEach((chunk) => {
+    readable.push(chunk);
+  });
+}
+
+export async function createStore(
+  quadStream: RDF.Stream<RDF.Quad>
+): Promise<Store> {
+  try {
+    const store = new Store();
+    await importToStore(store, quadStream);
+    return store;
+  } catch (e) {
+    throw new Error(
+      `Something went wrong while creating store from stream: ${e}`
+    );
+  }
+}
+
+export function importToStore(
+  store: Store,
+  quadStream: RDF.Stream<RDF.Quad>
+): Promise<void> {
+  return new Promise((resolve, reject) =>
+    store
+      .import(quadStream)
+      .on('error', reject)
+      .once('end', () => resolve())
+  );
 }
 
 export type Newable<T> = { new (...args: any[]): T };

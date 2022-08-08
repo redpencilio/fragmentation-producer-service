@@ -1,5 +1,6 @@
-import Node from '../models/node';
-import { readNode, writeNode } from './files';
+import Node from '../../models/node';
+import { readNode } from '../file-system/reader';
+import { writeNode } from '../file-system/writer';
 import fs from 'fs';
 import path from 'path';
 
@@ -99,7 +100,7 @@ export default class Cache {
 
   async evictFromCache(keys: string[]) {
     this.evicting = true;
-    const listOfPromises: any[] = [];
+    const listOfPromises: Promise<void>[] = [];
     for (const key of keys) {
       const node = this.nodes.get(key);
       if (node) {

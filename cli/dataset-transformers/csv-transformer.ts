@@ -1,13 +1,12 @@
-import { Readable, Stream, PassThrough } from 'stream';
+import { Readable, PassThrough } from 'stream';
 import DatasetTransformer, {
   DatasetConfiguration,
 } from './dataset-transformer';
 import csv from 'csv-parser';
 import { DataFactory } from 'n3';
 import { RDF_NAMESPACE } from '../../lib/utils/namespaces';
-import Resource from '../../lib/models/resource';
 const { quad, literal, namedNode } = DataFactory;
-import dataFactory from '@rdfjs/data-model';
+import Member from '../../lib/models/member';
 interface CSVDatasetConfiguration extends DatasetConfiguration {
   resourceIdField: string;
   propertyMappings: object;
@@ -20,24 +19,26 @@ export default class CSVTransformer implements DatasetTransformer {
     input
       .pipe(csv())
       .on('data', (data) => {
-        let id = namedNode(
+        const id = namedNode(
           encodeURI(config.resourceIdPrefix + data[config.resourceIdField])
         );
 
-        let resource = new Resource(id);
-        resource.addProperty(
-          RDF_NAMESPACE('type').value,
-          dataFactory.namedNode(config.resourceType)
+        const member = new Member(id);
+        member.addQuads(
+          quad(member.id, RDF_NAMESPACE('type'), namedNode(config.resourceType))
         );
         Object.entries(config.propertyMappings).forEach(
           ([propertyName, predicateUri]) => {
-            resource.addProperty(
-              predicateUri,
-              dataFactory.literal(data[propertyName])
+            member.addQuads(
+              quad(
+                member.id,
+                namedNode(predicateUri),
+                literal(data[propertyName])
+              )
             );
           }
         );
-        resultStream.push(resource);
+        resultStream.push(member);
       })
       .on('end', () => {
         resultStream.end();

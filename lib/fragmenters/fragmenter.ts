@@ -1,10 +1,10 @@
 import { DataFactory, NamedNode } from 'n3';
 import Node from '../models/node';
-import Resource from '../models/resource';
 import * as RDF from 'rdf-js';
 import path from 'path';
-import Cache from '../storage/cache';
+import Cache from '../storage/caching/cache';
 import { STREAM_PREFIX } from '../utils/constants';
+import Member from '../models/member';
 const { namedNode } = DataFactory;
 
 export interface FragmenterArgs {
@@ -38,11 +38,12 @@ export default abstract class Fragmenter {
   constructNewNode(): Node {
     const nodeId = (this.cache.getLastPage(this.folder) || 0) + 1;
     this.cache.updateLastPage(this.folder, nodeId);
-    const node = new Node(
-      nodeId,
-      STREAM_PREFIX(this.folder),
-      this.getRelationReference(nodeId, 1)
-    );
+
+    const node = new Node({
+      id: nodeId,
+      stream: STREAM_PREFIX(path.basename(this.folder)),
+      view: this.getRelationReference(nodeId, 1),
+    });
     return node;
   }
 
@@ -71,7 +72,10 @@ export default abstract class Fragmenter {
     }
   }
 
-  getRelationReference(sourceNodeId: number, targetNodeId: number): NamedNode {
+  protected getRelationReference(
+    sourceNodeId: number,
+    targetNodeId: number
+  ): NamedNode {
     const sourceSubFolder: string = this.determineSubFolder(sourceNodeId);
     const targetSubFolder: string = this.determineSubFolder(targetNodeId);
 
@@ -85,13 +89,13 @@ export default abstract class Fragmenter {
     return namedNode(relativePath);
   }
 
-  getViewFile() {
+  protected getViewFile() {
     return this.fileForNode(1);
   }
 
-  shouldCreateNewPage(node: Node): boolean {
-    return node.count() >= this.maxResourcesPerPage;
+  protected shouldCreateNewPage(node: Node): boolean {
+    return node.count >= this.maxResourcesPerPage;
   }
 
-  abstract addResource(resource: Resource): Promise<Node | null>;
+  abstract addMember(resource: Member): Promise<Node>;
 }
