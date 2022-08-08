@@ -2,11 +2,9 @@ import { Command, Option } from 'commander';
 import Node from '../lib/models/node';
 import PromiseQueue from '../lib/utils/promise-queue';
 import fs from 'fs';
-import DefaultTransformer from './dataset-transformers/default-transformer';
 import DatasetTransformer, {
   DatasetConfiguration,
 } from './dataset-transformers/dataset-transformer';
-import CSVTransformer from './dataset-transformers/csv-transformer';
 import path from 'path';
 import Cache from '../lib/storage/caching/cache';
 import {
@@ -19,13 +17,6 @@ import {
   FRAGMENTER_MAP,
 } from '../lib/fragmenters/fragmenter-factory';
 import { createTransformer } from './dataset-transformers/transformer-factory';
-
-const extensionMap = new Map<string, DatasetTransformer>();
-extensionMap.set('.csv', new CSVTransformer());
-
-function getTransformer(extension: string): DatasetTransformer {
-  return extensionMap.get(extension) || new DefaultTransformer();
-}
 
 const UPDATE_QUEUE = new PromiseQueue<Node | null | void>();
 
