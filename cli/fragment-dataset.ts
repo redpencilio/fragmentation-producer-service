@@ -8,9 +8,7 @@ import DatasetTransformer, {
 } from './dataset-transformers/dataset-transformer';
 import CSVTransformer from './dataset-transformers/csv-transformer';
 import path from 'path';
-import { IPFSIndexTransformer } from './dataset-transformers/ipfs-index-transformer';
 import Cache from '../lib/storage/caching/cache';
-import RDFTransformer from './dataset-transformers/rdf-transformer';
 import {
   FOLDER_DEPTH,
   PAGE_RESOURCES_COUNT,
@@ -20,12 +18,7 @@ import {
   createFragmenter,
   FRAGMENTER_MAP,
 } from '../lib/fragmenters/fragmenter-factory';
-
-const transformerMap = new Map<string, DatasetTransformer>();
-transformerMap.set('csv-transformer', new CSVTransformer());
-transformerMap.set('default-transformer', new DefaultTransformer());
-transformerMap.set('ipfs-transformer', new IPFSIndexTransformer());
-transformerMap.set('rdf-transformer', new RDFTransformer());
+import { createTransformer } from './dataset-transformers/transformer-factory';
 
 const extensionMap = new Map<string, DatasetTransformer>();
 extensionMap.set('.csv', new CSVTransformer());
@@ -72,17 +65,15 @@ program
     new Option(
       '-t, --transformer <dataset_transformer>',
       'The dataset transformer which should be applied, overrides automatic selection of transformer based on file extension'
-    ).choices([...transformerMap.keys()] as string[])
+    ).choices([...Object.keys(FRAGMENTER_MAP)] as string[])
   )
   .action(async (datasetFile, options) => {
     const jsonData = fs.readFileSync(options.config, 'utf8');
     const datasetConfig: DatasetConfiguration = JSON.parse(jsonData);
-    let transformer: DatasetTransformer;
-    if (options.transformer) {
-      transformer = transformerMap.get(options.transformer)!;
-    } else {
-      transformer = getTransformer(path.extname(datasetFile));
-    }
+    const transformer = createTransformer({
+      name: options.transformer,
+      extension: path.extname(datasetFile),
+    });
     await fragmentDataset(
       transformer,
       datasetFile,
