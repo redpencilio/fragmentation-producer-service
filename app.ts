@@ -1,4 +1,4 @@
-const { app, errorHandler } = require('mu-javascript-library');
+import { app, errorHandler } from 'mu';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import { addMember, getNode } from './lib/controller';

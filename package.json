@@ -27,7 +27,6 @@
     "csv-parser": "^3.0.0",
     "jsonld": "^6.0.0",
     "jsonld-streaming-serializer": "^2.0.0",
-    "mu-javascript-library": "git+https://github.com/elpoelma/mu-javascript-library.git",
     "n3": "^1.15.0",
     "rdf-parse": "^2.0.0",
     "rdf-serialize": "^2.0.0",
