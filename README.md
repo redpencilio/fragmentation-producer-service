@@ -11,6 +11,13 @@ This application provides two parts:
 
 The web service in this repository can be run in a docker configuration. The docker image is based on the mu-javascript-template (https://github.com/mu-semtech/mu-javascript-template).
 
+You can add it to your docker compose stack as follows:
+
+```
+consumer:
+    image: redpencil/ldes-consumer
+```
+
 ### Configuration
 
 The following environment variables can be configured:
