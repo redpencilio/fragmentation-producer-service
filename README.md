@@ -9,11 +9,14 @@ This application provides two parts:
 
 ### Running the LDES web service
 
-The web service in this repository can be run locally or in a docker configuration.
+The web service in this repository can be run in a docker configuration. The docker image is based on the mu-javascript-template (https://github.com/mu-semtech/mu-javascript-template).
 
-#### Locally
+You can add it to your docker compose stack as follows:
 
-In order to run the service locally, run the `npm start` script. The service will be exposed on port 3000.
+```
+consumer:
+    image: redpencil/ldes-consumer
+```
 
 ### Configuration
 
