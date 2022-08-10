@@ -1,7 +1,7 @@
 import { app, errorHandler } from 'mu';
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import { addMember, getNode } from './lib/controller';
+import { addMember, getIndex, getNode } from './lib/controller';
 import type { Request, Response, NextFunction } from 'express';
 import {
   AUTH_PASSWORD,
@@ -33,6 +33,8 @@ const validateUser = (req: Request, res: Response, next: NextFunction) => {
   }
   return next();
 };
+
+app.get('/', getIndex);
 
 app.post('/:folder', validateUser, addMember);
 

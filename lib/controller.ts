@@ -11,7 +11,7 @@ import Cache from './storage/caching/cache';
 import { error, fileForPage } from './utils/utils';
 import rdfSerializer from 'rdf-serialize';
 import rdfParser from 'rdf-parse';
-import { convert } from './storage/file-system/reader';
+import { convert, getStreams } from './storage/file-system/reader';
 import { convertToJsonLD } from './storage/file-system/reader';
 import PromiseQueue from './utils/promise-queue';
 import Node from './models/node';
@@ -21,6 +21,23 @@ import { createFragmenter } from './fragmenters/fragmenter-factory';
 const cache: Cache = new Cache(CACHE_SIZE);
 
 const UPDATE_QUEUE = new PromiseQueue<Node | null | void>();
+
+export async function getIndex(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const domainName = req.protocol + '://' + req.header('host') + '/';
+  try {
+    const streamNames = await getStreams();
+    const streams = streamNames.map((streamName) => {
+      return `${domainName}${streamName}/1`;
+    });
+    return res.json({ streams });
+  } catch (e) {
+    return next(e);
+  }
+}
 
 export async function getNode(req: Request, res: Response, next: NextFunction) {
   try {
@@ -106,7 +123,6 @@ export async function addMember(
         .send(`{"message": "ok", "membersInPage": ${currentDataset.count}}`);
     }
   } catch (e) {
-    console.error(e);
     return next(e);
   }
 }
