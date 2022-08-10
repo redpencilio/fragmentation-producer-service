@@ -1,5 +1,14 @@
 
 
+
+## 0.1.3 (2022-08-10)
+
+#### :bug: Bug Fix
+* [#13](https://github.com/redpencilio/fragmentation-producer-service/pull/13) Replace mu-javascript-library by mu ([@elpoelma](https://github.com/elpoelma))
+
+#### Committers: 1
+- Elena Poelman ([@elpoelma](https://github.com/elpoelma))
+
 ## 0.1.2 (2022-08-08)
 
 #### :rocket: Enhancement

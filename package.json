@@ -1,6 +1,6 @@
 {
   "name": "ldes-time-fragmenter",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "A time fragmenter for LDES",
   "repository": {
     "type": "git",
