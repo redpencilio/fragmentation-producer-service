@@ -83,3 +83,12 @@ export async function readNode(filePath: string): Promise<Node> {
     throw new Error(`Something went wrong while converting file to node: ${e}`);
   }
 }
+
+export async function getStreams(): Promise<string[]> {
+  try {
+    const streams = await fs.promises.readdir(BASE_FOLDER);
+    return streams;
+  } catch (e) {
+    return [];
+  }
+}
