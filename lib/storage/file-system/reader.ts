@@ -9,7 +9,7 @@ const ttl_read = require('@graphy/content.ttl.read');
 import rdfParser from 'rdf-parse';
 
 import rdfSerializer from 'rdf-serialize';
-import { FRAME } from '../../utils/context-jsonld';
+import { CONTEXT, FRAME } from '../../utils/context-jsonld';
 import * as jsonld from 'jsonld';
 import { BASE_FOLDER } from '../../utils/constants';
 import { convertToNode } from '../../converters/node-converters';
@@ -33,7 +33,7 @@ export async function convertToJsonLD(
       quadStream.on('end', resolve);
     });
     const jsonDoc = await jsonld.fromRDF(quads);
-    return jsonld.frame(jsonDoc, FRAME);
+    return jsonld.compact(jsonDoc, CONTEXT);
   } catch (e) {
     throw new Error(`Something went wrong while converting to JSON-LD: ${e}`);
   }
