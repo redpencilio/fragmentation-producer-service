@@ -1,6 +1,5 @@
 import fs from 'fs';
 import jsstream from 'stream';
-import * as RDF from 'rdf-js';
 import Node from '../../models/node';
 import path from 'path';
 
@@ -9,35 +8,9 @@ const ttl_read = require('@graphy/content.ttl.read');
 import rdfParser from 'rdf-parse';
 
 import rdfSerializer from 'rdf-serialize';
-import { CONTEXT, FRAME } from '../../utils/context-jsonld';
-import * as jsonld from 'jsonld';
 import { BASE_FOLDER } from '../../utils/constants';
 import { convertToNode } from '../../converters/node-converters';
 import { createStore } from '../../utils/utils';
-
-export async function convertToJsonLD(
-  file: string,
-  domainName: string
-): Promise<jsonld.NodeObject> {
-  try {
-    const quadStream = readTriplesStream(
-      file,
-      domainName + path.relative(BASE_FOLDER, file)
-    );
-    const quads: RDF.Quad[] = [];
-    await new Promise<void>((resolve, reject) => {
-      quadStream.on('data', (quad) => {
-        quads.push(quad);
-      });
-      quadStream.on('error', reject);
-      quadStream.on('end', resolve);
-    });
-    const jsonDoc = await jsonld.fromRDF(quads);
-    return jsonld.compact(jsonDoc, CONTEXT);
-  } catch (e) {
-    throw new Error(`Something went wrong while converting to JSON-LD: ${e}`);
-  }
-}
 
 /**
  * Reads the triples in a file, assuming text/turtle.
