@@ -12,7 +12,6 @@ import { error, fileForPage } from './utils/utils';
 import rdfSerializer from 'rdf-serialize';
 import rdfParser from 'rdf-parse';
 import { convert } from './storage/file-system/reader';
-import { convertToJsonLD } from './storage/file-system/reader';
 import PromiseQueue from './utils/promise-queue';
 import Node from './models/node';
 import convertToMember from './converters/member-converter';
@@ -47,15 +46,7 @@ export async function getNode(req: Request, res: Response, next: NextFunction) {
     );
     res.header('Content-Type', contentType);
     const domainName = req.protocol + '://' + req.header('host') + '/';
-    if (
-      contentType === 'application/json' ||
-      contentType === 'application/ld+json'
-    ) {
-      const contents = await convertToJsonLD(filePath, domainName);
-      res.json(contents);
-    } else {
-      convert(filePath, contentType, domainName).pipe(res);
-    }
+    convert(filePath, contentType, domainName).pipe(res);
   } catch (e) {
     console.error(e);
     return next(e);
