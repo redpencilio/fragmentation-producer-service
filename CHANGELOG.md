@@ -1,6 +1,15 @@
 
 
 
+
+## 0.2.0 (2023-02-23)
+
+#### :bug: Bug Fix
+* [#15](https://github.com/redpencilio/fragmentation-producer-service/pull/15) Remove jsonld framing in order to prevent duplicate data ([@elpoelma](https://github.com/elpoelma))
+
+#### Committers: 1
+- Elena Poelman ([@elpoelma](https://github.com/elpoelma))
+
 ## 0.1.3 (2022-08-10)
 
 #### :bug: Bug Fix
