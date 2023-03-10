@@ -1,24 +1,24 @@
 import rdfParser from 'rdf-parse';
 import nodeStream from 'stream';
-import { DataFactory } from 'n3';
 import Member from '../models/member';
-const { namedNode } = DataFactory;
+import { NamedNode, Quad } from '@rdfjs/types';
 
-export default async function convertToMember(
-  resource: string,
-  body: any,
-  contentType: string
-): Promise<Member> {
-  try {
-    const quadStream = rdfParser.parse(nodeStream.Readable.from(body), {
-      contentType,
-    });
-    const member = new Member(namedNode(resource));
-    await member.importStream(quadStream);
-    return member;
-  } catch (e) {
-    throw new Error(
-      `Something went wrong while parsing the request body: ${e}`
-    );
-  }
+export default async function extractMembers(body: any, contentType: string): Promise<Iterable<Member>>{
+  const quadStream = rdfParser.parse(nodeStream.Readable.from(body), {
+    contentType,
+  });
+  const memberMap = new Map<string, Member>();
+  return new Promise((resolve, reject) =>
+    quadStream
+    .on('data', (quad: Quad) => {
+      const member = memberMap.get(quad.subject.value);
+      if(member){
+        member.addQuads(quad);
+      } else {
+        memberMap.set(quad.subject.value, new Member(quad.subject as NamedNode));
+      }
+    })
+    .on('error', reject)
+    .once('end', () => resolve(memberMap.values()))
+  );
 }

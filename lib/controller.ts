@@ -14,8 +14,8 @@ import rdfParser from 'rdf-parse';
 import { convert } from './storage/file-system/reader';
 import PromiseQueue from './utils/promise-queue';
 import Node from './models/node';
-import convertToMember from './converters/member-converter';
 import { createFragmenter } from './fragmenters/fragmenter-factory';
+import extractMembers from './converters/member-converter';
 
 const cache: Cache = new Cache(CACHE_SIZE);
 
@@ -53,23 +53,13 @@ export async function getNode(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-export async function addMember(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
+export async function addData(req: Request, res: Response, next: NextFunction) {
   try {
-    if (!req.query.resource) {
-      throw new Error('Resource uri parameter was not supplied');
-    }
-
     const contentTypes = await rdfParser.getContentTypes();
     if (!contentTypes.includes(req.headers['content-type'] as string)) {
       return next(error(400, 'Content-Type not recognized'));
     }
-
-    const member = await convertToMember(
-      req.query.resource as string,
+    const members = await extractMembers(
       req.body,
       req.headers['content-type'] as string
     );
@@ -85,9 +75,11 @@ export async function addMember(
       }
     );
 
-    const currentDataset = await UPDATE_QUEUE.push(() =>
-      fragmenter.addMember(member)
-    );
+    const currentDataset = await UPDATE_QUEUE.push(async () => {
+      for (const member of members) {
+        await fragmenter.addMember(member);
+      }
+    });
 
     await UPDATE_QUEUE.push(() => cache.flush());
 
