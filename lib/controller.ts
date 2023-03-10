@@ -23,8 +23,7 @@ const UPDATE_QUEUE = new PromiseQueue<Node | null | void>();
 
 export async function getNode(req: Request, res: Response, next: NextFunction) {
   try {
-    console.log(req.protocol + '://' + req.header('host'));
-    const page = parseInt(req.params.nodeId);
+    const page = parseInt(req.params.nodeId ?? '1');
     const pagesFolder = path.join(BASE_FOLDER, req.params.folder);
 
     if (page > cache.getLastPage(pagesFolder)) {
@@ -75,7 +74,7 @@ export async function addData(req: Request, res: Response, next: NextFunction) {
       }
     );
 
-    const currentDataset = await UPDATE_QUEUE.push(async () => {
+    await UPDATE_QUEUE.push(async () => {
       for (const member of members) {
         await fragmenter.addMember(member);
       }
@@ -83,11 +82,7 @@ export async function addData(req: Request, res: Response, next: NextFunction) {
 
     await UPDATE_QUEUE.push(() => cache.flush());
 
-    if (currentDataset) {
-      res
-        .status(201)
-        .send(`{"message": "ok", "membersInPage": ${currentDataset.count}}`);
-    }
+    res.status(201).send();
   } catch (e) {
     console.error(e);
     return next(e);

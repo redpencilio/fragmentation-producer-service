@@ -38,6 +38,6 @@ const validateUser = (req: Request, res: Response, next: NextFunction) => {
 
 app.post('/:folder', validateUser, addData);
 
-app.get('/:folder*/:nodeId', getNode);
+app.get('/:folder*/:nodeId?', getNode);
 
 app.use(errorHandler);
