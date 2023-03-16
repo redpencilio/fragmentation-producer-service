@@ -1,7 +1,9 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import { app, errorHandler } from 'mu';
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import { addMember, getNode } from './lib/controller';
+import { addData, getNode } from './lib/controller';
 import type { Request, Response, NextFunction } from 'express';
 import {
   AUTH_PASSWORD,
@@ -34,8 +36,8 @@ const validateUser = (req: Request, res: Response, next: NextFunction) => {
   return next();
 };
 
-app.post('/:folder', validateUser, addMember);
+app.post('/:folder', validateUser, addData);
 
-app.get('/:folder*/:nodeId', getNode);
+app.get('/:folder*/:nodeId?', getNode);
 
 app.use(errorHandler);

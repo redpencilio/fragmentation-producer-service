@@ -40,13 +40,12 @@ The web service provides the following two endpoints:
 
 - `GET /:folder/:subfolder?/:nodeId`: this endpoint allows you to query a specific node represented in an RDF format to your liking. Using the HTTP Accept header, you can provide which representation of the data you would like to receive. Typically, the view node of the dataset is located in `/:folder/1` while the other nodes are additionally stored in subfolders.
 
-- `POST /:folder` allows you to add a new resource to a dataset located in `folder`. The post body can containing the resource in any RDF format to your liking. The post body format should be supplied using the `Content-Type` HTTP header. This endpoints expects the following query parameters:
-  - `resource: <resource_id>`: the id of the resource which is to be added
+- `POST /:folder` allows you to add a new resource to a dataset located in `folder`. The post body can containing the resource in any RDF format to your liking. The post body format should be supplied using the `Content-Type` HTTP header. This endpoints expects the following query parameter:
   - `fragmenter: <fragmenter_type>`: the type of fragmenter to use, defaults to `time-fragmenter`. The other option is `prefix-tree-fragmenter`.
 
 #### Example 1: adding a resource using the time-fragmenter
 
-In order to add a movie to a time-based LDES stream, you can execute the following POST request: `POST /movies?resource=https://example.org/movies/800005`
+In order to add a movie to a time-based LDES stream, you can execute the following POST request: `POST /movies`
 The body can for example contain a turtle document:
 
 ```.ttl
@@ -59,7 +58,7 @@ In this case, the supplied Content-Type header should be `text/turtle`.
 
 #### Example 2: adding a resource using the prefix-tree-fragmenter
 
-In order to add a movie to a prefix-tree dataset, you can execute the following POST request: `POST /movies?resource=https://example.org/movies/800005?fragmenter=prefix-tree-fragmenter`
+In order to add a movie to a prefix-tree dataset, you can execute the following POST request: `POST /movies?fragmenter=prefix-tree-fragmenter`
 The body can for example contain a turtle document:
 
 ```.ttl
