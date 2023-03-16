@@ -2,6 +2,18 @@
 
 
 
+
+## 0.3.0 (2023-03-16)
+
+#### :boom: Breaking Change
+* [#16](https://github.com/redpencilio/fragmentation-producer-service/pull/16) Add support for adding multiple members add once ([@elpoelma](https://github.com/elpoelma))
+
+#### :bug: Bug Fix
+* [#17](https://github.com/redpencilio/fragmentation-producer-service/pull/17) Fix name of tree:GreaterThanOrEqualToRelation predicate ([@elpoelma](https://github.com/elpoelma))
+
+#### Committers: 1
+- Elena Poelman ([@elpoelma](https://github.com/elpoelma))
+
 ## 0.2.0 (2023-02-23)
 
 #### :bug: Bug Fix
