@@ -59,7 +59,7 @@ export default class TimeFragmenter extends Fragmenter {
     node.add_relation(
       new Relation(
         generateTreeRelation(),
-        TREE('GreaterThanOrEqualRelation'),
+        TREE('GreaterThanOrEqualToRelation'),
         timestamp,
         this.getRelationReference(node.metadata.id, currentNode.metadata.id),
         currentNode.metadata.id,
