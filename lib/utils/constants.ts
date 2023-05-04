@@ -25,3 +25,12 @@ export const ENABLE_AUTH = process.env.ENABLE_AUTH === 'true' ? true : false;
 
 export const AUTH_USERNAME = process.env.AUTH_USERNAME || 'username';
 export const AUTH_PASSWORD = process.env.AUTH_PASSWORD || 'password';
+
+export const ACCEPTED_CONTENT_TYPES = [
+  'application/ld+json',
+  'application/n-quads',
+  'application/n-triples',
+  'application/trig',
+  'text/n3',
+  'text/turtle',
+];

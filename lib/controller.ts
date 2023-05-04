@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import path from 'path';
 import {
+  ACCEPTED_CONTENT_TYPES,
   BASE_FOLDER,
   CACHE_SIZE,
   FOLDER_DEPTH,
@@ -9,7 +10,6 @@ import {
 } from './utils/constants';
 import Cache from './storage/caching/cache';
 import { error, fileForPage } from './utils/utils';
-import rdfSerializer from 'rdf-serialize';
 import rdfParser from 'rdf-parse';
 import { convert } from './storage/file-system/reader';
 import PromiseQueue from './utils/promise-queue';
@@ -33,9 +33,7 @@ export async function getNode(req: Request, res: Response, next: NextFunction) {
     if (page < cache.getLastPage(pagesFolder))
       res.header('Cache-Control', 'public, immutable');
 
-    const contentTypes = await rdfSerializer.getContentTypes();
-
-    const contentType = req.accepts(contentTypes);
+    const contentType = req.accepts(ACCEPTED_CONTENT_TYPES);
     if (!contentType) {
       return next(error(406));
     }
