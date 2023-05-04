@@ -3,6 +3,15 @@
 
 
 
+
+## 0.3.2 (2023-05-04)
+
+#### :house: Internal
+* [#18](https://github.com/redpencilio/fragmentation-producer-service/pull/18) Use predefined array of accepted content types ([@elpoelma](https://github.com/elpoelma))
+
+#### Committers: 1
+- Elena Poelman ([@elpoelma](https://github.com/elpoelma))
+
 ## 0.3.1 (2023-03-16)
 
 ## 0.3.0 (2023-03-16)
