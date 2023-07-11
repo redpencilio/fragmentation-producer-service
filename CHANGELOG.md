@@ -4,6 +4,15 @@
 
 
 
+
+## 0.3.3 (2023-07-11)
+
+#### :bug: Bug Fix
+* [#19](https://github.com/redpencilio/fragmentation-producer-service/pull/19) Fix issue with `extractMembers` resulting in incomplete member objects ([@elpoelma](https://github.com/elpoelma))
+
+#### Committers: 1
+- Elena Poelman ([@elpoelma](https://github.com/elpoelma))
+
 ## 0.3.2 (2023-05-04)
 
 #### :house: Internal
