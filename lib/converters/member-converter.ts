@@ -15,7 +15,9 @@ export default async function extractMembers(body: any, contentType: string): Pr
       if(member){
         member.addQuads(quad);
       } else {
-        memberMap.set(quad.subject.value, new Member(quad.subject as NamedNode));
+        const newMember = new Member(quad.subject as NamedNode);
+        newMember.addQuads(quad);
+        memberMap.set(quad.subject.value, newMember);
       }
     })
     .on('error', reject)
