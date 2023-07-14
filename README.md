@@ -22,6 +22,7 @@ consumer:
 
 The following environment variables can be configured:
 
+- `BASE_URL` (required): the base-url on which this service is hosted. This ensures the service can resolve relative urls. 
 - `BASE_FOLDER`: the parent folder to store the LDES streams in. (default: `./data`)
 - `LDES_STREAM_PREFIX`: the stream prefix to use to identify the streams. This prefix is used in conjunction with the folder name of the stream. (default: `http://mu.semte.ch/streams/`)
 - `TIME_TREE_RELATION_PATH`: the path on which the relations should be defined when fragmenting resources using the time-fragmenter. This is also the predicate which is used when adding a timestamp to a new version of a resource. (default: `http://www.w3.org/ns/prov#generatedAtTime`)
