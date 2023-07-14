@@ -5,6 +5,15 @@
 
 
 
+
+## 0.4.0 (2023-07-14)
+
+#### :boom: Breaking Change
+* [#20](https://github.com/redpencilio/fragmentation-producer-service/pull/20) Update manner in which relative paths are resolved ([@elpoelma](https://github.com/elpoelma))
+
+#### Committers: 1
+- Elena Poelman ([@elpoelma](https://github.com/elpoelma))
+
 ## 0.3.3 (2023-07-11)
 
 #### :bug: Bug Fix
