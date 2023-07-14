@@ -34,3 +34,5 @@ export const ACCEPTED_CONTENT_TYPES = [
   'text/n3',
   'text/turtle',
 ];
+
+export const BASE_URL = process.env.BASE_URL ?? '';
