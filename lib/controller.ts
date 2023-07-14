@@ -3,6 +3,7 @@ import path from 'path';
 import {
   ACCEPTED_CONTENT_TYPES,
   BASE_FOLDER,
+  BASE_URL,
   CACHE_SIZE,
   FOLDER_DEPTH,
   PAGE_RESOURCES_COUNT,
@@ -16,6 +17,10 @@ import PromiseQueue from './utils/promise-queue';
 import Node from './models/node';
 import { createFragmenter } from './fragmenters/fragmenter-factory';
 import extractMembers from './converters/member-converter';
+
+if(!BASE_URL){
+  throw new Error('No BASE_URL provided');
+}
 
 const cache: Cache = new Cache(CACHE_SIZE);
 
@@ -42,8 +47,8 @@ export async function getNode(req: Request, res: Response, next: NextFunction) {
       page
     );
     res.header('Content-Type', contentType);
-    const domainName = req.protocol + '://' + req.header('host') + '/';
-    convert(filePath, contentType, domainName).pipe(res);
+    
+    convert(filePath, contentType, BASE_URL).pipe(res);
   } catch (e) {
     console.error(e);
     return next(e);
