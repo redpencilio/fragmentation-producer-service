@@ -15,7 +15,7 @@ You can add it to your docker compose stack as follows:
 
 ```
 consumer:
-    image: redpencil/ldes-consumer
+    image: redpencil/fragmentation-producer
 ```
 
 ### Configuration
