@@ -37,7 +37,7 @@ export default class Node {
   }
 
   add_relations(...relations: Relation[]) {
-    relations.forEach(this.add_relation);
+    relations.forEach((item) => this.add_relation(item));
   }
 
   delete_members(members: Member[]) {
