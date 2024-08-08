@@ -8,8 +8,8 @@
   },
   "main": "app.js",
   "scripts": {
-    "fragment-dataset": "node --max_old_space_size=8192 -r ts-node/register fragment-dataset.ts",
-    "fragment-dataset-debug": "node --max_old_space_size=8192 -r ts-node/register --inspect fragment-dataset.ts",
+    "fragment-dataset": "node --max_old_space_size=8192 -r ts-node/register cli/fragment-dataset.ts",
+    "fragment-dataset-debug": "node --max_old_space_size=8192 -r ts-node/register --inspect cli/fragment-dataset.ts",
     "release": "release-it"
   },
   "author": "",
