@@ -4,10 +4,8 @@ import DatasetTransformer, {
 import { Readable } from 'stream';
 import rdfParser from 'rdf-parse';
 
-import { RDF_NAMESPACE } from '../../lib/utils/namespaces';
 import { DataFactory, NamedNode, Store } from 'n3';
-import Member from '../../lib/models/member';
-import { createStore } from '../../lib/utils/utils';
+import { createStore, Member, RDF_NAMESPACE } from '@lblod/ldes-producer';
 const { namedNode } = DataFactory;
 export interface RDFDatasetConfiguration extends DatasetConfiguration {
   datatype: string;

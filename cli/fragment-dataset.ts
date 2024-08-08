@@ -1,65 +1,62 @@
-import { Command, Option } from 'commander';
-import Node from '../lib/models/node';
-import PromiseQueue from '../lib/utils/promise-queue';
-import fs from 'fs';
+import { Command, Option } from "commander";
+import fs from "fs";
 import DatasetTransformer, {
   DatasetConfiguration,
-} from './dataset-transformers/dataset-transformer';
-import path from 'path';
-import Cache from '../lib/storage/caching/cache';
+} from "./dataset-transformers/dataset-transformer";
+import path from "path";
+
+import { createTransformer } from "./dataset-transformers/transformer-factory";
 import {
-  FOLDER_DEPTH,
-  PAGE_RESOURCES_COUNT,
-  SUBFOLDER_NODE_COUNT,
-} from '../lib/utils/constants';
-import {
+  getConfigFromEnv,
+  PromiseQueue,
+  Cache,
+  Config,
+  Node,
   createFragmenter,
-  FRAGMENTER_MAP,
-} from '../lib/fragmenters/fragmenter-factory';
-import { createTransformer } from './dataset-transformers/transformer-factory';
+} from "@lblod/ldes-producer";
 
 const UPDATE_QUEUE = new PromiseQueue<Node | null | void>();
 
 const program = new Command();
 
 program
-  .name('fragment-dataset')
-  .description('CLI tool to create a fragmented version of a provided dataset');
+  .name("fragment-dataset")
+  .description("CLI tool to create a fragmented version of a provided dataset");
 
 program
-  .argument('<dataset_file>', 'The dataset which should be fragmented')
+  .argument("<dataset_file>", "The dataset which should be fragmented")
   .requiredOption(
-    '-c, --config <config_file>',
-    'JSON configuration file which describes how the dataset should be parsed'
+    "-c, --config <config_file>",
+    "JSON configuration file which describes how the dataset should be parsed"
   )
   .requiredOption(
-    '-o, --output <output_folder>',
-    'The destination folder in which the fragmented dataset should be stored'
+    "-o, --output <output_folder>",
+    "The destination folder in which the fragmented dataset should be stored"
   )
   .addOption(
     new Option(
-      '--cache-size <cache_size>',
-      'The maximum size of the node cache'
+      "--cache-size <cache_size>",
+      "The maximum size of the node cache"
     )
-      .default('1000')
+      .default("1000")
       .argParser(parseInt)
   )
   .addOption(
     new Option(
-      '-f, --fragmenter <fragmenter>',
-      'The fragmenter which is to be used'
+      "-f, --fragmenter <fragmenter>",
+      "The fragmenter which is to be used"
     )
-      .choices(Object.keys(FRAGMENTER_MAP))
-      .default('time-fragmenter')
+      .choices(["prefix-tree-fragmenter", "time-fragmenter"])
+      .default("time-fragmenter")
   )
   .addOption(
     new Option(
-      '-t, --transformer <dataset_transformer>',
-      'The dataset transformer which should be applied, overrides automatic selection of transformer based on file extension'
-    ).choices([...Object.keys(FRAGMENTER_MAP)] as string[])
+      "-t, --transformer <dataset_transformer>",
+      "The dataset transformer which should be applied, overrides automatic selection of transformer based on file extension"
+    ).choices(["prefix-tree-fragmenter", "time-fragmenter"])
   )
   .action(async (datasetFile, options) => {
-    const jsonData = fs.readFileSync(options.config, 'utf8');
+    const jsonData = fs.readFileSync(options.config, "utf8");
     const datasetConfig: DatasetConfiguration = JSON.parse(jsonData);
     const transformer = createTransformer({
       name: options.transformer,
@@ -69,7 +66,7 @@ program
       transformer,
       datasetFile,
       datasetConfig,
-      options.fragmenter || 'time-fragmenter',
+      options.fragmenter || "time-fragmenter",
       options.cacheSize,
       options.output
     );
@@ -86,12 +83,17 @@ export default async function fragmentDataset(
   outputFolder: string
 ): Promise<void> {
   const cache: Cache = new Cache(cacheSizeLimit);
-  const fragmenter = createFragmenter(fragmenterName, {
-    folder: outputFolder,
-    maxResourcesPerPage: PAGE_RESOURCES_COUNT,
-    maxNodeCountPerSubFolder: SUBFOLDER_NODE_COUNT,
-    folderDepth: FOLDER_DEPTH,
+  const config: Config = {
+    ...getConfigFromEnv(),
     cache,
+    cacheSize: cacheSizeLimit,
+  };
+
+  const fragmenter = createFragmenter(fragmenterName, config, {
+    folder: outputFolder,
+    maxResourcesPerPage: config.pageResourcesCount,
+    maxNodeCountPerSubFolder: config.subFolderNodeCount,
+    folderDepth: config.folderDepth,
   });
   const fileStream = fs.createReadStream(datasetFile);
   const transformedStream = await transformer.transform(
@@ -100,15 +102,15 @@ export default async function fragmentDataset(
   );
   return new Promise<void>((resolve) => {
     transformedStream
-      .on('data', async (resource) => {
+      .on("data", async (resource) => {
         transformedStream.pause();
 
         await UPDATE_QUEUE.push(() => fragmenter.addMember(resource));
         transformedStream.resume();
       })
-      .on('close', async () => {
-        console.log('finished loading resources');
-        await UPDATE_QUEUE.push(() => fragmenter.cache.flush());
+      .on("close", async () => {
+        console.log("finished loading resources");
+        await UPDATE_QUEUE.push(() => config.cache.flush());
         resolve();
       });
   });

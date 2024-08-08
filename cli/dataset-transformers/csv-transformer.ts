@@ -4,9 +4,8 @@ import DatasetTransformer, {
 } from './dataset-transformer';
 import csv from 'csv-parser';
 import { DataFactory } from 'n3';
-import { RDF_NAMESPACE } from '../../lib/utils/namespaces';
+import { Member, RDF_NAMESPACE } from '@lblod/ldes-producer';
 const { quad, literal, namedNode } = DataFactory;
-import Member from '../../lib/models/member';
 interface CSVDatasetConfiguration extends DatasetConfiguration {
   resourceIdField: string;
   propertyMappings: object;

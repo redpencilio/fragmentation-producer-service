@@ -5,11 +5,10 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import { addData, getNode } from './lib/controller';
 import type { Request, Response, NextFunction } from 'express';
-import {
-  AUTH_PASSWORD,
-  AUTH_USERNAME,
-  ENABLE_AUTH,
-} from './lib/utils/constants';
+
+const AUTH_USERNAME = process.env.AUTH_USERNAME || 'username';
+const AUTH_PASSWORD = process.env.AUTH_PASSWORD || 'password';
+const ENABLE_AUTH = process.env.ENABLE_AUTH === 'true' ? true : false;
 
 app.use(cors());
 app.use(

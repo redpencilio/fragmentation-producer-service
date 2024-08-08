@@ -1,10 +1,9 @@
 import { Readable, PassThrough } from 'stream';
 import DatasetTransformer from './dataset-transformer';
 import readline from 'readline';
-import { RDF_NAMESPACE } from '../../lib/utils/namespaces';
 import { DefaultDatasetConfiguration } from './default-transformer';
-import Member from '../../lib/models/member';
 import { DataFactory } from 'n3';
+import { Member, RDF_NAMESPACE } from '@lblod/ldes-producer';
 const { quad, namedNode, literal } = DataFactory;
 export class IPFSIndexTransformer implements DatasetTransformer {
   transform(input: Readable, config: DefaultDatasetConfiguration): Readable {
