@@ -22,7 +22,7 @@ consumer:
 
 The following environment variables can be configured:
 
-- `BASE_URL` (required): the base-url on which this service is hosted. This ensures the service can resolve relative urls. 
+- `BASE_URL` (required): the base-url on which this service is hosted. This ensures the service can resolve relative urls.
 - `BASE_FOLDER`: the parent folder to store the LDES streams in. (default: `./data`)
 - `LDES_STREAM_PREFIX`: the stream prefix to use to identify the streams. This prefix is used in conjunction with the folder name of the stream. (default: `http://mu.semte.ch/streams/`)
 - `TIME_TREE_RELATION_PATH`: the path on which the relations should be defined when fragmenting resources using the time-fragmenter. This is also the predicate which is used when adding a timestamp to a new version of a resource. (default: `http://www.w3.org/ns/prov#generatedAtTime`)
@@ -108,12 +108,12 @@ When using an IPFS export as input, the configuration file should also contain t
 
 ### Example 2: fragmenting an ordinary text file
 
-This repository contains a `default-config.json` which is a configuration suitable for loading a dataset containing a list of streetnames. In order to run the CLI tool with this configuration, execute `npm run fragment-dataset -- -c default-config.json -o data/streetnames -f prefix-tree-fragmenter <streetname_dataset>`.
+This repository contains a `default-config.json` which is a configuration suitable for loading a dataset containing a list of streetnames. In order to run the CLI tool with this configuration, execute `npm run fragment-dataset -- -c cli/fragmentation-configs/default-config.json -o data/streetnames -f prefix-tree-fragmenter <streetname_dataset>`.
 The resulting dataset will be stored in the `data/streetnames` folder. This example applies a prefix-tree-fragmenter to the dataset, but you can also replace this by a time-fragmenter.
 
 ### Example 3: fragmenting a csv movie dataset
 
-This repository also contains a `csv-config.json` as an example on how to write a configuration when fragmenting a csv dataset. This configuration can be used in combination with a GroupLens MovieLens dataset, such as https://files.grouplens.org/datasets/movielens/ml-latest-small.zip. The fragmenter can be applied on the `movies.csv` file supplied in dataset archive. You can run the CLI tool with this configuration by executing `npm run fragment-dataset -- -c csv-config.json -o data/movies -f prefix-tree-fragmenter <movie_dataset.csv>`. The resulting dataset will be stored in the `data/movies` folder.
+This repository also contains a `csv-config.json` as an example on how to write a configuration when fragmenting a csv dataset. This configuration can be used in combination with a GroupLens MovieLens dataset, such as https://files.grouplens.org/datasets/movielens/ml-latest-small.zip. The fragmenter can be applied on the `movies.csv` file supplied in dataset archive. You can run the CLI tool with this configuration by executing `npm run fragment-dataset -- -c cli/fragmentation-configs/csv-config.json -o data/movies -f prefix-tree-fragmenter <movie_dataset.csv>`. The resulting dataset will be stored in the `data/movies` folder.
 
 ## Components overview
 

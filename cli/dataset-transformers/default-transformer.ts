@@ -4,9 +4,8 @@ import DatasetTransformer, {
 import { Readable, PassThrough } from 'stream';
 
 import readline from 'readline';
-import { RDF_NAMESPACE } from '../../lib/utils/namespaces';
 import { DataFactory } from 'n3';
-import Member from '../../lib/models/member';
+import { Member, RDF_NAMESPACE } from '@lblod/ldes-producer';
 const { quad, namedNode, literal } = DataFactory;
 export interface DefaultDatasetConfiguration extends DatasetConfiguration {
   propertyType: string;
