@@ -6,7 +6,7 @@ export const TREE = namespace('https://w3id.org/tree#');
 
 export const XML = namespace('http://www.w3.org/2001/XMLSchema#');
 
-export const LDES = namespace('http://w3id.org/ldes#');
+export const LDES = namespace('https://w3id.org/ldes#');
 
 export const LDES_TIME = namespace(
   'http://mu.semte.ch/services/ldes-time-fragmenter/'
