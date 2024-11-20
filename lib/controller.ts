@@ -21,7 +21,6 @@ export async function getNode(req: Request, res: Response, next: NextFunction) {
       folder: req.params.folder,
       contentType: contentType,
       nodeId: parseInt(req.params.nodeId ?? "1"),
-      // Not sure about this one
       resource: req.params[0] || "",
     });
 
