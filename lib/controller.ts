@@ -18,7 +18,7 @@ import Node from './models/node';
 import { createFragmenter } from './fragmenters/fragmenter-factory';
 import extractMembers from './converters/member-converter';
 
-if(!BASE_URL){
+if (!BASE_URL) {
   throw new Error('No BASE_URL provided');
 }
 
@@ -30,13 +30,19 @@ export async function getNode(req: Request, res: Response, next: NextFunction) {
   try {
     const page = parseInt(req.params.nodeId ?? '1');
     const pagesFolder = path.join(BASE_FOLDER, req.params.folder);
+    let lastPage = cache.getLastPage(pagesFolder);
 
-    if (page > cache.getLastPage(pagesFolder)) {
-      return next(error(404, 'Page not found'));
+    if (page > lastPage) {
+      // recompute. our cache sometimes is not correct because of a race condition.
+      // Someone is asking us for a page that is further than what we know of, this is odd.
+      // So let's double check.
+      lastPage = cache.getLastPage(pagesFolder, true);
+      if (page > lastPage) {
+        return next(error(404, 'Page not found'));
+      }
     }
 
-    if (page < cache.getLastPage(pagesFolder))
-      res.header('Cache-Control', 'public, immutable');
+    if (page < lastPage) res.header('Cache-Control', 'public, immutable');
 
     const contentType = req.accepts(ACCEPTED_CONTENT_TYPES);
     if (!contentType) {
@@ -47,7 +53,7 @@ export async function getNode(req: Request, res: Response, next: NextFunction) {
       page
     );
     res.header('Content-Type', contentType);
-    
+
     convert(filePath, contentType, BASE_URL).pipe(res);
   } catch (e) {
     console.error(e);

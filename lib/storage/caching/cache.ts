@@ -54,8 +54,8 @@ export default class Cache {
     }
   }
 
-  getLastPage(folder: string): number {
-    if (!this.lastPages.has(folder)) {
+  getLastPage(folder: string, noCache = false): number {
+    if (noCache || !this.lastPages.has(folder)) {
       if (!fs.existsSync(folder)) {
         return NaN;
       }
