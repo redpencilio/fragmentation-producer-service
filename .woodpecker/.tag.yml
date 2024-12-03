@@ -1,10 +1,10 @@
 pipeline:
-  build-and-push:
+  release:
     image: plugins/docker
     settings:
       repo: "${CI_REPO_OWNER/redpencilio/redpencil}/${CI_REPO_NAME%%-service}"
-      tags: latest
-    secrets: [docker_username, docker_password]
+      tags: "${CI_COMMIT_TAG##v}"
+    secrets: [ docker_username, docker_password ]
 when:
-  event: push
-  branch: master
+  event: tag
+  tag: v*
